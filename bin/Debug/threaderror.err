@@ -1,4 +1,0 @@
-16/05/2014 22:13:41: Error in thread Server status update task: 
-System.NullReferenceException: Refer?ncia de objeto n?o definida para uma inst?ncia de um objeto.
-   em Phoenix.HabboHotel.Misc.LowPriorityWorker.Process()
-

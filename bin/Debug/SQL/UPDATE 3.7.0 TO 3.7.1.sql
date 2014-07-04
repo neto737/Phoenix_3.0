@@ -1,1 +1,0 @@
-ALTER TABLE `users` ADD COLUMN `volume` int(3) NOT NULL DEFAULT 100;
