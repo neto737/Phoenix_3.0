@@ -1,0 +1,3 @@
+#Phoenix changelog
+- Cleaned MUS commands
+- Fixed Friend Stream

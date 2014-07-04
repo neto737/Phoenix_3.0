@@ -1,0 +1,15 @@
+// Assembly Phoenix 3.0, Version 3.0.0.0
+
+[assembly: System.Diagnostics.Debuggable(System.Diagnostics.DebuggableAttribute.DebuggingModes.DisableOptimizations | System.Diagnostics.DebuggableAttribute.DebuggingModes.EnableEditAndContinue | System.Diagnostics.DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints | System.Diagnostics.DebuggableAttribute.DebuggingModes.Default)]
+[assembly: System.Reflection.AssemblyTitle("Phoenix Emulator")]
+[assembly: System.Runtime.InteropServices.ComVisible(false)]
+[assembly: System.Runtime.InteropServices.Guid("18621a48-6904-420f-be41-3fba562df9ac")]
+[assembly: System.Reflection.AssemblyFileVersion("3.0.0.0")]
+[assembly: System.Reflection.AssemblyTrademark("")]
+[assembly: System.Reflection.AssemblyCopyright("Copyright \x00a9 2006 - 2013 Otaku Studios")]
+[assembly: System.Reflection.AssemblyConfiguration("")]
+[assembly: System.Reflection.AssemblyCompany("Otaku Studios")]
+[assembly: System.Reflection.AssemblyProduct("Phoenix Emu")]
+[assembly: System.Reflection.AssemblyDescription("Habbo Hotel Emulator")]
+[assembly: System.Runtime.CompilerServices.CompilationRelaxations(8)]
+[assembly: System.Runtime.CompilerServices.RuntimeCompatibility(WrapNonExceptionThrows = true)]

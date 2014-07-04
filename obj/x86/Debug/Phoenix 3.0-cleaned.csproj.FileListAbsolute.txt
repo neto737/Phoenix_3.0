@@ -1,0 +1,10 @@
+C:\Users\amiller-blake\Desktop\phx (3)\phx\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\amiller-blake\Desktop\phx (3)\phx\bin\Debug\Phoenix 3.0.exe
+C:\Users\amiller-blake\Desktop\phx (3)\phx\bin\Debug\Phoenix 3.0.pdb
+C:\Users\amiller-blake\Desktop\phx (3)\phx\obj\x86\Debug\Phoenix 3.0.exe
+C:\Users\amiller-blake\Desktop\phx (3)\phx\obj\x86\Debug\Phoenix 3.0.pdb
+C:\Users\amiller-blake\Desktop\phx (3)\Source (Phoenix v3.11)\obj\x86\Debug\Phoenix 3.0.exe
+C:\Users\amiller-blake\Desktop\phx (3)\Source (Phoenix v3.11)\obj\x86\Debug\Phoenix 3.0.pdb
+C:\Users\amiller-blake\Desktop\phx (3)\Source (Phoenix v3.11)\bin\Debug\Phoenix 3.0.exe
+C:\Users\amiller-blake\Desktop\phx (3)\Source (Phoenix v3.11)\bin\Debug\Phoenix 3.0.pdb
+C:\Users\amiller-blake\Desktop\phx (3)\Source (Phoenix v3.11)\obj\x86\Debug\ResolveAssemblyReference.cache
