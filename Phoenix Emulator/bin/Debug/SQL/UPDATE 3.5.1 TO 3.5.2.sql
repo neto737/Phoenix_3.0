@@ -1,0 +1,1 @@
+ALTER TABLE `server_settings` ADD `enable_securesessions` enum('1','0') NOT NULL DEFAULT '1';
