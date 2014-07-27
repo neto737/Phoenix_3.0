@@ -7,11 +7,11 @@ namespace Phoenix.Communication.Messages.Avatar
 {
 	internal class SaveWardrobeOutfitMessageEvent : MessageEvent
 	{
-		public void parse(GameClient Session, ClientMessage Event)
+		public void parse(GameClient Session, ClientMessage Request)
 		{
-			uint Slot = Event.PopWiredUInt();
-			string Look = Event.PopFixedString();
-			string Gender = Event.PopFixedString();
+			uint Slot = Request.PopWiredUInt();
+			string Look = Request.PopFixedString();
+			string Gender = Request.PopFixedString();
 
 			using (DatabaseClient dbClient = PhoenixEnvironment.GetDatabase().GetClient())
 			{

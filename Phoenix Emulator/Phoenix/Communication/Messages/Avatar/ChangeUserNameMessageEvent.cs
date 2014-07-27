@@ -13,9 +13,9 @@ namespace Phoenix.Communication.Messages.Avatar
 	{
 		[CompilerGenerated]
 		private static Func<Room, int> func_0;
-		public void parse(GameClient Session, ClientMessage Event)
+		public void parse(GameClient Session, ClientMessage Request)
 		{
-			string text = PhoenixEnvironment.FilterInjectionChars(Event.PopFixedString(), false, true);
+			string text = PhoenixEnvironment.FilterInjectionChars(Request.PopFixedString(), false, true);
 			if (text.Length < 3)
 			{
 				ServerMessage Message = new ServerMessage(571u);
@@ -40,7 +40,7 @@ namespace Phoenix.Communication.Messages.Avatar
 					}
 					else
 					{
-						if (Event.Header == "GW")
+						if (Request.Header == "GW")
 						{
 							ServerMessage Message = new ServerMessage(571u);
 							Message.AppendString("H");
@@ -49,7 +49,7 @@ namespace Phoenix.Communication.Messages.Avatar
 						}
 						else
 						{
-							if (Event.Header == "GV")
+							if (Request.Header == "GV")
 							{
 								ServerMessage Message2 = new ServerMessage(570u);
 								Message2.AppendString("H");
