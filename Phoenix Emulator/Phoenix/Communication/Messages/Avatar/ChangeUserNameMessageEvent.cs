@@ -9,7 +9,7 @@ using Phoenix.Messages;
 using Phoenix.Storage;
 namespace Phoenix.Communication.Messages.Avatar
 {
-	internal sealed class ChangeUserNameMessageEvent : MessageEvent
+	internal class ChangeUserNameMessageEvent : MessageEvent
 	{
 		[CompilerGenerated]
 		private static Func<Room, int> func_0;

@@ -5,7 +5,7 @@ using Phoenix.Messages;
 using Phoenix.Storage;
 namespace Phoenix.Communication.Messages.Avatar
 {
-    internal sealed class GetWardrobeMessageEvent : MessageEvent
+    internal class GetWardrobeMessageEvent : MessageEvent
     {
         public void parse(GameClient Session, ClientMessage Event)
         {

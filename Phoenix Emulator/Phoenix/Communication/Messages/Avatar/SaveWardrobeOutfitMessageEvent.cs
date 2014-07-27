@@ -5,17 +5,18 @@ using Phoenix.Messages;
 using Phoenix.Storage;
 namespace Phoenix.Communication.Messages.Avatar
 {
-	internal sealed class SaveWardrobeOutfitMessageEvent : MessageEvent
+	internal class SaveWardrobeOutfitMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			uint num = Event.PopWiredUInt();
+			uint Slot = Event.PopWiredUInt();
 			string Look = Event.PopFixedString();
 			string Gender = Event.PopFixedString();
+
 			using (DatabaseClient dbClient = PhoenixEnvironment.GetDatabase().GetClient())
 			{
 				dbClient.AddParamWithValue("userid", Session.GetHabbo().Id);
-				dbClient.AddParamWithValue("slotid", num);
+				dbClient.AddParamWithValue("slotid", Slot);
 				dbClient.AddParamWithValue("look", Look);
 				dbClient.AddParamWithValue("gender", Gender.ToUpper());
 				if (dbClient.ReadDataRow("SELECT null FROM user_wardrobe WHERE user_id = @userid AND slot_id = @slotid LIMIT 1") != null)

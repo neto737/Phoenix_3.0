@@ -6,7 +6,7 @@ using Phoenix.HabboHotel.Rooms;
 using Phoenix.Storage;
 namespace Phoenix.Communication.Messages.Avatar
 {
-	internal sealed class ChangeMottoMessageEvent : MessageEvent
+	internal class ChangeMottoMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
