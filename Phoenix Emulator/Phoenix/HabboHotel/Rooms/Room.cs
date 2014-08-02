@@ -218,7 +218,7 @@ namespace Phoenix.HabboHotel.Rooms
                 }
                 else
                 {
-                    FlatCat @class = PhoenixEnvironment.GetGame().GetNavigator().method_2(this.Category);
+                    FlatCat @class = PhoenixEnvironment.GetGame().GetNavigator().GetFlatCat(this.Category);
                     return (@class != null && @class.CanTrade);
                 }
             }

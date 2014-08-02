@@ -16,7 +16,7 @@ namespace Phoenix.Communication.Messages.Navigator
 			{
 				ServerMessage Message = new ServerMessage(454u);
 				Message.AppendBoolean(bool_);
-				@class.method_3(Message, false, flag);
+				@class.Serialize(Message, false, flag);
 				Message.AppendBoolean(flag);
 				Message.AppendBoolean(bool_);
 				Session.SendMessage(Message);

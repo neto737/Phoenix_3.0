@@ -510,13 +510,13 @@ namespace Phoenix.HabboHotel.Items
 									{
 										roomUserByHabbo.TeleDelay = 1;
 									}
-									if (TeleHandler.smethod_2(this.Id))
+									if (TeleHandler.IsTeleLinked(this.Id))
 									{
 										flag2 = true;
 										if (roomUserByHabbo.TeleDelay == 0)
 										{
-											uint num2 = TeleHandler.smethod_0(this.Id);
-											uint num3 = TeleHandler.smethod_1(num2);
+											uint num2 = TeleHandler.GetLinkedTele(this.Id);
+											uint num3 = TeleHandler.GetTeleRoomId(num2);
 											if (num3 == this.uint_1)
 											{
 												RoomItem class2 = this.GetRoom().GetItem(num2);

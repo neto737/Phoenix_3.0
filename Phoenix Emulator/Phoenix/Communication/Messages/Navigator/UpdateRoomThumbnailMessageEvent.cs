@@ -68,7 +68,7 @@ namespace Phoenix.Communication.Messages.Navigator
 					RoomData class27_ = @class.Class27_0;
 					ServerMessage Message3 = new ServerMessage(454u);
 					Message3.AppendBoolean(false);
-					class27_.method_3(Message3, false, false);
+					class27_.Serialize(Message3, false, false);
 					Session.SendMessage(Message3);
 				}
 			}

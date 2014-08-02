@@ -46,7 +46,7 @@ namespace Phoenix.HabboHotel.Users
 		public uint uint_4;
 		public bool IsTeleporting;
 		public uint TeleporterId;
-		public List<uint> list_1;
+		public List<uint> FavoriteRooms;
 		public List<uint> MutedUsers;
 		public List<string> list_3;
 		public Dictionary<uint, int> Achievements;
@@ -185,7 +185,7 @@ namespace Phoenix.HabboHotel.Users
 			this.Waitingfordoorbell = false;
 			this.CurrentRoomId = 0u;
 			this.uint_4 = HomeRoom;
-			this.list_1 = new List<uint>();
+			this.FavoriteRooms = new List<uint>();
 			this.MutedUsers = new List<uint>();
 			this.list_3 = new List<string>();
 			this.Achievements = new Dictionary<uint, int>();
@@ -429,11 +429,11 @@ namespace Phoenix.HabboHotel.Users
 		}
 		public void method_5(HabboData class12_1)
 		{
-			this.list_1.Clear();
+			this.FavoriteRooms.Clear();
 			DataTable dataTable_ = class12_1.GetUserFavouriteRooms;
 			foreach (DataRow dataRow in dataTable_.Rows)
 			{
-				this.list_1.Add((uint)dataRow["room_id"]);
+				this.FavoriteRooms.Add((uint)dataRow["room_id"]);
 			}
 		}
 		public void method_6(HabboData class12_1)

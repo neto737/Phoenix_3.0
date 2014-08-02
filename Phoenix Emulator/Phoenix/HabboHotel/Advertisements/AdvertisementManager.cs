@@ -23,6 +23,7 @@ namespace Phoenix.HabboHotel.Advertisements
 				Logging.WriteLine("completed!");
 			}
 		}
+
 		public RoomAdvertisement GetRandomRoomAdvertisement()
 		{
 			if (this.RoomAdvertisements.Count <= 0)

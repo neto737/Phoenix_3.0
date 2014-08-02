@@ -1124,7 +1124,7 @@ namespace Phoenix.HabboHotel.Misc
                             {
                                 using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
                                 {
-                                    PhoenixEnvironment.GetGame().GetNavigator().LoadNavigator(adapter);
+                                    PhoenixEnvironment.GetGame().GetNavigator().Initialize(adapter);
                                     PhoenixEnvironment.GetGame().GetRoomManager().LoadModels(adapter);
                                 }
                                 PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);

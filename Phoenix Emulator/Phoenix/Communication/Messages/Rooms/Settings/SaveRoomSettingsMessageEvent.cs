@@ -68,7 +68,7 @@ namespace Phoenix.Communication.Messages.Rooms.Settings
 					@class.Floorthick = num10;
 					if (num >= 0 && num <= 2 && (num2 == 10 || num2 == 15 || num2 == 20 || num2 == 25 || num2 == 30 || num2 == 35 || num2 == 40 || num2 == 45 || num2 == 50 || num2 == 55 || num2 == 60 || num2 == 65 || num2 == 70 || num2 == 75 || num2 == 80 || num2 == 85 || num2 == 90 || num2 == 95 || num2 == 100))
 					{
-						FlatCat class2 = PhoenixEnvironment.GetGame().GetNavigator().method_2(num3);
+						FlatCat class2 = PhoenixEnvironment.GetGame().GetNavigator().GetFlatCat(num3);
 						if (class2 != null)
 						{
 							if ((long)class2.MinRank > (long)((ulong)Session.GetHabbo().Rank))
@@ -186,7 +186,7 @@ namespace Phoenix.Communication.Messages.Rooms.Settings
                                 RoomData class27_ = @class.Class27_0;
 								ServerMessage Message5 = new ServerMessage(454u);
 								Message5.AppendBoolean(false);
-								class27_.method_3(Message5, false, false);
+								class27_.Serialize(Message5, false, false);
 								Session.SendMessage(Message5);
 							}
 						}

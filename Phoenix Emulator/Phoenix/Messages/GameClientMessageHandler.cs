@@ -11,22 +11,28 @@ namespace Phoenix.Messages
 {
 	internal sealed class GameClientMessageHandler
 	{
-		private delegate void Delegate();
-		private const int HIGHEST_MESSAGE_ID = 4004;
-		private GameClient Session;
-		private ClientMessage Request;
+        private const int HIGHEST_MESSAGE_ID = 4004;
+		
+        private GameClient Session;
+		
+        private ClientMessage Request;
 		private ServerMessage Response;
+
+        private delegate void RequestHandler();
 		private RequestHandler[] RequestHandlers;
+
 		public GameClientMessageHandler(GameClient Session)
 		{
 			this.Session = Session;
             this.RequestHandlers = new RequestHandler[HIGHEST_MESSAGE_ID];
 			this.Response = new ServerMessage(0);
 		}
+
 		public ServerMessage GetResponse()
 		{
 			return this.Response;
 		}
+
 		public void Destroy()
 		{
 			this.Session = null;
@@ -34,29 +40,28 @@ namespace Phoenix.Messages
 			this.Request = null;
 			this.Response = null;
 		}
-		public void HandleRequest(ClientMessage Request)
-		{
+        public void HandleRequest(ClientMessage Request)
+        {
             if (Request.Id > HIGHEST_MESSAGE_ID)
-			{
-				Logging.WriteLine("Warning - out of protocol request: " + Request.Header);
-			}
-			else
-			{
-				if (this.RequestHandlers[(int)((UIntPtr)Request.Id)] != null && Request != null)
-				{
-					this.Request = Request;
-					this.RequestHandlers[(int)((UIntPtr)Request.Id)]();
-					this.Request = null;
-				}
-			}
-		}
+            {
+                Logging.WriteLine("Warning - out of protocol request: " + Request.Header);
+            }
+            if (this.RequestHandlers[Request.Id] != null && Request != null)
+            {
+                this.Request = Request;
+                this.RequestHandlers[Request.Id](); //.Invoke(); ?
+                this.Request = null;
+            }
+        }
+
 		public void SendResponse()
 		{
-			if (this.Response != null && this.Response.Id > 0u && this.Session.GetConnection() != null)
+			if (this.Response != null && this.Response.Id > 0 && this.Session.GetConnection() != null)
 			{
 				this.Session.GetConnection().SendMessage(this.Response);
 			}
 		}
+
 		public void GetAdvertisement()
 		{
 			RoomAdvertisement randomRoomAdvertisement = PhoenixEnvironment.GetGame().GetAdvertisementManager().GetRandomRoomAdvertisement();
@@ -259,22 +264,21 @@ namespace Phoenix.Messages
 			this.Session.GetHabbo().LoadingChecksPassed = false;
 			this.Session.GetHabbo().Waitingfordoorbell = false;
 		}
-		public bool NameFree(string string_0)
+		public bool NameFree(string username)
 		{
-			if (!Regex.IsMatch(string_0, "^[-a-zA-Z0-9._:,]+$"))
+			if (!Regex.IsMatch(username, "^[-a-zA-Z0-9._:,]+$"))
 			{
 				return false;
 			}
 			else
 			{
-				DataRow dataRow = null;
-				using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+				DataRow Row = null;
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					dataRow = @class.ReadDataRow("SELECT * FROM users WHERE username = '" + string_0 + "'");
+					Row = adapter.ReadDataRow("SELECT * FROM users WHERE username = '" + username + "'");
 				}
-				return (dataRow == null);
+				return (Row == null);
 			}
 		}
-        private delegate void RequestHandler();
 	}
 }

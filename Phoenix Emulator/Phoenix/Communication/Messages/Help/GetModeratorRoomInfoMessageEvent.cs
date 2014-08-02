@@ -11,7 +11,7 @@ namespace Phoenix.Communication.Messages.Help
 			if (Session.GetHabbo().HasRole("acc_supporttool"))
 			{
 				uint uint_ = Event.PopWiredUInt();
-                RoomData class27_ = PhoenixEnvironment.GetGame().GetRoomManager().method_11(uint_);
+                RoomData class27_ = PhoenixEnvironment.GetGame().GetRoomManager().GenerateNullableRoomData(uint_);
 				Session.SendMessage(PhoenixEnvironment.GetGame().GetModerationTool().method_14(class27_));
 			}
 		}

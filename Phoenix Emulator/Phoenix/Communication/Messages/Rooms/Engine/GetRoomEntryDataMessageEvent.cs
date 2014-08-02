@@ -107,7 +107,7 @@ namespace Phoenix.Communication.Messages.Rooms.Engine
 									Session.SendMessage(Message6);
 									ServerMessage Message7 = new ServerMessage(454u);
 									Message7.AppendBoolean(false);
-									@class.method_3(Message7, false, false);
+									@class.Serialize(Message7, false, false);
 									Session.SendMessage(Message7);
 								}
 							}

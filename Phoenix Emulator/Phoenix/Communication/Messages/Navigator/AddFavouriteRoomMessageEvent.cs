@@ -11,7 +11,7 @@ namespace Phoenix.Communication.Messages.Navigator
 		{
 			uint num = Event.PopWiredUInt();
             RoomData @class = PhoenixEnvironment.GetGame().GetRoomManager().GenerateRoomData(num);
-			if (@class == null || Session.GetHabbo().list_1.Count >= 30 || Session.GetHabbo().list_1.Contains(num) || @class.Type == "public")
+			if (@class == null || Session.GetHabbo().FavoriteRooms.Count >= 30 || Session.GetHabbo().FavoriteRooms.Contains(num) || @class.Type == "public")
 			{
 				ServerMessage Message = new ServerMessage(33u);
 				Message.AppendInt32(-9001);
@@ -23,7 +23,7 @@ namespace Phoenix.Communication.Messages.Navigator
 				Message2.AppendUInt(num);
 				Message2.AppendBoolean(true);
 				Session.SendMessage(Message2);
-				Session.GetHabbo().list_1.Add(num);
+				Session.GetHabbo().FavoriteRooms.Add(num);
 				using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
 				{
 					class2.ExecuteQuery(string.Concat(new object[]

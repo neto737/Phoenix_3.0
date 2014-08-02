@@ -14,7 +14,7 @@ namespace Phoenix.Communication.Messages.Help
 				SupportTicket @class = PhoenixEnvironment.GetGame().GetModerationTool().method_5(Event.PopWiredUInt());
 				if (@class != null)
 				{
-                    RoomData class2 = PhoenixEnvironment.GetGame().GetRoomManager().method_11(@class.RoomId);
+                    RoomData class2 = PhoenixEnvironment.GetGame().GetRoomManager().GenerateNullableRoomData(@class.RoomId);
 					if (class2 != null)
 					{
                         Session.SendMessage(PhoenixEnvironment.GetGame().GetModerationTool().method_21(@class, class2, @class.Timestamp));

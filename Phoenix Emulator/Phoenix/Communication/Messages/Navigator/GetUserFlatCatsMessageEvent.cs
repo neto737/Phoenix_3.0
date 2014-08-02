@@ -7,7 +7,7 @@ namespace Phoenix.Communication.Messages.Navigator
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			Session.SendMessage(PhoenixEnvironment.GetGame().GetNavigator().method_3());
+			Session.SendMessage(PhoenixEnvironment.GetGame().GetNavigator().SerializeFlatCategories());
 		}
 	}
 }

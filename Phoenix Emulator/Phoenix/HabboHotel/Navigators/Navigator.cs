@@ -15,7 +15,6 @@ namespace Phoenix.HabboHotel.Navigators
 {
 	internal sealed class Navigator
 	{
-		[CompilerGenerated]
 		private sealed class Class219
 		{
 			public int int_0;
@@ -28,146 +27,143 @@ namespace Phoenix.HabboHotel.Navigators
 				return class14_0.Category == this.int_0;
 			}
 		}
-		private List<FlatCat> list_0;
-		private Dictionary<int, PublicItem> dictionary_0;
+		private List<FlatCat> PrivateCategories;
+		private Dictionary<int, PublicItem> PublicItems;
 		private Dictionary<int, PublicItem> dictionary_1;
-		[CompilerGenerated]
+
 		private static Comparison<KeyValuePair<string, int>> comparison_0;
-		[CompilerGenerated]
+
 		private static Func<RoomData, int> func_0;
-		[CompilerGenerated]
+
 		private static Func<Room, int> func_1;
-		[CompilerGenerated]
+
 		private static Func<Room, int> func_2;
 		public Navigator()
 		{
-			this.list_0 = new List<FlatCat>();
-			this.dictionary_0 = new Dictionary<int, PublicItem>();
+			this.PrivateCategories = new List<FlatCat>();
+			this.PublicItems = new Dictionary<int, PublicItem>();
 			this.dictionary_1 = new Dictionary<int, PublicItem>();
 		}
-		public void LoadNavigator(DatabaseClient class6_0)
+		public void Initialize(DatabaseClient adapter)
 		{
 			Logging.Write("Loading Navigator..");
-			this.list_0.Clear();
-			this.dictionary_0.Clear();
+			this.PrivateCategories.Clear();
+			this.PublicItems.Clear();
 			this.dictionary_1.Clear();
-			DataTable dataTable = class6_0.ReadDataTable("SELECT Id,caption,min_rank,cantrade FROM navigator_flatcats WHERE enabled = '1'");
-			DataTable dataTable2 = class6_0.ReadDataTable("SELECT Id,bannertype,caption,image,image_type,room_id,category,category_parent_id FROM navigator_publics ORDER BY ordernum ASC;");
+			DataTable dataTable = adapter.ReadDataTable("SELECT Id,caption,min_rank,cantrade FROM navigator_flatcats WHERE enabled = '1'");
+			DataTable dataTable2 = adapter.ReadDataTable("SELECT Id,bannertype,caption,image,image_type,room_id,category,category_parent_id FROM navigator_publics ORDER BY ordernum ASC;");
 			if (dataTable != null)
 			{
 				foreach (DataRow dataRow in dataTable.Rows)
 				{
-					this.list_0.Add(new FlatCat((int)dataRow["Id"], (string)dataRow["caption"], (int)dataRow["min_rank"], PhoenixEnvironment.EnumToBool(dataRow["cantrade"].ToString())));
+					this.PrivateCategories.Add(new FlatCat((int)dataRow["Id"], (string)dataRow["caption"], (int)dataRow["min_rank"], PhoenixEnvironment.EnumToBool(dataRow["cantrade"].ToString())));
 				}
 			}
 			if (dataTable2 != null)
 			{
 				foreach (DataRow dataRow in dataTable2.Rows)
 				{
-					this.dictionary_0.Add((int)dataRow["Id"], new PublicItem((int)dataRow["Id"], int.Parse(dataRow["bannertype"].ToString()), (string)dataRow["caption"], (string)dataRow["image"], (dataRow["image_type"].ToString().ToLower() == "internal") ? PublicImageType.INTERNAL : PublicImageType.EXTERNAL, (uint)dataRow["room_id"], PhoenixEnvironment.EnumToBool(dataRow["category"].ToString()), (int)dataRow["category_parent_id"]));
-					if (!this.dictionary_0[(int)dataRow["Id"]].Category)
+					this.PublicItems.Add((int)dataRow["Id"], new PublicItem((int)dataRow["Id"], int.Parse(dataRow["bannertype"].ToString()), (string)dataRow["caption"], (string)dataRow["image"], (dataRow["image_type"].ToString().ToLower() == "internal") ? PublicImageType.INTERNAL : PublicImageType.EXTERNAL, (uint)dataRow["room_id"], PhoenixEnvironment.EnumToBool(dataRow["category"].ToString()), (int)dataRow["category_parent_id"]));
+					if (!this.PublicItems[(int)dataRow["Id"]].Category)
 					{
-						this.dictionary_1.Add((int)dataRow["Id"], this.dictionary_0[(int)dataRow["Id"]]);
+						this.dictionary_1.Add((int)dataRow["Id"], this.PublicItems[(int)dataRow["Id"]]);
 					}
 				}
 			}
 			Logging.WriteLine("completed!");
 		}
-		public int method_1(int int_0)
+
+		public int GetCountForParent(int ParentId)
 		{
-			int num = 0;
-			foreach (PublicItem current in this.dictionary_0.Values)
+			int i = 0;
+			foreach (PublicItem current in PublicItems.Values)
 			{
-				if (current.Recommended == int_0 || int_0 == -1)
+				if (current.Recommended == ParentId || ParentId == -1)
 				{
-					num++;
+					i++;
 				}
 			}
-			return num;
+			return i;
 		}
-		public FlatCat method_2(int int_0)
-		{
-			FlatCat result;
-			using (TimedLock.Lock(this.list_0))
-			{
-				foreach (FlatCat current in this.list_0)
-				{
-					if (current.Id == int_0)
-					{
-						result = current;
-						return result;
-					}
-				}
-			}
-			result = null;
-			return result;
-		}
-		public ServerMessage method_3()
+
+        public FlatCat GetFlatCat(int Id)
+        {
+            foreach (FlatCat current in PrivateCategories)
+            {
+                if (current.Id == Id)
+                {
+                    return current;
+                }
+            }
+            return null;
+        }
+
+		public ServerMessage SerializeFlatCategories()
 		{
 			ServerMessage Message = new ServerMessage(221);
-			Message.AppendInt32(this.list_0.Count);
-			foreach (FlatCat current in this.list_0)
+			Message.AppendInt32(this.PrivateCategories.Count);
+			foreach (FlatCat FlatCat in this.PrivateCategories)
 			{
-				if (current.Id > 0)
+				if (FlatCat.Id > 0)
 				{
 					Message.AppendBoolean(true);
 				}
-				if (current.Id != 15)
+				if (FlatCat.Id != 15)
 				{
-					Message.AppendInt32(current.Id);
+					Message.AppendInt32(FlatCat.Id);
 				}
-				Message.AppendStringWithBreak(current.Caption);
+				Message.AppendStringWithBreak(FlatCat.Caption);
 			}
 			Message.AppendStringWithBreak("");
 			return Message;
 		}
-		public void method_4(int int_0, ServerMessage Message5_0)
+
+		public void SerializeItemsFromCata(int Id, ServerMessage Message)
 		{
-			foreach (PublicItem current in this.dictionary_0.Values)
+			foreach (PublicItem Item in PublicItems.Values)
 			{
-				if (current.Recommended == int_0 && !current.Category)
+				if (Item.Recommended == Id && !Item.Category)
 				{
-					current.Serialize(Message5_0);
+					Item.Serialize(Message);
 				}
 			}
 		}
+
 		public ServerMessage method_5()
 		{
-			ServerMessage Message = new ServerMessage(450);
-			Message.AppendInt32(this.dictionary_0.Count);
-			foreach (PublicItem current in this.dictionary_0.Values)
+			ServerMessage Frontpage = new ServerMessage(450);
+			Frontpage.AppendInt32(PublicItems.Count);
+			foreach (PublicItem Pub in PublicItems.Values)
 			{
-				if (current.Category)
+				if (Pub.Category)
 				{
-					current.Serialize(Message);
-					this.method_4(current.Id, Message);
+					Pub.Serialize(Frontpage);
+					SerializeItemsFromCata(Pub.Id, Frontpage);
 				}
-				if (!current.Category && (current.Recommended == 0 || current.Recommended == -1))
+				if (!Pub.Category && (Pub.Recommended == 0 || Pub.Recommended == -1))
 				{
-					current.Serialize(Message);
+					Pub.Serialize(Frontpage);
 				}
 			}
-			return Message;
+			return Frontpage;
 		}
+
 		public ServerMessage method_6(GameClient Session)
 		{
-			ServerMessage Message = new ServerMessage(451);
-			Message.AppendInt32(0);
-			Message.AppendInt32(6);
-			Message.AppendStringWithBreak("");
-			Message.AppendInt32(Session.GetHabbo().list_1.Count);
-			using (TimedLock.Lock(Session.GetHabbo().list_1))
-			{
-				foreach (uint current in Session.GetHabbo().list_1)
-				{
-					PhoenixEnvironment.GetGame().GetRoomManager().method_11(current).method_3(Message, false, false);
-				}
-			}
-			return Message;
+			ServerMessage Rooms = new ServerMessage(451);
+			Rooms.AppendInt32(0);
+			Rooms.AppendInt32(6);
+			Rooms.AppendStringWithBreak("");
+			Rooms.AppendInt32(Session.GetHabbo().FavoriteRooms.Count);
+            foreach (uint Id in Session.GetHabbo().FavoriteRooms)
+            {
+                PhoenixEnvironment.GetGame().GetRoomManager().GenerateNullableRoomData(Id).Serialize(Rooms, false, false);
+            }
+			return Rooms;
 		}
+
 		public ServerMessage method_7(GameClient Session)
 		{
-			ServerMessage result;
 			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
 			{
 				DataTable dataTable = @class.ReadDataTable("SELECT * FROM rooms JOIN user_roomvisits ON rooms.Id = user_roomvisits.room_id WHERE user_roomvisits.user_id = '" + Session.GetHabbo().Id + "' ORDER BY entry_timestamp DESC LIMIT 50;");
@@ -190,31 +186,31 @@ namespace Phoenix.HabboHotel.Navigators
 				Message.AppendInt32(list.Count);
 				foreach (RoomData current in list)
 				{
-					current.method_3(Message, false, false);
+					current.Serialize(Message, false, false);
 				}
-				result = Message;
+				return Message;
 			}
-			return result;
 		}
-		public ServerMessage method_8(GameClient Session, int int_0)
+		public ServerMessage SerializeEventListing(GameClient Session, int Category)
 		{
 			ServerMessage Message = new ServerMessage(451);
-			Message.AppendInt32(int_0);
+			Message.AppendInt32(Category);
 			Message.AppendInt32(12);
 			Message.AppendStringWithBreak("");
-			List<Room> list = PhoenixEnvironment.GetGame().GetRoomManager().method_6(int_0);
-			Message.AppendInt32(list.Count);
-			foreach (Room current in list)
+
+			List<Room> EventRooms = PhoenixEnvironment.GetGame().GetRoomManager().GetEventRoomsForCategory(Category);
+			Message.AppendInt32(EventRooms.Count);
+			foreach (Room Room in EventRooms)
 			{
-				RoomData class27_ = current.Class27_0;
-				class27_.method_3(Message, true, false);
+				RoomData Data = Room.Class27_0;
+				Data.Serialize(Message, true, false);
 			}
 			return Message;
 		}
 		public ServerMessage SerializePopularRoomTags()
 		{
-			Dictionary<string, int> collection = new Dictionary<string, int>();
-			ServerMessage result;
+			Dictionary<string, int> Tags = new Dictionary<string, int>();
+			//ServerMessage result;
 			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
 				DataTable dataTable = adapter.ReadDataTable("SELECT tags,users_now FROM rooms WHERE roomtype = 'private' AND users_now > 0 ORDER BY users_now DESC LIMIT 50;");
@@ -222,7 +218,7 @@ namespace Phoenix.HabboHotel.Navigators
 				{
 					foreach (DataRow dataRow in dataTable.Rows)
 					{
-						List<string> list = new List<string>();
+						List<string> RoomTags = new List<string>();
 						string[] array = dataRow["tags"].ToString().Split(new char[]
 						{
 							','
@@ -230,40 +226,39 @@ namespace Phoenix.HabboHotel.Navigators
 						for (int i = 0; i < array.Length; i++)
 						{
 							string text = array[i];
-							list.Add(text);
+							RoomTags.Add(text);
 						}
-						foreach (string text in list)
+						foreach (string Tag in RoomTags)
 						{
-							if (collection.ContainsKey(text))
+							if (Tags.ContainsKey(Tag))
 							{
 								Dictionary<string, int> dictionary2;
 								string key;
-								(dictionary2 = collection)[key = text] = dictionary2[key] + (int)dataRow["users_now"];
+								(dictionary2 = Tags)[key = Tag] = dictionary2[key] + (int)dataRow["users_now"];
 							}
 							else
 							{
-								collection.Add(text, (int)dataRow["users_now"]);
+								Tags.Add(Tag, (int)dataRow["users_now"]);
 							}
 						}
 					}
 				}
-				List<KeyValuePair<string, int>> list2 = new List<KeyValuePair<string, int>>(collection);
+				List<KeyValuePair<string, int>> list2 = new List<KeyValuePair<string, int>>(Tags);
 				List<KeyValuePair<string, int>> arg_163_0 = list2;
 				if (Navigator.comparison_0 == null)
 				{
 					Navigator.comparison_0 = new Comparison<KeyValuePair<string, int>>(Navigator.smethod_0);
 				}
 				arg_163_0.Sort(Navigator.comparison_0);
-				ServerMessage Message = new ServerMessage(452u);
+				ServerMessage Message = new ServerMessage(452);
 				Message.AppendInt32(list2.Count);
 				foreach (KeyValuePair<string, int> current in list2)
 				{
 					Message.AppendStringWithBreak(current.Key);
 					Message.AppendInt32(current.Value);
 				}
-				result = Message;
+				return Message;
 			}
-			return result;
 		}
 		public ServerMessage SerializeSearchResults(string SearchQuery)
 		{
@@ -305,7 +300,7 @@ namespace Phoenix.HabboHotel.Navigators
 			Message.AppendInt32(list.Count);
 			foreach (RoomData current in list)
 			{
-				current.method_3(Message, false, false);
+				current.Serialize(Message, false, false);
 			}
 			return Message;
 		}
@@ -530,29 +525,25 @@ namespace Phoenix.HabboHotel.Navigators
 			Message.AppendInt32(list.Count);
 			foreach (RoomData current5 in list)
 			{
-				current5.method_3(Message, false, false);
+				current5.Serialize(Message, false, false);
 			}
 			Random random = new Random();
 			Message.AppendStringWithBreak("");
 			this.dictionary_1.ElementAt(random.Next(0, this.dictionary_1.Count)).Value.Serialize(Message);
 			return Message;
 		}
-		[CompilerGenerated]
 		private static int smethod_0(KeyValuePair<string, int> keyValuePair_0, KeyValuePair<string, int> keyValuePair_1)
 		{
 			return keyValuePair_0.Value.CompareTo(keyValuePair_1.Value);
 		}
-		[CompilerGenerated]
 		private static int smethod_1(RoomData class27_0)
 		{
 			return class27_0.UsersNow;
 		}
-		[CompilerGenerated]
 		private static int smethod_2(Room class14_0)
 		{
 			return class14_0.UserCount;
 		}
-		[CompilerGenerated]
 		private static int smethod_3(Room class14_0)
 		{
 			return class14_0.UserCount;

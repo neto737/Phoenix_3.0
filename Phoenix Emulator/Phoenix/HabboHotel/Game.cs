@@ -81,7 +81,7 @@ namespace Phoenix.HabboHotel
 				ItemManager.LoadItems(adapter);
 				Catalog.Initialize(adapter);
 				Catalog.InitCache();
-				Navigator.LoadNavigator(adapter);
+				Navigator.Initialize(adapter);
 				RoomManager.LoadModels(adapter);
 				RoomManager.LoadCache();
 				NavigatorCache = new NavigatorCache();

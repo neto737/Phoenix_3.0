@@ -9,7 +9,7 @@ namespace Phoenix.Communication.Messages.Navigator
 		public void parse(GameClient Session, ClientMessage Event)
 		{
 			uint num = Event.PopWiredUInt();
-			Session.GetHabbo().list_1.Remove(num);
+			Session.GetHabbo().FavoriteRooms.Remove(num);
 			ServerMessage Message = new ServerMessage(459u);
 			Message.AppendUInt(num);
 			Message.AppendBoolean(false);

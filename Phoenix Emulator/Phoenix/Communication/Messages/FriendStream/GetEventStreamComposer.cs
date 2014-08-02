@@ -31,11 +31,11 @@ namespace Phoenix.Communication.Messages.FriendStream
                     int likes = 0;
                     bool canlike = false;
 
-                    using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+                    using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
                     {
-                        likes = @class.ReadInt32("SELECT COUNT(friend_stream_id) FROM friend_stream_likes WHERE friend_stream_id = '" + id + "' LIMIT 1");
+                        likes = adapter.ReadInt32("SELECT COUNT(friend_stream_id) FROM friend_stream_likes WHERE friend_stream_id = '" + id + "' LIMIT 1");
 
-                        DataRow datarow = @class.ReadDataRow("SELECT id FROM friend_stream_likes WHERE friend_stream_id = '" + id + "' AND userid = '" + Session.GetHabbo().Id + "' LIMIT 1");
+                        DataRow datarow = adapter.ReadDataRow("SELECT id FROM friend_stream_likes WHERE friend_stream_id = '" + id + "' AND userid = '" + Session.GetHabbo().Id + "' LIMIT 1");
 
                         if (datarow == null)
                         {

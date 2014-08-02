@@ -5,54 +5,51 @@ namespace Phoenix.HabboHotel.Items
 {
 	internal sealed class TeleHandler
 	{
-		public static uint smethod_0(uint uint_0)
+		public static uint GetLinkedTele(uint TeleId)
 		{
-			uint result;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				DataRow dataRow = @class.ReadDataRow("SELECT tele_two_id FROM tele_links WHERE tele_one_id = '" + uint_0 + "' LIMIT 1;");
+				DataRow dataRow = adapter.ReadDataRow("SELECT tele_two_id FROM tele_links WHERE tele_one_id = '" + TeleId + "' LIMIT 1;");
 				if (dataRow == null)
 				{
-					result = 0u;
+					return 0;
 				}
 				else
 				{
-					result = (uint)dataRow[0];
+					return (uint)dataRow[0];
 				}
 			}
-			return result;
 		}
-		public static uint smethod_1(uint uint_0)
+		public static uint GetTeleRoomId(uint TeleId)
 		{
-			uint result;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				DataRow dataRow = @class.ReadDataRow("SELECT room_id FROM items WHERE Id = '" + uint_0 + "' LIMIT 1;");
+				DataRow dataRow = adapter.ReadDataRow("SELECT room_id FROM items WHERE Id = '" + TeleId + "' LIMIT 1;");
 				if (dataRow == null)
 				{
-					result = 0u;
+					return 0;
 				}
 				else
 				{
-					result = (uint)dataRow[0];
+					return (uint)dataRow[0];
 				}
 			}
-			return result;
 		}
-		public static bool smethod_2(uint uint_0)
-		{
-			uint num = TeleHandler.smethod_0(uint_0);
-			bool result;
-			if (num == 0u)
-			{
-				result = false;
-			}
-			else
-			{
-				uint num2 = TeleHandler.smethod_1(num);
-				result = (num2 != 0u);
-			}
-			return result;
-		}
+        public static bool IsTeleLinked(uint TeleId)
+        {
+            uint LinkId = GetLinkedTele(TeleId);
+            if (LinkId == 0)
+            {
+                return false;
+            }
+
+            uint RoomId = GetTeleRoomId(LinkId);
+            if (RoomId == 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
 	}
 }

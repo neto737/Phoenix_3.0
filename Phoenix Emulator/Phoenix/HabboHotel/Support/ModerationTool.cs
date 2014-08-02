@@ -213,7 +213,7 @@ namespace Phoenix.HabboHotel.Support
 		{
 			if (Session.GetHabbo().CurrentRoomId > 0u)
 			{
-				RoomData @class = PhoenixEnvironment.GetGame().GetRoomManager().method_11(Session.GetHabbo().CurrentRoomId);
+				RoomData @class = PhoenixEnvironment.GetGame().GetRoomManager().GenerateNullableRoomData(Session.GetHabbo().CurrentRoomId);
 				uint uint_ = 0u;
 				using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
 				{
@@ -634,7 +634,7 @@ namespace Phoenix.HabboHotel.Support
 						while (enumerator.MoveNext())
 						{
 							DataRow dataRow = (DataRow)enumerator.Current;
-							RoomData class2 = PhoenixEnvironment.GetGame().GetRoomManager().method_11((uint)dataRow["room_id"]);
+							RoomData class2 = PhoenixEnvironment.GetGame().GetRoomManager().GenerateNullableRoomData((uint)dataRow["room_id"]);
 							Message.AppendBoolean(class2.IsPublicRoom);
 							Message.AppendUInt(class2.Id);
 							Message.AppendStringWithBreak(class2.Name);
@@ -701,7 +701,7 @@ namespace Phoenix.HabboHotel.Support
 									" ORDER BY timestamp DESC LIMIT 100"
 								}));
 							}
-							RoomData class2 = PhoenixEnvironment.GetGame().GetRoomManager().method_11((uint)dataRow["room_id"]);
+							RoomData class2 = PhoenixEnvironment.GetGame().GetRoomManager().GenerateNullableRoomData((uint)dataRow["room_id"]);
 							Message.AppendBoolean(class2.IsPublicRoom);
 							Message.AppendUInt(class2.Id);
 							Message.AppendStringWithBreak(class2.Name);

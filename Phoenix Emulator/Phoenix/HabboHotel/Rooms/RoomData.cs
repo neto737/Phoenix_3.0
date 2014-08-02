@@ -228,7 +228,7 @@ namespace Phoenix.HabboHotel.Rooms
 			this.Achievement = Room.Achievement;
 			this.class28_0 = PhoenixEnvironment.GetGame().GetRoomManager().GetModel(ModelName, Id);
 		}
-		public void method_3(ServerMessage Message, bool ShowEvents, bool bool_6)
+		public void Serialize(ServerMessage Message, bool ShowEvents, bool bool_6)
 		{
 			Message.AppendUInt(this.Id);
 			if (Event == null || !ShowEvents)
@@ -243,7 +243,7 @@ namespace Phoenix.HabboHotel.Rooms
 				Message.AppendBoolean(true);
 				if (this.Category > 0)
 				{
-					Message.AppendBoolean(PhoenixEnvironment.GetGame().GetNavigator().method_2(Category).CanTrade);
+					Message.AppendBoolean(PhoenixEnvironment.GetGame().GetNavigator().GetFlatCat(Category).CanTrade);
 				}
 				else
 				{

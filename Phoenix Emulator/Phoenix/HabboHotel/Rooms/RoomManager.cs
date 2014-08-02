@@ -155,7 +155,7 @@ namespace Phoenix.HabboHotel.Rooms
 		{
 			this.list_1.Add(TeleUserData_0);
 		}
-		public List<Room> method_6(int int_0)
+		public List<Room> GetEventRoomsForCategory(int int_0)
 		{
 			List<Room> list = new List<Room>();
 			try
@@ -292,7 +292,7 @@ namespace Phoenix.HabboHotel.Rooms
 			}
 			return result;
 		}
-		public RoomData method_11(uint uint_0)
+		public RoomData GenerateNullableRoomData(uint uint_0)
 		{
 			RoomData result;
 			if (this.GenerateRoomData(uint_0) != null)

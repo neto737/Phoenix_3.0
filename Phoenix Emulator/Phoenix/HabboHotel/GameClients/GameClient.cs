@@ -204,8 +204,8 @@ namespace Phoenix.HabboHotel.GameClients
 			this.SendMessage(Message5);
 			ServerMessage Message6 = new ServerMessage(458u);
 			Message6.AppendInt32(30);
-			Message6.AppendInt32(this.GetHabbo().list_1.Count);
-			foreach (uint current in this.GetHabbo().list_1)
+			Message6.AppendInt32(this.GetHabbo().FavoriteRooms.Count);
+			foreach (uint current in this.GetHabbo().FavoriteRooms)
 			{
 				Message6.AppendUInt(current);
 			}
