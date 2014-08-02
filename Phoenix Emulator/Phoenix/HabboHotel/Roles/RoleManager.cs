@@ -1062,88 +1062,88 @@ namespace Phoenix.HabboHotel.Roles
             this.PetCommandsList.Add(TextManager.GetText("pet_cmd_talk"), 11);
             this.CommandsList.Clear();
             this.CommandsList.Add(TextManager.GetText("cmd_about_name"), 1);
-            this.CommandsList.Add(TextManager.GetText("cmd_alert_name"), 2);
-            this.CommandsList.Add(TextManager.GetText("cmd_award_name"), 3);
-            this.CommandsList.Add(TextManager.GetText("cmd_ban_name"), 4);
-            this.CommandsList.Add(TextManager.GetText("cmd_buy_name"), 5);
-            this.CommandsList.Add(TextManager.GetText("cmd_coins_name"), 6);
-            this.CommandsList.Add(TextManager.GetText("cmd_coords_name"), 7);
-            this.CommandsList.Add(TextManager.GetText("cmd_disablediagonal_name"), 8);
-            this.CommandsList.Add(TextManager.GetText("cmd_emptyitems_name"), 9);
-            this.CommandsList.Add(TextManager.GetText("cmd_empty_name"), 10);
-            this.CommandsList.Add(TextManager.GetText("cmd_enable_name"), 11);
-            this.CommandsList.Add(TextManager.GetText("cmd_flagme_name"), 12);
-            this.CommandsList.Add(TextManager.GetText("cmd_follow_name"), 13);
-            this.CommandsList.Add(TextManager.GetText("cmd_freeze_name"), 14);
-            this.CommandsList.Add(TextManager.GetText("cmd_givebadge_name"), 15);
-            this.CommandsList.Add(TextManager.GetText("cmd_globalcredits_name"), 16);
-            this.CommandsList.Add(TextManager.GetText("cmd_globalpixels_name"), 17);
-            this.CommandsList.Add(TextManager.GetText("cmd_globalpoints_name"), 18);
-            this.CommandsList.Add(TextManager.GetText("cmd_hal_name"), 19);
-            this.CommandsList.Add(TextManager.GetText("cmd_ha_name"), 20);
-            this.CommandsList.Add(TextManager.GetText("cmd_invisible_name"), 21);
-            this.CommandsList.Add(TextManager.GetText("cmd_ipban_name"), 22);
-            this.CommandsList.Add(TextManager.GetText("cmd_kick_name"), 23);
-            this.CommandsList.Add(TextManager.GetText("cmd_massbadge_name"), 24);
-            this.CommandsList.Add(TextManager.GetText("cmd_masscredits_name"), 25);
-            this.CommandsList.Add(TextManager.GetText("cmd_masspixels_name"), 26);
-            this.CommandsList.Add(TextManager.GetText("cmd_masspoints_name"), 27);
-            this.CommandsList.Add(TextManager.GetText("cmd_mimic_name"), 28);
-            this.CommandsList.Add(TextManager.GetText("cmd_moonwalk_name"), 29);
-            this.CommandsList.Add(TextManager.GetText("cmd_motd_name"), 30);
-            this.CommandsList.Add(TextManager.GetText("cmd_mute_name"), 31);
-            this.CommandsList.Add(TextManager.GetText("cmd_override_name"), 32);
-            this.CommandsList.Add(TextManager.GetText("cmd_pickall_name"), 33);
-            this.CommandsList.Add(TextManager.GetText("cmd_pixels_name"), 34);
-            this.CommandsList.Add(TextManager.GetText("cmd_points_name"), 35);
-            this.CommandsList.Add(TextManager.GetText("cmd_pull_name"), 36);
-            this.CommandsList.Add(TextManager.GetText("cmd_push_name"), 37);
+            this.CommandsList.Add(TextManager.GetText("cmd_alert_name"), 2); //Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_award_name"), 3);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_ban_name"), 4);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_buy_name"), 5);//------ Normal User
+            this.CommandsList.Add(TextManager.GetText("cmd_coins_name"), 6);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_coords_name"), 7);//------ Normal/VIP User
+            this.CommandsList.Add(TextManager.GetText("cmd_disablediagonal_name"), 8);//--------- Normal/VIP user
+            this.CommandsList.Add(TextManager.GetText("cmd_emptyitems_name"), 9);//---------- Normal user
+            this.CommandsList.Add(TextManager.GetText("cmd_empty_name"), 10);//---------- normal  user
+            this.CommandsList.Add(TextManager.GetText("cmd_enable_name"), 11);//------- VIP user
+            this.CommandsList.Add(TextManager.GetText("cmd_flagme_name"), 12);//------- VIP user
+            this.CommandsList.Add(TextManager.GetText("cmd_follow_name"), 13);//------- VIP user
+            this.CommandsList.Add(TextManager.GetText("cmd_freeze_name"), 14);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_givebadge_name"), 15);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_globalcredits_name"), 16);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_globalpixels_name"), 17);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_globalpoints_name"), 18);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_hal_name"), 19);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_ha_name"), 20);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_invisible_name"), 21);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_ipban_name"), 22);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_kick_name"), 23);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_massbadge_name"), 24);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_masscredits_name"), 25);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_masspixels_name"), 26);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_masspoints_name"), 27);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_mimic_name"), 28);//VIP
+            this.CommandsList.Add(TextManager.GetText("cmd_moonwalk_name"), 29);//VIP
+            this.CommandsList.Add(TextManager.GetText("cmd_motd_name"), 30);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_mute_name"), 31);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_override_name"), 32);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_pickall_name"), 33);//normal user
+            this.CommandsList.Add(TextManager.GetText("cmd_pixels_name"), 34);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_points_name"), 35);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_pull_name"), 36);//VIP
+            this.CommandsList.Add(TextManager.GetText("cmd_push_name"), 37);//VIP
             this.CommandsList.Add(TextManager.GetText("cmd_redeemcreds_name"), 38);
-            this.CommandsList.Add(TextManager.GetText("cmd_removebadge_name"), 39);
+            this.CommandsList.Add(TextManager.GetText("cmd_removebadge_name"), 39);//Maked Command - Moderation ok
             this.CommandsList.Add(TextManager.GetText("cmd_ride_name"), 40);
-            this.CommandsList.Add(TextManager.GetText("cmd_roomalert_name"), 41);
-            this.CommandsList.Add(TextManager.GetText("cmd_roombadge_name"), 42);
-            this.CommandsList.Add(TextManager.GetText("cmd_roomkick_name"), 43);
-            this.CommandsList.Add(TextManager.GetText("cmd_roommute_name"), 44);
-            this.CommandsList.Add(TextManager.GetText("cmd_sa_name"), 45);
+            this.CommandsList.Add(TextManager.GetText("cmd_roomalert_name"), 41);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_roombadge_name"), 42);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_roomkick_name"), 43);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_roommute_name"), 44);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_sa_name"), 45);//Maked Command - Moderation ok
             this.CommandsList.Add(TextManager.GetText("cmd_setmax_name"), 46);
             this.CommandsList.Add(TextManager.GetText("cmd_setspeed_name"), 47);
-            this.CommandsList.Add(TextManager.GetText("cmd_shutdown_name"), 48);
+            this.CommandsList.Add(TextManager.GetText("cmd_shutdown_name"), 48);//Maked Command - Moderation ok
             this.CommandsList.Add(TextManager.GetText("cmd_spull_name"), 49);
-            this.CommandsList.Add(TextManager.GetText("cmd_summon_name"), 50);
-            this.CommandsList.Add(TextManager.GetText("cmd_superban_name"), 51);
+            this.CommandsList.Add(TextManager.GetText("cmd_summon_name"), 50);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_superban_name"), 51);//Maked Command - Moderation ok
             this.CommandsList.Add(TextManager.GetText("cmd_teleport_name"), 52);
             this.CommandsList.Add(TextManager.GetText("cmd_unload_name"), 53);
             this.CommandsList.Add(TextManager.GetText("cmd_unmute_name"), 54);
-            this.CommandsList.Add(TextManager.GetText("cmd_update_achievements_name"), 55);
-            this.CommandsList.Add(TextManager.GetText("cmd_update_bans_name"), 56);
-            this.CommandsList.Add(TextManager.GetText("cmd_update_bots_name"), 57);
-            this.CommandsList.Add(TextManager.GetText("cmd_update_catalogue_name"), 58);
-            this.CommandsList.Add(TextManager.GetText("cmd_update_filter_name"), 59);
-            this.CommandsList.Add(TextManager.GetText("cmd_update_items_name"), 60);
-            this.CommandsList.Add(TextManager.GetText("cmd_update_navigator_name"), 61);
-            this.CommandsList.Add(TextManager.GetText("cmd_update_permissions_name"), 62);
-            this.CommandsList.Add(TextManager.GetText("cmd_update_settings_name"), 63);
-            this.CommandsList.Add(TextManager.GetText("cmd_userinfo_name"), 64);
-            this.CommandsList.Add(TextManager.GetText("cmd_update_texts_name"), 65);
-            this.CommandsList.Add(TextManager.GetText("cmd_disconnect_name"), 66);
+            this.CommandsList.Add(TextManager.GetText("cmd_update_achievements_name"), 55);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_update_bans_name"), 56);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_update_bots_name"), 57);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_update_catalogue_name"), 58);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_update_filter_name"), 59);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_update_items_name"), 60);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_update_navigator_name"), 61);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_update_permissions_name"), 62);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_update_settings_name"), 63);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_userinfo_name"), 64);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_update_texts_name"), 65);//Maked Command - Moderation ok
+            this.CommandsList.Add(TextManager.GetText("cmd_disconnect_name"), 66);//Maked Command - Moderation ok
             this.CommandsList.Add(TextManager.GetText("cmd_commands_name"), 67);
             this.CommandsList.Add("about", 68);
             this.CommandsList.Add(TextManager.GetText("cmd_roominfo_name"), 69);
-            this.CommandsList.Add("amiaaron", 70);
-            this.CommandsList.Add("dance", 71);
-            this.CommandsList.Add("rave", 72);
-            this.CommandsList.Add("roll", 73);
-            this.CommandsList.Add("control", 74);
-            this.CommandsList.Add("makesay", 75);
-            this.CommandsList.Add("sitdown", 76);
-            this.CommandsList.Add("exe", 77);
-            this.CommandsList.Add("giveitem", 79);
-            this.CommandsList.Add("sit", 80);
-            this.CommandsList.Add("dismount", 81);
-            this.CommandsList.Add("getoff", 82);
-            this.CommandsList.Add(TextManager.GetText("cmd_emptypets_name"), 83);
-            this.CommandsList.Add("closetickets", 84);
+            this.CommandsList.Add("amiaaron", 70); //Developer command
+            this.CommandsList.Add("dance", 71); //Developer command
+            this.CommandsList.Add("rave", 72); //Developer command
+            this.CommandsList.Add("roll", 73); //Developer command
+            this.CommandsList.Add("control", 74); //Developer command
+            this.CommandsList.Add("makesay", 75); //Developer command
+            this.CommandsList.Add("sitdown", 76); //Developer command
+            this.CommandsList.Add("exe", 77); //Developer command
+            this.CommandsList.Add(TextManager.GetText("cmd_sit_name"), 79); //normal user
+            this.CommandsList.Add(TextManager.GetText("cmd_dismount_name"), 80); //normal user
+            this.CommandsList.Add(TextManager.GetText("cmd_emptypets_name"), 82); //normal user
+            this.CommandsList.Add("getoff", 81); //Developer command
+            this.CommandsList.Add(TextManager.GetText("cmd_giveitem_name"), 83); //Developer command
+            this.CommandsList.Add("lay", 84); //normal user
             Logging.WriteLine("completed!");
             try
             {

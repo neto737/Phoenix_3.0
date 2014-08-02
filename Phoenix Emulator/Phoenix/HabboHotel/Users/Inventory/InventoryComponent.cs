@@ -76,7 +76,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
             }
         }
 
-		public void method_0()
+		public void ClearItems()
 		{
 			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
 			{
@@ -89,7 +89,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			ServerMessage Message5_ = new ServerMessage(101u);
 			this.GetClient().SendMessage(Message5_);
 		}
-		public void method_1(GameClient class16_1)
+		public void RedeemCredits(GameClient class16_1)
 		{
 			int num = 0;
 			List<UserItem> list = new List<UserItem>();
@@ -120,7 +120,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			class16_1.GetHabbo().UpdateCreditsBalance(true);
 			class16_1.SendNotif("All coins in your inventory have been converted back into " + num + " credits!");
 		}
-		public void method_2()
+		public void ClearPets()
 		{
 			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
 			{

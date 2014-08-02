@@ -26,7 +26,7 @@ namespace Phoenix.Communication.Messages.Help
 				{
 					text += " Kick Users";
 				}
-				PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, "ModTool - Room Action", text);
+				PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, "ModTool - Room Action", text);
 				PhoenixEnvironment.GetGame().GetModerationTool().method_12(Session, uint_, flag3, flag, flag2);
 			}
 		}

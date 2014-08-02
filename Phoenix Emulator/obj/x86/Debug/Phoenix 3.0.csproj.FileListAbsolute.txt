@@ -23,6 +23,7 @@ C:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\obj\x86\Debug\
 C:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\obj\x86\Debug\Phoenix 3.0.pdb
 C:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\bin\Debug\Phoenix 3.0.exe
 C:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\bin\Debug\Phoenix 3.0.pdb
-C:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\obj\x86\Debug\Phoenix 3.0.csprojResolveAssemblyReference.cache
 C:\Users\NETO\Documents\GitHub\Phoenix_3.0\obj\x86\Debug\Phoenix 3.0.exe
 C:\Users\NETO\Documents\GitHub\Phoenix_3.0\obj\x86\Debug\Phoenix 3.0.pdb
+C:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\bin\Debug\Phoenix 3.0.exe.config
+C:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\obj\x86\Debug\Phoenix 3.0.csprojResolveAssemblyReference.cache

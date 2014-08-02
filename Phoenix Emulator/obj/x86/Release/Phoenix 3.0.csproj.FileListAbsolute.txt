@@ -1,0 +1,7 @@
+C:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\bin\Release\Phoenix 3.0.exe.config
+C:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\bin\Release\Phoenix 3.0.exe
+C:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\bin\Release\Phoenix 3.0.pdb
+C:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\bin\Release\mysql.data.dll
+C:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\obj\x86\Release\Phoenix 3.0.csprojResolveAssemblyReference.cache
+C:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\obj\x86\Release\Phoenix 3.0.exe
+C:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\obj\x86\Release\Phoenix 3.0.pdb

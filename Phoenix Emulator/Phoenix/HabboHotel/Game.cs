@@ -89,7 +89,7 @@ namespace Phoenix.HabboHotel
 				BotManager.LoadBots(adapter);
 				AchievementManager.LoadAchievements(adapter);
 				PixelManager.Start();
-				ChatCommandHandler.initFilter(adapter);
+				ChatCommandHandler.InitFilter(adapter);
 				QuestManager.InitQuests();
 				GuildManager.LoadGroups(adapter);
 				DatabaseCleanup(adapter, 1);

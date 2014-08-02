@@ -698,6 +698,13 @@ namespace Phoenix.HabboHotel.Users
 			{
 				this.GetClient().SendNotif("You have been muted by a moderator.");
 				this.Muted = true;
+                using (DatabaseClient dbClient = PhoenixEnvironment.GetDatabase().GetClient())
+                {
+                    dbClient.ExecuteQuery(string.Concat(new object[]
+                    {
+                        "UPDATE users SET is_muted = '1' WHERE Id = '", this.Id, "' LIMIT 1;"
+                    }));
+                }
 			}
 		}
 		public void Unmute()
@@ -705,6 +712,13 @@ namespace Phoenix.HabboHotel.Users
 			if (this.Muted)
 			{
 				this.Muted = false;
+                using (DatabaseClient dbClient = PhoenixEnvironment.GetDatabase().GetClient())
+                {
+                    dbClient.ExecuteQuery(string.Concat(new object[]
+                    {
+                        "UPDATE users SET is_muted = '0' WHERE Id = '", this.Id, "' LIMIT 1;"
+                    }));
+                }
 			}
 		}
 		private GameClient GetClient()

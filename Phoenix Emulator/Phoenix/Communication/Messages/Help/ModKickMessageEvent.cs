@@ -18,7 +18,7 @@ namespace Phoenix.Communication.Messages.Help
 					", Message: ",
 					text
 				});
-				PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, "ModTool - Kick User", string_);
+				PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, "ModTool - Kick User", string_);
 				PhoenixEnvironment.GetGame().GetModerationTool().method_15(Session, num, text, false);
 			}
 		}

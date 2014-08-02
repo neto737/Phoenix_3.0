@@ -6,13 +6,15 @@ namespace Phoenix.Core
 	public sealed class Logging
 	{
 		private static bool IsRunning = false;
-		internal static void Write(string string_0)
+
+		internal static void Write(string Line)
 		{
 			if (!Logging.IsRunning)
 			{
-				Console.Write(string_0);
+				Console.Write(Line);
 			}
 		}
+
 		internal static void WriteLine(string Line)
 		{
 			if (!Logging.IsRunning)
@@ -20,6 +22,7 @@ namespace Phoenix.Core
 				Console.WriteLine(Line);
 			}
 		}
+
 		internal static void LogException(string logText)
 		{
 			try
@@ -43,6 +46,7 @@ namespace Phoenix.Core
 			Logging.WriteLine("Exception has been saved");
 			Console.ForegroundColor = ConsoleColor.Gray;
 		}
+
 		internal static void LogCriticalException(string logText)
 		{
 			try
@@ -66,6 +70,7 @@ namespace Phoenix.Core
 				Logging.WriteLine(DateTime.Now + ": " + logText);
 			}
 		}
+
 		internal static void LogCacheError(string logText)
 		{
 			try
@@ -89,6 +94,7 @@ namespace Phoenix.Core
 			Logging.WriteLine("Critical error saved");
 			Console.ForegroundColor = ConsoleColor.Gray;
 		}
+
 		internal static void LogDDoS(string logText)
 		{
 			try
@@ -109,6 +115,7 @@ namespace Phoenix.Core
 			}
 			Logging.WriteLine(DateTime.Now + ": " + logText);
 		}
+
 		internal static void LogThreadException(string Exception, string Threadname)
 		{
 			try
@@ -134,10 +141,12 @@ namespace Phoenix.Core
 				Logging.WriteLine(DateTime.Now + ": " + Exception);
 			}
 		}
+
 		internal static void DisablePrimaryWriting()
 		{
 			Logging.IsRunning = true;
 		}
+
 		internal static void smethod_8(string logText)
 		{
 			throw new NotImplementedException();

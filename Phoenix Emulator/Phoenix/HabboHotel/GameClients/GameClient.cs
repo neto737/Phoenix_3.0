@@ -280,6 +280,16 @@ namespace Phoenix.HabboHotel.GameClients
 			if (GlobalClass.Motd != "")
 			{
 				this.SendNotif(GlobalClass.Motd, 2);
+                DataTable muteDatas = null;
+                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                {
+                    adapter.AddParamWithValue("habboId", this.Id);
+                    muteDatas = adapter.ReadDataTable("SELECT is_muted FROM users WHERE id = '@habboId' LIMIT 1");
+                }
+                if (muteDatas.ToString() == "1")
+                {
+                    Habbo.Muted = true;
+                }  
 			}
 			for (uint num = (uint)PhoenixEnvironment.GetGame().GetRoleManager().RankCount(); num > 1u; num -= 1u)
 			{

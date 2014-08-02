@@ -349,7 +349,7 @@ namespace Phoenix.HabboHotel.GameClients
 				}
 			}
 		}
-		internal void method_18(int int_0)
+		internal void GiveCredits(int int_0)
 		{
 			for (int i = 0; i < this.Session.Length; i++)
 			{
@@ -368,7 +368,7 @@ namespace Phoenix.HabboHotel.GameClients
 				}
 			}
 		}
-		internal void method_19(int int_0, bool bool_0)
+		internal void GivePixels(int int_0, bool bool_0)
 		{
 			for (int i = 0; i < this.Session.Length; i++)
 			{
@@ -387,7 +387,7 @@ namespace Phoenix.HabboHotel.GameClients
 				}
 			}
 		}
-		internal void method_20(int int_0, bool bool_0)
+		internal void GivePoints(int int_0, bool bool_0)
 		{
 			for (int i = 0; i < this.Session.Length; i++)
 			{
@@ -406,7 +406,7 @@ namespace Phoenix.HabboHotel.GameClients
 				}
 			}
 		}
-		internal void method_21(string string_0)
+		internal void GiveMassBadge(string string_0)
 		{
 			for (int i = 0; i < this.Session.Length; i++)
 			{
@@ -655,7 +655,7 @@ namespace Phoenix.HabboHotel.GameClients
 			list.Add(Message);
 			return list;
 		}
-		internal void method_31(GameClient Session, string string_0, string string_1)
+		internal void RecordCmdLogs(GameClient Session, string string_0, string string_1)
 		{
             if (GlobalClass.RecordCmdlogs)
 			{

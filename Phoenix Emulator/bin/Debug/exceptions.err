@@ -1,0 +1,18 @@
+30/07/2014 19:58:55: Error: System.IndexOutOfRangeException: O ?ndice estava fora dos limites da matriz.
+   em Phoenix.HabboHotel.Misc.ChatCommandHandler.Parse(GameClient Session, String Input) na c:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\Phoenix\HabboHotel\Misc\ChatCommandHandler.cs:linha 1522
+   em Phoenix.HabboHotel.Rooms.RoomUser.Chat(GameClient Session, String Message, Boolean Shout) na c:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\Phoenix\HabboHotel\Rooms\RoomUser.cs:linha 157
+   em Phoenix.Communication.Messages.Rooms.Chat.ChatMessageEvent.parse(GameClient Session, ClientMessage Event) na c:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\Phoenix\Communication\Messages\Rooms\Chat\ChatMessageEvent.cs:linha 17
+   em Phoenix.HabboHotel.GameClients.GameClient.HandleConnectionData(Byte[]& byte_0) na c:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\Phoenix\HabboHotel\GameClients\GameClient.cs:linha 487
+
+30/07/2014 20:05:06: Error: System.IndexOutOfRangeException: O ?ndice estava fora dos limites da matriz.
+   em Phoenix.HabboHotel.Misc.ChatCommandHandler.Parse(GameClient Session, String Input) na c:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\Phoenix\HabboHotel\Misc\ChatCommandHandler.cs:linha 1523
+   em Phoenix.HabboHotel.Rooms.RoomUser.Chat(GameClient Session, String Message, Boolean Shout) na c:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\Phoenix\HabboHotel\Rooms\RoomUser.cs:linha 157
+   em Phoenix.Communication.Messages.Rooms.Chat.ChatMessageEvent.parse(GameClient Session, ClientMessage Event) na c:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\Phoenix\Communication\Messages\Rooms\Chat\ChatMessageEvent.cs:linha 17
+   em Phoenix.HabboHotel.GameClients.GameClient.HandleConnectionData(Byte[]& byte_0) na c:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\Phoenix\HabboHotel\GameClients\GameClient.cs:linha 487
+
+30/07/2014 20:05:57: Error: System.IndexOutOfRangeException: O ?ndice estava fora dos limites da matriz.
+   em Phoenix.HabboHotel.Misc.ChatCommandHandler.Parse(GameClient Session, String Input) na c:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\Phoenix\HabboHotel\Misc\ChatCommandHandler.cs:linha 229
+   em Phoenix.HabboHotel.Rooms.RoomUser.Chat(GameClient Session, String Message, Boolean Shout) na c:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\Phoenix\HabboHotel\Rooms\RoomUser.cs:linha 157
+   em Phoenix.Communication.Messages.Rooms.Chat.ChatMessageEvent.parse(GameClient Session, ClientMessage Event) na c:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\Phoenix\Communication\Messages\Rooms\Chat\ChatMessageEvent.cs:linha 17
+   em Phoenix.HabboHotel.GameClients.GameClient.HandleConnectionData(Byte[]& byte_0) na c:\Users\NETO\Downloads\Phoenix\3.11.0\3.11.0 - Backup 26.03.2014\Phoenix\HabboHotel\GameClients\GameClient.cs:linha 487
+

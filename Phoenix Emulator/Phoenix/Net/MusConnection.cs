@@ -175,7 +175,7 @@ namespace Phoenix.Net
                 case "refresh_filter":
                     using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
                     {
-                        ChatCommandHandler.InitWords(adapter);
+                        ChatCommandHandler.UpdateFilters(adapter);
                     }
                     break;
 

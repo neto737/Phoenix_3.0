@@ -34,7 +34,7 @@ namespace Phoenix.HabboHotel.Rooms
 		public int int_9;
 		public int GoalX;
 		public int GoalY;
-		public bool bool_3;
+		public bool WalkBackwards;
 		public bool SetStep;
 		public int SetX;
 		public int SetY;

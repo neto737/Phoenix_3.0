@@ -1,13 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectGuid>{1E507DDE-C18F-4D02-A4F3-6C170FC286A6}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <OutputType>Exe</OutputType>
     <AssemblyName>Phoenix 3.0</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <WarningLevel>4</WarningLevel>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Platform)' == 'x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -30,6 +31,13 @@
   <PropertyGroup>
     <StartupObject>
     </StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <Prefer32Bit>false</Prefer32Bit>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mysql.data, Version=6.8.3.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
@@ -193,7 +201,7 @@
     <Compile Include="Phoenix\Communication\Messages\Rooms\Action\AssignRightsMessageEvent.cs" />
     <Compile Include="Phoenix\Communication\Messages\Rooms\Action\KickBotMessageEvent.cs" />
     <Compile Include="Phoenix\Communication\Messages\Rooms\Action\CallGuideBotMessageEvent.cs" />
-    <Compile Include="Phoenix\Communication\Messages\Avatar\ChangeUserNameMessageEvent.cs" />
+    <Compile Include="Phoenix\Communication\Messages\Rooms\Avatar\ChangeUserNameMessageEvent.cs" />
     <Compile Include="Phoenix\Communication\Messages\Rooms\Avatar\LockToMessageEvent.cs" />
     <Compile Include="Phoenix\Communication\Messages\Rooms\Avatar\DanceMessageEvent.cs" />
     <Compile Include="Phoenix\Communication\Messages\Rooms\Avatar\WaveMessageEvent.cs" />
@@ -252,7 +260,7 @@
     <Compile Include="Phoenix\Communication\Messages\Wired\UpdateConditionMessageEvent.cs" />
     <Compile Include="Phoenix\Communication\Messages\Wired\UpdateActionMessageEvent.cs" />
     <Compile Include="Phoenix\Communication\Messages\Wired\UpdateTriggerMessageEvent.cs" />
-    <Compile Include="Phoenix\Core\RandomCore.cs" />
+    <Compile Include="Phoenix\Core\RandomBase.cs" />
     <Compile Include="Phoenix\Core\Quick.cs" />
     <Compile Include="Phoenix\Core\Logging.cs" />
     <Compile Include="Phoenix\HabboHotel\Achievements\AchievementManager.cs" />
@@ -411,6 +419,8 @@
   <ItemGroup>
     <Content Include="Phoenix_3.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

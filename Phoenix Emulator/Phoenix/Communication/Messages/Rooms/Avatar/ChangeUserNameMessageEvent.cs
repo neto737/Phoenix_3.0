@@ -101,7 +101,7 @@ namespace Phoenix.Communication.Messages.Rooms.Avatar
 										Session.GetHabbo().Id,
 										"' LIMIT 1"
 									}));
-									PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, "flagme", "OldName: " + Session.GetHabbo().Username + " NewName: " + text);
+									PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, "flagme", "OldName: " + Session.GetHabbo().Username + " NewName: " + text);
 									Session.GetHabbo().Username = text;
 									Session.GetHabbo().UpdateRooms(class3);
                                     foreach (RoomData current2 in Session.GetHabbo().list_6)

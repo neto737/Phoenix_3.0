@@ -1,7 +1,3 @@
-// Type: Phoenix.HabboHotel.Misc.AntiMutant
-// Assembly: Phoenix 3.0, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// Assembly location: C:\Users\NETO\Desktop\Phoenix 3.0.exe
-
 using Phoenix.Core;
 using Phoenix.HabboHotel.Rooms;
 using System;

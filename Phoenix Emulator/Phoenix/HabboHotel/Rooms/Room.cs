@@ -254,7 +254,7 @@ namespace Phoenix.HabboHotel.Rooms
                 return this.class27_0;
             }
         }
-        public byte[,] Byte_0
+        public byte[,] SqFloorHeight
         {
             get
             {
@@ -327,67 +327,68 @@ namespace Phoenix.HabboHotel.Rooms
             this.Tags = list_18;
             this.AllowPet = bool_13;
             this.AllowPetsEating = bool_14;
-                this.AllowWalkthrough = bool_15;
-                this.Hidewall = bool_16;
-                this.Wallthick = int_21;
-                this.Floorthick = int_22;
-                this.int_7 = 0;
-                this.UserList = new RoomUser[500];
-                this.class29_0 = class29_1;
-                this.Password = string_16;
-                this.dictionary_0 = new Dictionary<uint, double>();
-                this.Event = null;
-                this.Wallpaper = string_17;
-                this.Floor = string_18;
-                this.Landscape = string_19;
-                this.mWallItems = new Hashtable();
-                this.mFloorItems = new Hashtable();
-                this.list_2 = new List<Trade>();
-                this.class28_0 = PhoenixEnvironment.GetGame().GetRoomManager().GetModel(this.ModelName, this.Id);
-                this.bool_6 = false;
-                this.bool_7 = false;
-                this.bool_5 = true;
-                this.class27_0 = class27_1;
-                this.bool_8 = bool_17;
-                this.list_17 = new List<Guild>();
-                this.list_4 = new List<uint>();
-                this.bbTiles = new List<RoomItem>();
-                this.bbbTiles = new List<RoomItem>();
-                this.bbgTiles = new List<RoomItem>();
-                this.bbrTiles = new List<RoomItem>();
-                this.bbyTiles = new List<RoomItem>();
-                this.RedScoreboards = new List<RoomItem>();
-                this.YellowScoreboards = new List<RoomItem>();
-                this.BlueScoreboards = new List<RoomItem>();
-                this.GreenScoreboards = new List<RoomItem>();
-                this.int_10 = 0;
-                this.int_11 = 0;
-                this.int_9 = 0;
-                this.int_12 = 0;
-                this.int_13 = 0;
-                this.StickiePoles = new List<RoomItem>();
-                this.WF_Triggers = new List<RoomItem>();
-                this.WF_Effects = new List<RoomItem>();
-                this.WF_Conditions = new List<RoomItem>();
-                this.byte_0 = new byte[this.Model.MapSizeX, this.Model.MapSizeY];
-                this.double_1 = new double[this.Model.MapSizeX, this.Model.MapSizeY];
-                this.double_2 = new double[this.Model.MapSizeX, this.Model.MapSizeY];
-                this.timer_0 = new Timer(new TimerCallback(this.method_32), null, 480, 480);
-                this.int_8 = 0;
-                this.RoomMuted = false;
-                this.bool_9 = true;
-                this.mGotRollers = false;
-                this.int_16 = 0;
-                this.int_15 = 4;
-                this.Achievement = uint_3;
-                this.bool_10 = false;
-                this.mRemovedItems = new Hashtable();
-                this.mMovedItems = new Hashtable();
-                this.mAddedItems = new Hashtable();
-                this.method_23();
-                this.LoadFurniture();
-                this.GenerateMaps();
+            this.AllowWalkthrough = bool_15;
+            this.Hidewall = bool_16;
+            this.Wallthick = int_21;
+            this.Floorthick = int_22;
+            this.int_7 = 0;
+            this.UserList = new RoomUser[500];
+            this.class29_0 = class29_1;
+            this.Password = string_16;
+            this.dictionary_0 = new Dictionary<uint, double>();
+            this.Event = null;
+            this.Wallpaper = string_17;
+            this.Floor = string_18;
+            this.Landscape = string_19;
+            this.mWallItems = new Hashtable();
+            this.mFloorItems = new Hashtable();
+            this.list_2 = new List<Trade>();
+            this.class28_0 = PhoenixEnvironment.GetGame().GetRoomManager().GetModel(this.ModelName, this.Id);
+            this.bool_6 = false;
+            this.bool_7 = false;
+            this.bool_5 = true;
+            this.class27_0 = class27_1;
+            this.bool_8 = bool_17;
+            this.list_17 = new List<Guild>();
+            this.list_4 = new List<uint>();
+            this.bbTiles = new List<RoomItem>();
+            this.bbbTiles = new List<RoomItem>();
+            this.bbgTiles = new List<RoomItem>();
+            this.bbrTiles = new List<RoomItem>();
+            this.bbyTiles = new List<RoomItem>();
+            this.RedScoreboards = new List<RoomItem>();
+            this.YellowScoreboards = new List<RoomItem>();
+            this.BlueScoreboards = new List<RoomItem>();
+            this.GreenScoreboards = new List<RoomItem>();
+            this.int_10 = 0;
+            this.int_11 = 0;
+            this.int_9 = 0;
+            this.int_12 = 0;
+            this.int_13 = 0;
+            this.StickiePoles = new List<RoomItem>();
+            this.WF_Triggers = new List<RoomItem>();
+            this.WF_Effects = new List<RoomItem>();
+            this.WF_Conditions = new List<RoomItem>();
+            this.byte_0 = new byte[this.Model.MapSizeX, this.Model.MapSizeY];
+            this.double_1 = new double[this.Model.MapSizeX, this.Model.MapSizeY];
+            this.double_2 = new double[this.Model.MapSizeX, this.Model.MapSizeY];
+            this.timer_0 = new Timer(new TimerCallback(this.method_32), null, 480, 480);
+            this.int_8 = 0;
+            this.RoomMuted = false;
+            this.bool_9 = true;
+            this.mGotRollers = false;
+            this.int_16 = 0;
+            this.int_15 = 4;
+            this.Achievement = uint_3;
+            this.bool_10 = false;
+            this.mRemovedItems = new Hashtable();
+            this.mMovedItems = new Hashtable();
+            this.mAddedItems = new Hashtable();
+            this.method_23();
+            this.LoadFurniture();
+            this.GenerateMaps();
         }
+
         public void method_0()
         {
             List<RoomBot> list = PhoenixEnvironment.GetGame().GetBotManager().method_2(this.RoomId);
@@ -2852,7 +2853,7 @@ namespace Phoenix.HabboHotel.Rooms
 												}));
                                             }
                                             int num5;
-                                            if (class3.bool_3)
+                                            if (class3.WalkBackwards)
                                             {
                                                 num5 = Rotation.CalculateMoonWalk(class3.X, class3.Y, int32_, int32_2);
                                             }
@@ -3752,7 +3753,7 @@ namespace Phoenix.HabboHotel.Rooms
             result = null;
             return result;
         }
-        public RoomUser GetRoomUserByHabbo(uint Id)
+        internal RoomUser GetRoomUserByHabbo(uint Id)
         {
             for (int i = 0; i < this.UserList.Length; i++)
             {
@@ -3779,7 +3780,7 @@ namespace Phoenix.HabboHotel.Rooms
                 }
             }
         }
-        public void method_55()
+        public void Sitdown()
         {
             for (int i = 0; i < this.UserList.Length; i++)
             {

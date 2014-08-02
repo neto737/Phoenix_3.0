@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C# Express 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2013 for Windows Desktop
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix 3.0", "Phoenix 3.0.csproj", "{1E507DDE-C18F-4D02-A4F3-6C170FC286A6}"
 EndProject
 Global
@@ -11,6 +13,7 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{1E507DDE-C18F-4D02-A4F3-6C170FC286A6}.Debug|x86.ActiveCfg = Debug|x86
 		{1E507DDE-C18F-4D02-A4F3-6C170FC286A6}.Debug|x86.Build.0 = Debug|x86
+		{1E507DDE-C18F-4D02-A4F3-6C170FC286A6}.Debug|x86.Deploy.0 = Debug|x86
 		{1E507DDE-C18F-4D02-A4F3-6C170FC286A6}.Release|x86.ActiveCfg = Release|x86
 		{1E507DDE-C18F-4D02-A4F3-6C170FC286A6}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection

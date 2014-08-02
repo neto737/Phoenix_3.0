@@ -18,7 +18,7 @@ namespace Phoenix.Communication.Messages.Help
 					text2 += "Room Cautioned.";
 				}
 				text2 = text2 + " Message: " + text;
-				PhoenixEnvironment.GetGame().GetClientManager().method_31(Session, "ModTool - Room Alert", text2);
+				PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, "ModTool - Room Alert", text2);
 				PhoenixEnvironment.GetGame().GetModerationTool().method_13(Session.GetHabbo().CurrentRoomId, !num.Equals(3), text);
 			}
 		}
