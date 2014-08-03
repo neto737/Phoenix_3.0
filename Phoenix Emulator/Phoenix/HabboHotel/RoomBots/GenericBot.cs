@@ -4,7 +4,7 @@ using Phoenix.Messages;
 using Phoenix.HabboHotel.Rooms;
 namespace Phoenix.HabboHotel.RoomBots
 {
-	internal sealed class GenericBot : BotAI
+	internal class GenericBot : BotAI
 	{
 		private int SpeechTimer;
 		private int ActionTimer;
@@ -14,6 +14,7 @@ namespace Phoenix.HabboHotel.RoomBots
 			this.SpeechTimer = new Random((VirtualId ^ 2) + DateTime.Now.Millisecond).Next(10, 250);
 			this.ActionTimer = new Random((VirtualId ^ 2) + DateTime.Now.Millisecond).Next(10, 30);
 		}
+
         public override void OnSelfEnterRoom() { }
         public override void OnSelfLeaveRoom(bool Kicked) { }
         public override void OnUserEnterRoom(RoomUser User) { }

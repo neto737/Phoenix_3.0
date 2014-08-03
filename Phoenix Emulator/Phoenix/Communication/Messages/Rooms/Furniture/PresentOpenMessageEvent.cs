@@ -35,7 +35,7 @@ namespace Phoenix.Communication.Messages.Rooms.Furniture
 								Session.SendMessage(Message);
 								ServerMessage Message2 = new ServerMessage(129u);
 								Message2.AppendStringWithBreak(class4.Type.ToString());
-								Message2.AppendInt32(class4.Sprite);
+								Message2.AppendInt32(class4.SpriteId);
 								Message2.AppendStringWithBreak(class4.Name);
 								Session.SendMessage(Message2);
 								using (DatabaseClient class3 = PhoenixEnvironment.GetDatabase().GetClient())

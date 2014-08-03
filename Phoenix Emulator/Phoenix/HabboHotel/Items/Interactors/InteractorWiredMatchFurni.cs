@@ -28,7 +28,7 @@ namespace Phoenix.HabboHotel.Items.Interactors
 				{
 					Message.AppendInt32(0);
 				}
-				Message.AppendInt32(Item.GetBaseItem().Sprite);
+				Message.AppendInt32(Item.GetBaseItem().SpriteId);
 				Message.AppendUInt(Item.Id);
 				Message.AppendStringWithBreak("");
 				Message.AppendString("K");

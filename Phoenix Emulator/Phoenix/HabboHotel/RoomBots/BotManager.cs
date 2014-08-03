@@ -5,29 +5,31 @@ using Phoenix.Core;
 using Phoenix.Storage;
 namespace Phoenix.HabboHotel.RoomBots
 {
-	internal sealed class BotManager
+	internal class BotManager
 	{
-		private List<RoomBot> list_0;
+		private List<RoomBot> Bots;
+
 		public BotManager()
 		{
-			this.list_0 = new List<RoomBot>();
+			this.Bots = new List<RoomBot>();
 		}
-		public void LoadBots(DatabaseClient class6_0)
+
+		public void LoadBots(DatabaseClient adapter)
 		{
             Logging.Write("Loading Bot data..");
-			this.list_0 = new List<RoomBot>();
-			DataTable dataTable = class6_0.ReadDataTable("SELECT * FROM bots;");
-			DataTable dataTable2 = class6_0.ReadDataTable("SELECT Id, bot_id, keywords, response_text, mode, serve_id FROM bots_responses;");
-			DataTable dataTable3 = class6_0.ReadDataTable("SELECT text, shout, bot_id FROM bots_speech;");
-			List<BotResponse> list = new List<BotResponse>();
-			List<RandomSpeech> list2 = new List<RandomSpeech>();
+			this.Bots = new List<RoomBot>();
+			DataTable dataTable = adapter.ReadDataTable("SELECT * FROM bots;");
+			DataTable dataTable2 = adapter.ReadDataTable("SELECT Id, bot_id, keywords, response_text, mode, serve_id FROM bots_responses;");
+			DataTable dataTable3 = adapter.ReadDataTable("SELECT text, shout, bot_id FROM bots_speech;");
+			List<BotResponse> Response = new List<BotResponse>();
+			List<RandomSpeech> Speech = new List<RandomSpeech>();
 			foreach (DataRow dataRow in dataTable2.Rows)
 			{
-				list.Add(new BotResponse((uint)dataRow["Id"], (uint)dataRow["bot_id"], (string)dataRow["keywords"], (string)dataRow["response_text"], dataRow["mode"].ToString(), (int)dataRow["serve_id"]));
+				Response.Add(new BotResponse((uint)dataRow["Id"], (uint)dataRow["bot_id"], (string)dataRow["keywords"], (string)dataRow["response_text"], dataRow["mode"].ToString(), (int)dataRow["serve_id"]));
 			}
 			foreach (DataRow dataRow in dataTable3.Rows)
 			{
-				list2.Add(new RandomSpeech((string)dataRow["text"], PhoenixEnvironment.EnumToBool(dataRow["shout"].ToString()), (uint)dataRow["bot_id"]));
+				Speech.Add(new RandomSpeech((string)dataRow["text"], PhoenixEnvironment.EnumToBool(dataRow["shout"].ToString()), (uint)dataRow["bot_id"]));
 			}
 			if (dataTable != null)
 			{
@@ -60,7 +62,7 @@ namespace Phoenix.HabboHotel.RoomBots
 						enum2_ = AIType.const_2;
 					}
 					IL_204:
-					this.list_0.Add(new RoomBot((uint)dataRow["Id"], (uint)dataRow["room_id"], enum2_, (string)dataRow["walk_mode"], (string)dataRow["name"], (string)dataRow["motto"], (string)dataRow["look"], (int)dataRow["x"], (int)dataRow["y"], (int)dataRow["z"], (int)dataRow["rotation"], (int)dataRow["min_x"], (int)dataRow["min_y"], (int)dataRow["max_x"], (int)dataRow["max_y"], ref list2, ref list, (int)dataRow["effect"]));
+					this.Bots.Add(new RoomBot((uint)dataRow["Id"], (uint)dataRow["room_id"], enum2_, (string)dataRow["walk_mode"], (string)dataRow["name"], (string)dataRow["motto"], (string)dataRow["look"], (int)dataRow["x"], (int)dataRow["y"], (int)dataRow["z"], (int)dataRow["rotation"], (int)dataRow["min_x"], (int)dataRow["min_y"], (int)dataRow["max_x"], (int)dataRow["max_y"], ref Speech, ref Response, (int)dataRow["effect"]));
 					continue;
 					IL_201:
 					enum2_ = AIType.const_2;
@@ -69,40 +71,35 @@ namespace Phoenix.HabboHotel.RoomBots
 				Logging.WriteLine("completed!");
 			}
 		}
-		public bool method_1(uint uint_0)
+
+		public bool RoomHasBots(uint RoomId)
 		{
-			return this.method_2(uint_0).Count >= 1;
+			return GetBotsForRoom(RoomId).Count >= 1;
 		}
-		public List<RoomBot> method_2(uint uint_0)
-		{
-			List<RoomBot> list = new List<RoomBot>();
-			using (TimedLock.Lock(this.list_0))
-			{
-				foreach (RoomBot current in this.list_0)
-				{
-					if (current.RoomId == uint_0)
-					{
-						list.Add(current);
-					}
-				}
-			}
-			return list;
-		}
-		public RoomBot method_3(uint uint_0)
-		{
-			RoomBot result;
-			using (TimedLock.Lock(this.list_0))
-			{
-				foreach (RoomBot current in this.list_0)
-				{
-					if (current.BotId == uint_0)
-					{
-						result = current;
-						return result;
-					}
-				}
-			}
-			return null;
-		}
+
+        public List<RoomBot> GetBotsForRoom(uint RoomId)
+        {
+            List<RoomBot> List = new List<RoomBot>();
+            foreach (RoomBot Bot in Bots)
+            {
+                if (Bot.RoomId == RoomId)
+                {
+                    List.Add(Bot);
+                }
+            }
+            return List;
+        }
+
+        public RoomBot GetBot(uint BotId)
+        {
+            foreach (RoomBot Bot in Bots)
+            {
+                if (Bot.BotId == BotId)
+                {
+                    return Bot;
+                }
+            }
+            return null;
+        }
 	}
 }

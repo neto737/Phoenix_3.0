@@ -363,7 +363,7 @@ namespace Phoenix.HabboHotel.Catalogs
 									Message3.AppendInt32(0);
 								}
 								Message3.AppendStringWithBreak(class2.GetBaseItem().Type.ToString());
-								Message3.AppendInt32(class2.GetBaseItem().Sprite);
+								Message3.AppendInt32(class2.GetBaseItem().SpriteId);
 								Message3.AppendStringWithBreak("");
 								Message3.AppendInt32(1);
 								Message3.AppendInt32(-1);
@@ -656,7 +656,7 @@ namespace Phoenix.HabboHotel.Catalogs
 								{
 									@class.ExecuteQuery("INSERT INTO room_items_moodlight (item_id,enabled,current_preset,preset_one,preset_two,preset_three) VALUES ('" + num + "','0','1','#000000,255,0','#000000,255,0','#000000,255,0')");
 								}
-								Session.GetHabbo().GetInventoryComponent().method_11(num, Item.UInt32_0, string_0, bool_0);
+								Session.GetHabbo().GetInventoryComponent().AddItem(num, Item.UInt32_0, string_0, bool_0);
 							}
 							else
 							{
@@ -680,8 +680,8 @@ namespace Phoenix.HabboHotel.Catalogs
 										"')"
 									}));
 								}
-								Session.GetHabbo().GetInventoryComponent().method_11(num2, Item.UInt32_0, "0", bool_0);
-								Session.GetHabbo().GetInventoryComponent().method_11(num, Item.UInt32_0, "0", bool_0);
+								Session.GetHabbo().GetInventoryComponent().AddItem(num2, Item.UInt32_0, "0", bool_0);
+								Session.GetHabbo().GetInventoryComponent().AddItem(num, Item.UInt32_0, "0", bool_0);
 							}
 						}
 						else
@@ -695,7 +695,7 @@ namespace Phoenix.HabboHotel.Catalogs
 								't'
 							})[1]), array[1], array[2]);
 							Session.GetHabbo().GetInventoryComponent().method_7(class15_);
-							Session.GetHabbo().GetInventoryComponent().method_11(num, 320u, "0", bool_0);
+							Session.GetHabbo().GetInventoryComponent().AddItem(num, 320u, "0", bool_0);
 						}
 						IL_4EA:
 						ServerMessage Message = new ServerMessage(832u);
@@ -721,7 +721,7 @@ namespace Phoenix.HabboHotel.Catalogs
 						i++;
 						continue;
 						IL_4CF:
-						Session.GetHabbo().GetInventoryComponent().method_11(num, Item.UInt32_0, string_0, bool_0);
+						Session.GetHabbo().GetInventoryComponent().AddItem(num, Item.UInt32_0, string_0, bool_0);
 						goto IL_4EA;
 					}
 					Session.GetHabbo().GetInventoryComponent().UpdateItems(false);
@@ -731,7 +731,7 @@ namespace Phoenix.HabboHotel.Catalogs
 				{
 					for (int i = 0; i < int_0; i++)
 					{
-						Session.GetHabbo().GetAvatarEffectsInventoryComponent().AddEffect(Item.Sprite, 3600);
+						Session.GetHabbo().GetAvatarEffectsInventoryComponent().AddEffect(Item.SpriteId, 3600);
 					}
 					return;
 				}

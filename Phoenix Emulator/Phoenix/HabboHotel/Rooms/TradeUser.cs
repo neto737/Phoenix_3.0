@@ -11,7 +11,8 @@ namespace Phoenix.HabboHotel.Rooms
 		private uint RoomId;
 		private bool Accepted;
 		public List<UserItem> OfferedItems;
-		public bool Boolean_0
+
+		public bool HasAccepted
 		{
 			get
 			{
@@ -22,28 +23,31 @@ namespace Phoenix.HabboHotel.Rooms
 				this.Accepted = value;
 			}
 		}
-		public TradeUser(uint UserId, uint RoomId)
+
+		public TradeUser(uint mUserId, uint mRoomId)
 		{
-			this.UserId = UserId;
-			this.RoomId = RoomId;
+			this.UserId = mUserId;
+			this.RoomId = mRoomId;
 			this.Accepted = false;
 			this.OfferedItems = new List<UserItem>();
 		}
-		public RoomUser method_0()
+
+		public RoomUser GetRoomUser()
 		{
-			Room @class = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(this.RoomId);
-			if (@class == null)
+			Room Room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(RoomId);
+			if (Room == null)
 			{
 				return null;
 			}
 			else
 			{
-				return @class.GetRoomUserByHabbo(this.UserId);
+				return Room.GetRoomUserByHabbo(UserId);
 			}
 		}
-		public GameClient method_1()
+
+		public GameClient GetClient()
 		{
-			return PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(this.UserId);
+			return PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(UserId);
 		}
 	}
 }

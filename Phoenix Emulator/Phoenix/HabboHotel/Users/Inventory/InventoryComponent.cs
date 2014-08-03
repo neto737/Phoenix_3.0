@@ -15,44 +15,47 @@ namespace Phoenix.HabboHotel.Users.Inventory
 	internal sealed class InventoryComponent
 	{
         private Hashtable discs;
-		public List<UserItem> list_0;
-		private Hashtable hashtable_0;
+		public List<UserItem> InventoryItems;
+		private Hashtable InventoryPets;
 		private Hashtable hashtable_1;
 		public List<uint> list_1;
 		private GameClient Session;
-		public uint uint_0;
-		public int Int32_0
+		public uint UserId;
+
+		public int ItemCount
 		{
 			get
 			{
-				return this.list_0.Count;
+				return this.InventoryItems.Count;
 			}
 		}
-		public int Int32_1
+
+		public int PetCount
 		{
 			get
 			{
-				return this.hashtable_0.Count;
+				return this.InventoryPets.Count;
 			}
 		}
-        public InventoryComponent(uint uint_1, GameClient class16_1, HabboData class12_0)
+
+        public InventoryComponent(uint mUserId, GameClient Session, HabboData Data)
         {
-            this.Session = class16_1;
-            this.uint_0 = uint_1;
-            this.list_0 = new List<UserItem>();
-            this.hashtable_0 = new Hashtable();
+            this.Session = Session;
+            this.UserId = mUserId;
+            this.InventoryItems = new List<UserItem>();
+            this.InventoryPets = new Hashtable();
             this.hashtable_1 = new Hashtable();
             this.discs = new Hashtable();
             this.list_1 = new List<uint>();
-            this.list_0.Clear();
-            DataTable dataTable_ = class12_0.GetUserInventory;
-            foreach (DataRow dataRow in dataTable_.Rows)
+            this.InventoryItems.Clear();
+            DataTable Table = Data.GetUserInventory;
+            foreach (DataRow Row in Table.Rows)
             {
-                this.list_0.Add(new UserItem((uint)dataRow["Id"], (uint)dataRow["base_item"], (string)dataRow["extra_data"]));
+                this.InventoryItems.Add(new UserItem((uint)Row["Id"], (uint)Row["base_item"], (string)Row["extra_data"]));
             }
-            this.hashtable_0.Clear();
-            DataTable dataTable_2 = class12_0.GetUserPets;
-            foreach (DataRow dataRow in dataTable_.Rows)
+            this.InventoryPets.Clear();
+            DataTable dataTable_2 = Data.GetUserPets;
+            foreach (DataRow dataRow in Table.Rows)
             {
                 string str;
                 uint id = Convert.ToUInt32(dataRow["Id"]);
@@ -66,7 +69,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
                     str = string.Empty;
                 }
 
-                list_0.Add(new UserItem(id, baseItem, str));
+                InventoryItems.Add(new UserItem(id, baseItem, str));
                 UserItem item = new UserItem(id, baseItem, str);
 
                 if (item.GetBaseItem().InteractionType == "musicdisc")
@@ -78,22 +81,25 @@ namespace Phoenix.HabboHotel.Users.Inventory
 
 		public void ClearItems()
 		{
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				@class.ExecuteQuery("DELETE FROM items WHERE room_id = 0 AND user_id = '" + this.uint_0 + "';");
+                adapter.AddParamWithValue("userid", UserId);
+				adapter.ExecuteQuery("DELETE FROM items WHERE room_id = 0 AND user_id = @userid;");
 			}
+
             this.discs.Clear();
 			this.hashtable_1.Clear();
 			this.list_1.Clear();
-			this.list_0.Clear();
-			ServerMessage Message5_ = new ServerMessage(101u);
-			this.GetClient().SendMessage(Message5_);
+			this.InventoryItems.Clear();
+			ServerMessage Message = new ServerMessage(101);
+			this.GetClient().SendMessage(Message);
 		}
+
 		public void RedeemCredits(GameClient class16_1)
 		{
 			int num = 0;
 			List<UserItem> list = new List<UserItem>();
-			foreach (UserItem current in this.list_0)
+			foreach (UserItem current in this.InventoryItems)
 			{
 				if (current != null && (current.GetBaseItem().Name.StartsWith("CF_") || current.GetBaseItem().Name.StartsWith("CFC_")))
 				{
@@ -120,19 +126,20 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			class16_1.GetHabbo().UpdateCreditsBalance(true);
 			class16_1.SendNotif("All coins in your inventory have been converted back into " + num + " credits!");
 		}
+
 		public void ClearPets()
 		{
 			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				@class.ExecuteQuery("DELETE FROM user_pets WHERE user_id = " + this.uint_0 + " AND room_id = 0;");
+				@class.ExecuteQuery("DELETE FROM user_pets WHERE user_id = " + this.UserId + " AND room_id = 0;");
 			}
-			foreach (Pet class2 in this.hashtable_0.Values)
+			foreach (Pet class2 in this.InventoryPets.Values)
 			{
 				ServerMessage Message = new ServerMessage(604u);
 				Message.AppendUInt(class2.PetId);
 				this.GetClient().SendMessage(Message);
 			}
-			this.hashtable_0.Clear();
+			this.InventoryPets.Clear();
 		}
 		public void method_3(bool bool_0)
 		{
@@ -144,14 +151,14 @@ namespace Phoenix.HabboHotel.Users.Inventory
 		}
 		public Pet method_4(uint uint_1)
 		{
-			return this.hashtable_0[uint_1] as Pet;
+			return this.InventoryPets[uint_1] as Pet;
 		}
 		public bool method_5(uint uint_1)
 		{
 			ServerMessage Message = new ServerMessage(604u);
 			Message.AppendUInt(uint_1);
 			this.GetClient().SendMessage(Message);
-			this.hashtable_0.Remove(uint_1);
+			this.InventoryPets.Remove(uint_1);
 			return true;
 		}
 		public void method_6(uint uint_1, uint uint_2)
@@ -165,9 +172,9 @@ namespace Phoenix.HabboHotel.Users.Inventory
 				if (class15_0 != null)
 				{
 					class15_0.PlacedInRoom = false;
-					if (!this.hashtable_0.ContainsKey(class15_0.PetId))
+					if (!this.InventoryPets.ContainsKey(class15_0.PetId))
 					{
-						this.hashtable_0.Add(class15_0.PetId, class15_0);
+						this.InventoryPets.Add(class15_0.PetId, class15_0);
 					}
 					ServerMessage Message5_ = new ServerMessage(603u);
 					class15_0.SerializeInventory(Message5_);
@@ -180,30 +187,30 @@ namespace Phoenix.HabboHotel.Users.Inventory
 		}
 		public void method_8()
 		{
-			using (TimedLock.Lock(this.list_0))
+			using (TimedLock.Lock(this.InventoryItems))
 			{
-				this.list_0.Clear();
+				this.InventoryItems.Clear();
 				this.hashtable_1.Clear();
 				this.list_1.Clear();
 				DataTable dataTable;
 				using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					dataTable = @class.ReadDataTable("SELECT Id,base_item,extra_data,user_id FROM items WHERE room_id = 0 AND user_id = " + this.uint_0);
+					dataTable = @class.ReadDataTable("SELECT Id,base_item,extra_data,user_id FROM items WHERE room_id = 0 AND user_id = " + this.UserId);
 				}
 				if (dataTable != null)
 				{
 					foreach (DataRow dataRow in dataTable.Rows)
 					{
-						this.list_0.Add(new UserItem((uint)dataRow["Id"], (uint)dataRow["base_item"], (string)dataRow["extra_data"]));
+						this.InventoryItems.Add(new UserItem((uint)dataRow["Id"], (uint)dataRow["base_item"], (string)dataRow["extra_data"]));
 					}
 				}
-				using (TimedLock.Lock(this.hashtable_0))
+				using (TimedLock.Lock(this.InventoryPets))
 				{
-					this.hashtable_0.Clear();
+					this.InventoryPets.Clear();
 					DataTable dataTable2;
 					using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
 					{
-						@class.AddParamWithValue("userid", this.uint_0);
+						@class.AddParamWithValue("userid", this.UserId);
 						dataTable2 = @class.ReadDataTable("SELECT Id, user_id, room_id, name, type, race, color, expirience, energy, nutrition, respect, createstamp, x, y, z FROM user_pets WHERE user_id = @userid AND room_id <= 0");
 					}
 					if (dataTable2 != null)
@@ -211,7 +218,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 						foreach (DataRow dataRow in dataTable2.Rows)
 						{
 							Pet class2 = PhoenixEnvironment.GetGame().GetCatalog().method_12(dataRow);
-							this.hashtable_0.Add(class2.PetId, class2);
+							this.InventoryPets.Add(class2.PetId, class2);
 						}
 					}
 				}
@@ -231,7 +238,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 		}
 		public UserItem GetItem(uint uint_1)
 		{
-			List<UserItem>.Enumerator enumerator = this.list_0.GetEnumerator();
+			List<UserItem>.Enumerator enumerator = this.InventoryItems.GetEnumerator();
 			UserItem result;
 			while (enumerator.MoveNext())
 			{
@@ -245,10 +252,10 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			result = null;
 			return result;
 		}
-		public void method_11(uint uint_1, uint uint_2, string string_0, bool bool_0)
+		public void AddItem(uint uint_1, uint uint_2, string string_0, bool bool_0)
 		{
 			UserItem item = new UserItem(uint_1, uint_2, string_0);
-			this.list_0.Add(item);
+			this.InventoryItems.Add(item);
 			if (this.list_1.Contains(uint_1))
 			{
 				this.list_1.Remove(uint_1);
@@ -265,7 +272,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 							"INSERT INTO items (Id,user_id,base_item,extra_data,wall_pos) VALUES ('",
 							uint_1,
 							"','",
-							this.uint_0,
+							this.UserId,
 							"','",
 							uint_2,
 							"',@extra_data, '')"
@@ -285,7 +292,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 					@class.ExecuteQuery(string.Concat(new object[]
 					{
 						"UPDATE items SET room_id = 0, user_id = '",
-						this.uint_0,
+						this.UserId,
 						"' WHERE Id = '",
 						uint_1,
 						"'"
@@ -304,7 +311,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			}
 			if (!this.list_1.Contains(uint_1))
 			{
-				this.list_0.Remove(this.GetItem(uint_1));
+				this.InventoryItems.Remove(this.GetItem(uint_1));
 				this.list_1.Add(uint_1);
                 this.discs.Remove(uint_1);
 				if (bool_0)
@@ -337,8 +344,8 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			Message.AppendStringWithBreak("S");
 			Message.AppendInt32(1);
 			Message.AppendInt32(1);
-			Message.AppendInt32(this.Int32_0);
-			List<UserItem>.Enumerator enumerator = this.list_0.GetEnumerator();
+			Message.AppendInt32(this.ItemCount);
+			List<UserItem>.Enumerator enumerator = this.InventoryItems.GetEnumerator();
 			while (enumerator.MoveNext())
 			{
 				enumerator.Current.Serialize(Message, true);
@@ -356,8 +363,8 @@ namespace Phoenix.HabboHotel.Users.Inventory
 		public ServerMessage method_15()
 		{
 			ServerMessage Message = new ServerMessage(600u);
-			Message.AppendInt32(this.hashtable_0.Count);
-			foreach (Pet @class in this.hashtable_0.Values)
+			Message.AppendInt32(this.InventoryPets.Count);
+			foreach (Pet @class in this.InventoryPets.Values)
 			{
 				@class.SerializeInventory(Message);
 			}
@@ -365,13 +372,13 @@ namespace Phoenix.HabboHotel.Users.Inventory
 		}
 		private GameClient GetClient()
 		{
-			return PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(this.uint_0);
+			return PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(this.UserId);
 		}
 		public void method_17(List<RoomItem> list_2)
 		{
 			foreach (RoomItem current in list_2)
 			{
-				this.method_11(current.Id, current.uint_2, current.ExtraData, false);
+				this.AddItem(current.Id, current.uint_2, current.ExtraData, false);
 			}
 		}
 		internal void method_18()
@@ -385,10 +392,10 @@ namespace Phoenix.HabboHotel.Users.Inventory
 		{
 			try
 			{
-				if (this.list_1.Count > 0 || this.hashtable_1.Count > 0 || this.hashtable_0.Count > 0)
+				if (this.list_1.Count > 0 || this.hashtable_1.Count > 0 || this.InventoryPets.Count > 0)
 				{
 					StringBuilder stringBuilder = new StringBuilder();
-					foreach (Pet @class in this.hashtable_0.Values)
+					foreach (Pet @class in this.InventoryPets.Values)
 					{
 						if (@class.DBState == DatabaseUpdateState.NeedsInsert)
 						{
@@ -488,7 +495,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
         {
             int num1 = 0;
             List<UserItem> list = new List<UserItem>();
-            foreach (UserItem userItem in this.list_0)
+            foreach (UserItem userItem in this.InventoryItems)
             {
                 if (userItem != null && userItem.GetBaseItem().Name.StartsWith("PixEx_"))
                 {
@@ -515,7 +522,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
         {
             int num1 = 0;
             List<UserItem> list = new List<UserItem>();
-            foreach (UserItem userItem in this.list_0)
+            foreach (UserItem userItem in this.InventoryItems)
             {
                 if (userItem != null && userItem.GetBaseItem().Name.StartsWith("PntEx_"))
                 {

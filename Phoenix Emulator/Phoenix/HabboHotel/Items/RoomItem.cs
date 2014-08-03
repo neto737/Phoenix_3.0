@@ -846,7 +846,7 @@ namespace Phoenix.HabboHotel.Items
 			if (this.IsFloorItem)
 			{
 				Message5_0.AppendUInt(this.Id);
-				Message5_0.AppendInt32(this.GetBaseItem().Sprite);
+				Message5_0.AppendInt32(this.GetBaseItem().SpriteId);
 				Message5_0.AppendInt32(this.mX);
 				Message5_0.AppendInt32(this.mY);
 				Message5_0.AppendInt32(this.Rot);
@@ -869,7 +869,7 @@ namespace Phoenix.HabboHotel.Items
 				if (this.IsWallItem)
 				{
 					Message5_0.AppendStringWithBreak(string.Concat(this.Id));
-					Message5_0.AppendInt32(this.GetBaseItem().Sprite);
+					Message5_0.AppendInt32(this.GetBaseItem().SpriteId);
 					Message5_0.AppendStringWithBreak(this.string_7);
 					if (this.GetBaseItem().Name.StartsWith("poster_"))
 					{

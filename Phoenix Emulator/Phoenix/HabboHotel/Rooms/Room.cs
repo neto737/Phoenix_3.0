@@ -69,7 +69,7 @@ namespace Phoenix.HabboHotel.Rooms
         private Hashtable mAddedItems;
         private Hashtable mWallItems;
         public MoodlightData MoodlightData;
-        public List<Trade> list_2;
+        public List<Trade> ActiveTrades;
         public bool bool_9;
         public List<RoomItem> StickiePoles;
         public List<uint> list_4;
@@ -342,7 +342,7 @@ namespace Phoenix.HabboHotel.Rooms
             this.Landscape = string_19;
             this.mWallItems = new Hashtable();
             this.mFloorItems = new Hashtable();
-            this.list_2 = new List<Trade>();
+            this.ActiveTrades = new List<Trade>();
             this.class28_0 = PhoenixEnvironment.GetGame().GetRoomManager().GetModel(this.ModelName, this.Id);
             this.bool_6 = false;
             this.bool_7 = false;
@@ -391,7 +391,7 @@ namespace Phoenix.HabboHotel.Rooms
 
         public void method_0()
         {
-            List<RoomBot> list = PhoenixEnvironment.GetGame().GetBotManager().method_2(this.RoomId);
+            List<RoomBot> list = PhoenixEnvironment.GetGame().GetBotManager().GetBotsForRoom(this.RoomId);
             foreach (RoomBot current in list)
             {
                 this.method_3(current);
@@ -1697,7 +1697,7 @@ namespace Phoenix.HabboHotel.Rooms
                                                 }
                                                 if (RoomUser_1.class34_1 != null)
                                                 {
-                                                    RoomUser_1.class34_1.RoomUser_0 = null;
+                                                    RoomUser_1.class34_1.RoomUser = null;
                                                     RoomUser_1.Target = null;
                                                     RoomUser_1.class34_1 = null;
                                                 }
@@ -2030,7 +2030,7 @@ namespace Phoenix.HabboHotel.Rooms
                             GameClient class2 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(this.Owner);
                             if (class2 != null)
                             {
-                                class2.GetHabbo().GetInventoryComponent().method_11(@class.Id, @class.uint_2, @class.ExtraData, true);
+                                class2.GetHabbo().GetInventoryComponent().AddItem(@class.Id, @class.uint_2, @class.ExtraData, true);
                             }
                         }
                         else
@@ -2208,7 +2208,7 @@ namespace Phoenix.HabboHotel.Rooms
                     GameClient class2 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(this.Owner);
                     if (class2 != null)
                     {
-                        class2.GetHabbo().GetInventoryComponent().method_11(@class.Id, @class.uint_2, @class.ExtraData, true);
+                        class2.GetHabbo().GetInventoryComponent().AddItem(@class.Id, @class.uint_2, @class.ExtraData, true);
                     }
                 }
             }
@@ -2781,21 +2781,21 @@ namespace Phoenix.HabboHotel.Rooms
                                     if (class3.SetStep && class3.class34_1 == null)
                                     {
                                         num = 7;
-                                        if (class3.IsBot && class3.BotData.RoomUser_0 != null && this.CanWalk(class3.SetX, class3.SetY, 0.0, true, true))
+                                        if (class3.IsBot && class3.BotData.RoomUser != null && this.CanWalk(class3.SetX, class3.SetY, 0.0, true, true))
                                         {
                                             num = 8;
                                             this.method_85(class3);
                                             class3.X = class3.SetX;
                                             class3.Y = class3.SetY;
                                             class3.Z = class3.SetZ;
-                                            class3.BotData.RoomUser_0.X = class3.SetX;
-                                            class3.BotData.RoomUser_0.Y = class3.SetY;
-                                            class3.BotData.RoomUser_0.Z = class3.SetZ + 1.0;
-                                            class3.BotData.RoomUser_0.SetStep = false;
-                                            class3.BotData.RoomUser_0.RemoveStatus("mv");
-                                            if (class3.X == this.Model.int_0 && class3.Y == this.Model.int_1 && !list.Contains(class3.BotData.RoomUser_0.HabboId))
+                                            class3.BotData.RoomUser.X = class3.SetX;
+                                            class3.BotData.RoomUser.Y = class3.SetY;
+                                            class3.BotData.RoomUser.Z = class3.SetZ + 1.0;
+                                            class3.BotData.RoomUser.SetStep = false;
+                                            class3.BotData.RoomUser.RemoveStatus("mv");
+                                            if (class3.X == this.Model.int_0 && class3.Y == this.Model.int_1 && !list.Contains(class3.BotData.RoomUser.HabboId))
                                             {
-                                                list.Add(class3.BotData.RoomUser_0.HabboId);
+                                                list.Add(class3.BotData.RoomUser.HabboId);
                                             }
                                             this.UpdateUserStatus(class3, true, true);
                                         }
@@ -2841,9 +2841,9 @@ namespace Phoenix.HabboHotel.Rooms
 												num4.ToString().Replace(',', '.')
 											}));
                                             num = 13;
-                                            if (class3.IsBot && class3.BotData.RoomUser_0 != null)
+                                            if (class3.IsBot && class3.BotData.RoomUser != null)
                                             {
-                                                class3.BotData.RoomUser_0.AddStatus("mv", string.Concat(new object[]
+                                                class3.BotData.RoomUser.AddStatus("mv", string.Concat(new object[]
 												{
 													int32_,
 													",",
@@ -2868,14 +2868,14 @@ namespace Phoenix.HabboHotel.Rooms
                                             class3.SetY = int32_2;
                                             class3.SetZ = num4;
                                             num = 14;
-                                            if (class3.IsBot && class3.BotData.RoomUser_0 != null)
+                                            if (class3.IsBot && class3.BotData.RoomUser != null)
                                             {
-                                                class3.BotData.RoomUser_0.RotBody = num5;
-                                                class3.BotData.RoomUser_0.RotHead = num5;
-                                                class3.BotData.RoomUser_0.SetStep = true;
-                                                class3.BotData.RoomUser_0.SetX = int32_;
-                                                class3.BotData.RoomUser_0.SetY = int32_2;
-                                                class3.BotData.RoomUser_0.SetZ = num4 + 1.0;
+                                                class3.BotData.RoomUser.RotBody = num5;
+                                                class3.BotData.RoomUser.RotHead = num5;
+                                                class3.BotData.RoomUser.SetStep = true;
+                                                class3.BotData.RoomUser.SetX = int32_;
+                                                class3.BotData.RoomUser.SetY = int32_2;
+                                                class3.BotData.RoomUser.SetZ = num4 + 1.0;
                                             }
                                             try
                                             {
@@ -2920,10 +2920,10 @@ namespace Phoenix.HabboHotel.Rooms
                                         IL_B8B:
                                             this.UpdateUserStatus(class3, false, true);
                                             class3.UpdateNeeded = true;
-                                            if (class3.IsBot && class3.BotData.RoomUser_0 != null)
+                                            if (class3.IsBot && class3.BotData.RoomUser != null)
                                             {
-                                                this.UpdateUserStatus(class3.BotData.RoomUser_0, true, true);
-                                                class3.BotData.RoomUser_0.UpdateNeeded = true;
+                                                this.UpdateUserStatus(class3.BotData.RoomUser, true, true);
+                                                class3.BotData.RoomUser.UpdateNeeded = true;
                                                 goto IL_BE0;
                                             }
                                             goto IL_BE0;
@@ -2942,12 +2942,12 @@ namespace Phoenix.HabboHotel.Rooms
                                         class3.IsWalking = false;
                                         class3.RemoveStatus("mv");
                                         class3.PathRecalcNeeded = false;
-                                        if (class3.IsBot && class3.BotData.RoomUser_0 != null)
+                                        if (class3.IsBot && class3.BotData.RoomUser != null)
                                         {
-                                            class3.BotData.RoomUser_0.RemoveStatus("mv");
-                                            class3.BotData.RoomUser_0.IsWalking = false;
-                                            class3.BotData.RoomUser_0.PathRecalcNeeded = false;
-                                            class3.BotData.RoomUser_0.UpdateNeeded = true;
+                                            class3.BotData.RoomUser.RemoveStatus("mv");
+                                            class3.BotData.RoomUser.IsWalking = false;
+                                            class3.BotData.RoomUser.PathRecalcNeeded = false;
+                                            class3.BotData.RoomUser.UpdateNeeded = true;
                                         }
                                     IL_BE0:
                                         class3.UpdateNeeded = true;
@@ -2960,10 +2960,10 @@ namespace Phoenix.HabboHotel.Rooms
                                             num = 18;
                                             class3.RemoveStatus("mv");
                                             class3.UpdateNeeded = true;
-                                            if (class3.IsBot && class3.BotData.RoomUser_0 != null)
+                                            if (class3.IsBot && class3.BotData.RoomUser != null)
                                             {
-                                                class3.BotData.RoomUser_0.RemoveStatus("mv");
-                                                class3.BotData.RoomUser_0.UpdateNeeded = true;
+                                                class3.BotData.RoomUser.RemoveStatus("mv");
+                                                class3.BotData.RoomUser.UpdateNeeded = true;
                                             }
                                         }
                                     }
@@ -3151,12 +3151,12 @@ namespace Phoenix.HabboHotel.Rooms
                                     {
                                         num = this.method_84(gStruct1_.X, gStruct1_.Y, this.method_93(gStruct1_.X, gStruct1_.Y));
                                     }
-                                    if (class2.IsBot && class2.BotData.RoomUser_0 != null)
+                                    if (class2.IsBot && class2.BotData.RoomUser != null)
                                     {
                                         this.method_42(class2, gStruct1_, @class.Id, num);
                                         list2.Add(class2.HabboId);
-                                        this.method_42(class2.BotData.RoomUser_0, gStruct1_, @class.Id, num + 1.0);
-                                        list2.Add(class2.BotData.RoomUser_0.HabboId);
+                                        this.method_42(class2.BotData.RoomUser, gStruct1_, @class.Id, num + 1.0);
+                                        list2.Add(class2.BotData.RoomUser.HabboId);
                                     }
                                     else
                                     {
@@ -3663,7 +3663,7 @@ namespace Phoenix.HabboHotel.Rooms
                                 num = 6;
                                 if (@class.class34_1 != null)
                                 {
-                                    @class.class34_1.RoomUser_0 = null;
+                                    @class.class34_1.RoomUser = null;
                                     @class.class34_1 = null;
                                     Session.GetHabbo().GetAvatarEffectsInventoryComponent().CurrentEffect = -1;
                                 }
@@ -4790,11 +4790,11 @@ namespace Phoenix.HabboHotel.Rooms
                     }
                     this.mWallItems = null;
                     this.MoodlightData = null;
-                    if (this.list_2 != null)
+                    if (this.ActiveTrades != null)
                     {
-                        this.list_2.Clear();
+                        this.ActiveTrades.Clear();
                     }
-                    this.list_2 = null;
+                    this.ActiveTrades = null;
                     if (this.musicController != null)
                     {
                         this.musicController.UnLinkRoomOutputItem();
@@ -4892,11 +4892,11 @@ namespace Phoenix.HabboHotel.Rooms
         public bool method_74(uint uint_2)
         {
             bool result;
-            using (TimedLock.Lock(this.list_2))
+            using (TimedLock.Lock(this.ActiveTrades))
             {
-                foreach (Trade current in this.list_2)
+                foreach (Trade current in this.ActiveTrades)
                 {
-                    if (current.method_0(uint_2))
+                    if (current.ContainsUser(uint_2))
                     {
                         result = true;
                         return result;
@@ -4922,11 +4922,11 @@ namespace Phoenix.HabboHotel.Rooms
         public Trade method_76(uint uint_2)
         {
             Trade result;
-            using (TimedLock.Lock(this.list_2))
+            using (TimedLock.Lock(this.ActiveTrades))
             {
-                foreach (Trade current in this.list_2)
+                foreach (Trade current in this.ActiveTrades)
                 {
-                    if (current.method_0(uint_2))
+                    if (current.ContainsUser(uint_2))
                     {
                         result = current;
                         return result;
@@ -4940,7 +4940,7 @@ namespace Phoenix.HabboHotel.Rooms
         {
             if (RoomUser_1 != null && RoomUser_2 != null && (!RoomUser_1.IsBot || RoomUser_1.BotData.Boolean_1) && (!RoomUser_2.IsBot || RoomUser_2.BotData.Boolean_1) && !RoomUser_1.IsTrading && !RoomUser_2.IsTrading && !this.method_73(RoomUser_1) && !this.method_73(RoomUser_2))
             {
-                this.list_2.Add(new Trade(RoomUser_1.GetClient().GetHabbo().Id, RoomUser_2.GetClient().GetHabbo().Id, this.RoomId));
+                this.ActiveTrades.Add(new Trade(RoomUser_1.GetClient().GetHabbo().Id, RoomUser_2.GetClient().GetHabbo().Id, this.RoomId));
             }
         }
         public void method_78(uint uint_2)
@@ -4948,8 +4948,8 @@ namespace Phoenix.HabboHotel.Rooms
             Trade @class = this.method_76(uint_2);
             if (@class != null)
             {
-                @class.method_12(uint_2);
-                this.list_2.Remove(@class);
+                @class.CloseTrade(uint_2);
+                this.ActiveTrades.Remove(@class);
             }
         }
         public bool method_79(GameClient Session, RoomItem RoomItem_0, int int_17, int int_18, int int_19, bool bool_13, bool bool_14, bool bool_15)
@@ -5594,11 +5594,11 @@ namespace Phoenix.HabboHotel.Rooms
                                 User.Z = this.Model.double_1[User.X, User.Y];
                                 User.RotHead = this.Model.int_3[User.X, User.Y];
                                 User.RotBody = this.Model.int_3[User.X, User.Y];
-                                if (User.IsBot && User.BotData.RoomUser_0 != null)
+                                if (User.IsBot && User.BotData.RoomUser != null)
                                 {
-                                    User.BotData.RoomUser_0.Z = User.Z + 1.0;
-                                    User.BotData.RoomUser_0.RotHead = User.RotHead;
-                                    User.BotData.RoomUser_0.RotBody = User.RotBody;
+                                    User.BotData.RoomUser.Z = User.Z + 1.0;
+                                    User.BotData.RoomUser.RotHead = User.RotHead;
+                                    User.BotData.RoomUser.RotBody = User.RotBody;
                                 }
                                 User.UpdateNeeded = true;
                             }
@@ -5615,7 +5615,7 @@ namespace Phoenix.HabboHotel.Rooms
                                 foreach (RoomItem Item in list)
                                 {
                                     num = 11;
-                                    if (Item.GetBaseItem().IsSeat && (!User.IsPet || User.BotData.RoomUser_0 == null))
+                                    if (Item.GetBaseItem().IsSeat && (!User.IsPet || User.BotData.RoomUser == null))
                                     {
                                         if (!User.Statusses.ContainsKey("sit"))
                                         {
@@ -5664,11 +5664,11 @@ namespace Phoenix.HabboHotel.Rooms
                                         User.Z = Item.Double_0;
                                         User.RotHead = Item.Rot;
                                         User.RotBody = Item.Rot;
-                                        if (User.IsBot && User.BotData.RoomUser_0 != null)
+                                        if (User.IsBot && User.BotData.RoomUser != null)
                                         {
-                                            User.BotData.RoomUser_0.Z = User.Z + 1.0;
-                                            User.BotData.RoomUser_0.RotHead = User.RotHead;
-                                            User.BotData.RoomUser_0.RotBody = User.RotBody;
+                                            User.BotData.RoomUser.Z = User.Z + 1.0;
+                                            User.BotData.RoomUser.RotHead = User.RotHead;
+                                            User.BotData.RoomUser.RotBody = User.RotBody;
                                         }
                                         User.UpdateNeeded = true;
                                     }
@@ -5713,11 +5713,11 @@ namespace Phoenix.HabboHotel.Rooms
                                         User.Z = Item.Double_0;
                                         User.RotHead = Item.Rot;
                                         User.RotBody = Item.Rot;
-                                        if (User.IsBot && User.BotData.RoomUser_0 != null)
+                                        if (User.IsBot && User.BotData.RoomUser != null)
                                         {
-                                            User.BotData.RoomUser_0.Z = User.Z + 1.0;
-                                            User.BotData.RoomUser_0.RotHead = User.RotHead;
-                                            User.BotData.RoomUser_0.RotBody = User.RotBody;
+                                            User.BotData.RoomUser.Z = User.Z + 1.0;
+                                            User.BotData.RoomUser.RotHead = User.RotHead;
+                                            User.BotData.RoomUser.RotBody = User.RotBody;
                                         }
                                         User.UpdateNeeded = true;
                                     }

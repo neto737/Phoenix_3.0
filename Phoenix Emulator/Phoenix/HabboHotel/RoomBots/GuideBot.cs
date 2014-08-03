@@ -5,7 +5,7 @@ using Phoenix.HabboHotel.Rooms;
 using Phoenix.Util;
 namespace Phoenix.HabboHotel.RoomBots
 {
-	internal sealed class GuideBot : BotAI
+	internal class GuideBot : BotAI
 	{
 		private int SpeechTimer;
 		private int ActionTimer;
@@ -73,7 +73,7 @@ namespace Phoenix.HabboHotel.RoomBots
             }
         }
 
-        public override void OnUserShout(RoomUser RoomUser_0, string string_0) { }
+        public override void OnUserShout(RoomUser User, string Message) { }
 
 		public override void OnTimerTick()
 		{

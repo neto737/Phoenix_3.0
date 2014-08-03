@@ -5,7 +5,7 @@ namespace Phoenix.HabboHotel.Items
 	internal sealed class Item
 	{
 		private uint Id;
-		internal int Sprite;
+		internal int SpriteId;
 		internal string PublicName;
 		internal string Name;
 		internal char Type;
@@ -36,7 +36,7 @@ namespace Phoenix.HabboHotel.Items
 		public Item(uint Id, int Sprite, string PublicName, string Name, string Type, int Width, int Length, double Height, bool Stackable, bool Walkable, bool IsSeat, bool AllowRecycle, bool AllowTrade, bool AllowMarketplaceSell, bool AllowGift, bool AllowInventoryStack, string InteractionType, int Modes, string VendingIds, string Height_Adjustable, byte EffectF, byte EffectM)
 		{
 			this.Id = Id;
-			this.Sprite = Sprite;
+			this.SpriteId = Sprite;
 			this.PublicName = PublicName;
 			this.Name = Name;
 			this.Type = char.Parse(Type);

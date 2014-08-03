@@ -86,7 +86,7 @@ namespace Phoenix.Catalogs
 			Message.AppendInt32(this.SnowCost);
 			Message.AppendInt32(1);
 			Message.AppendStringWithBreak(this.GetBaseItem().Type.ToString());
-			Message.AppendInt32(this.GetBaseItem().Sprite);
+			Message.AppendInt32(this.GetBaseItem().SpriteId);
 			string text = "";
 			if (this.Name.Contains("wallpaper_single") || this.Name.Contains("floor_single") || this.Name.Contains("landscape_single"))
 			{

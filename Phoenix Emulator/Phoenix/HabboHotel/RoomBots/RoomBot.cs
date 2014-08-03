@@ -4,7 +4,7 @@ using Phoenix.HabboHotel.RoomBots;
 using Phoenix.HabboHotel.Rooms;
 namespace Phoenix.HabboHotel.RoomBots
 {
-	internal sealed class RoomBot
+	internal class RoomBot
 	{
 		public uint BotId;
 		public uint RoomId;
@@ -30,7 +30,7 @@ namespace Phoenix.HabboHotel.RoomBots
 
 		public List<RandomSpeech> RandomSpeech;
 		public List<BotResponse> Responses;
-		public RoomUser RoomUser_0;
+		public RoomUser RoomUser;
 
 		public bool IsPet
 		{
@@ -67,7 +67,7 @@ namespace Phoenix.HabboHotel.RoomBots
 			this.maxY = Max_Y;
 			this.EffectId = EffectId;
 			this.bool_0 = true;
-			this.RoomUser_0 = null;
+			this.RoomUser = null;
 			this.LookRandomSpeech(BotSpeeches);
 			this.LoadResponses(BotResponses);
 		}

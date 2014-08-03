@@ -11,7 +11,7 @@ namespace Phoenix.Communication.Messages.Sound
         public void parse(GameClient Session, ClientMessage Event)
         {
             List<UserItem> list = new List<UserItem>();
-            foreach (UserItem current in Session.GetHabbo().GetInventoryComponent().list_0)
+            foreach (UserItem current in Session.GetHabbo().GetInventoryComponent().InventoryItems)
             {
                 if (current != null && !(current.GetBaseItem().Name != "song_disk") && !Session.GetHabbo().GetInventoryComponent().list_1.Contains(current.Id))
                 {

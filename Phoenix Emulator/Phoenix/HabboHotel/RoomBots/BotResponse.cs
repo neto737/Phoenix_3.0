@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 namespace Phoenix.HabboHotel.RoomBots
 {
-	internal sealed class BotResponse
+	internal class BotResponse
 	{
 		private uint Id;
 		public uint BotId;

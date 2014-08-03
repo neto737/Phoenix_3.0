@@ -62,7 +62,7 @@ namespace Phoenix.HabboHotel.Catalogs
 						"','",
 						num2,
 						"',@public_name,'",
-						@class.GetBaseItem().Sprite,
+						@class.GetBaseItem().SpriteId,
 						"','",
 						num3,
 						"','",

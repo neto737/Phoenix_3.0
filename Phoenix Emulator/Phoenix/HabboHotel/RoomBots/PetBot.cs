@@ -7,15 +7,17 @@ using Phoenix.HabboHotel.Pathfinding;
 using Phoenix.Util;
 namespace Phoenix.HabboHotel.RoomBots
 {
-	internal sealed class PetBot : BotAI
+	internal class PetBot : BotAI
 	{
 		private int int_2;
 		private int int_3;
-		public PetBot(int int_4)
+
+		public PetBot(int VirtualId)
 		{
-			this.int_2 = new Random((int_4 ^ 2) + DateTime.Now.Millisecond).Next(25, 60);
-			this.int_3 = new Random((int_4 ^ 2) + DateTime.Now.Millisecond).Next(10, 60);
+			this.int_2 = new Random((VirtualId ^ 2) + DateTime.Now.Millisecond).Next(25, 60);
+			this.int_3 = new Random((VirtualId ^ 2) + DateTime.Now.Millisecond).Next(10, 60);
 		}
+
 		private int method_4()
 		{
 			RoomUser @class = base.GetRoomUser();
@@ -57,6 +59,7 @@ namespace Phoenix.HabboHotel.RoomBots
 				}
 			}
 		}
+
 		public override void OnSelfEnterRoom()
 		{
 			if (base.GetRoomUser().PetData.X > 0 && base.GetRoomUser().PetData.Y > 0)
@@ -66,27 +69,28 @@ namespace Phoenix.HabboHotel.RoomBots
 			}
 			this.method_5(0, 0, true);
 		}
-		public override void OnSelfLeaveRoom(bool bool_0)
+
+		public override void OnSelfLeaveRoom(bool Kicked)
 		{
-			if (base.GetBotData().RoomUser_0 != null)
+			if (base.GetBotData().RoomUser != null)
 			{
-				RoomUser RoomUser_ = base.GetBotData().RoomUser_0;
-				if (RoomUser_.class34_1 != null && RoomUser_ == base.GetBotData().RoomUser_0)
+				RoomUser User = base.GetBotData().RoomUser;
+				if (User.class34_1 != null && User == base.GetBotData().RoomUser)
 				{
-					base.GetBotData().RoomUser_0 = null;
-					RoomUser_.GetClient().GetHabbo().GetAvatarEffectsInventoryComponent().ApplyEffect(-1, true);
-					RoomUser_.class34_1 = null;
-					RoomUser_.Target = null;
+					base.GetBotData().RoomUser = null;
+					User.GetClient().GetHabbo().GetAvatarEffectsInventoryComponent().ApplyEffect(-1, true);
+					User.class34_1 = null;
+					User.Target = null;
 				}
 			}
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
 				if (base.GetRoomUser().PetData.DBState == DatabaseUpdateState.NeedsInsert)
 				{
-					@class.AddParamWithValue("petname" + base.GetRoomUser().PetData.PetId, base.GetRoomUser().PetData.Name);
-					@class.AddParamWithValue("petcolor" + base.GetRoomUser().PetData.PetId, base.GetRoomUser().PetData.Color);
-					@class.AddParamWithValue("petrace" + base.GetRoomUser().PetData.PetId, base.GetRoomUser().PetData.Race);
-					@class.ExecuteQuery(string.Concat(new object[]
+					adapter.AddParamWithValue("petname" + base.GetRoomUser().PetData.PetId, base.GetRoomUser().PetData.Name);
+					adapter.AddParamWithValue("petcolor" + base.GetRoomUser().PetData.PetId, base.GetRoomUser().PetData.Color);
+					adapter.AddParamWithValue("petrace" + base.GetRoomUser().PetData.PetId, base.GetRoomUser().PetData.Race);
+					adapter.ExecuteQuery(string.Concat(new object[]
 					{
 						"INSERT INTO `user_pets` VALUES ('",
 						base.GetRoomUser().PetData.PetId,
@@ -121,7 +125,7 @@ namespace Phoenix.HabboHotel.RoomBots
 				}
 				else
 				{
-					@class.ExecuteQuery(string.Concat(new object[]
+					adapter.ExecuteQuery(string.Concat(new object[]
 					{
 						"UPDATE user_pets SET room_id = '0', expirience = '",
 						base.GetRoomUser().PetData.Expirience,
@@ -139,18 +143,18 @@ namespace Phoenix.HabboHotel.RoomBots
 				base.GetRoomUser().PetData.DBState = DatabaseUpdateState.Updated;
 			}
 		}
-		public override void OnUserEnterRoom(RoomUser RoomUser_0)
-		{
-		}
+
+        public override void OnUserEnterRoom(RoomUser User) { }
+
 		public override void OnUserLeaveRoom(GameClient Session)
 		{
 			if (Session != null && Session.GetHabbo() != null)
 			{
 				string string_ = Session.GetHabbo().Username;
 				RoomUser @class = base.GetRoom().GetRoomUserByHabbo(Session.GetHabbo().Id);
-				if (base.GetBotData().RoomUser_0 != null && @class != null && @class.class34_1 != null && @class == base.GetBotData().RoomUser_0)
+				if (base.GetBotData().RoomUser != null && @class != null && @class.class34_1 != null && @class == base.GetBotData().RoomUser)
 				{
-					base.GetBotData().RoomUser_0 = null;
+					base.GetBotData().RoomUser = null;
 				}
 				try
 				{
@@ -165,20 +169,21 @@ namespace Phoenix.HabboHotel.RoomBots
 				}
 			}
 		}
-		public override void OnUserSay(RoomUser RoomUser_0, string string_0)
+
+		public override void OnUserSay(RoomUser User, string Message)
 		{
 			RoomUser @class = base.GetRoomUser();
-			if (@class.BotData.RoomUser_0 == null)
+			if (@class.BotData.RoomUser == null)
 			{
-				if (string_0.ToLower().Equals(@class.PetData.Name.ToLower()))
+				if (Message.ToLower().Equals(@class.PetData.Name.ToLower()))
 				{
-					@class.SetRot(Rotation.Calculate(@class.X, @class.Y, RoomUser_0.X, RoomUser_0.Y));
+					@class.SetRot(Rotation.Calculate(@class.X, @class.Y, User.X, User.Y));
 				}
 				else
 				{
-					if (string_0.ToLower().StartsWith(@class.PetData.Name.ToLower() + " ") && RoomUser_0.GetClient().GetHabbo().Username.ToLower() == base.GetRoomUser().PetData.OwnerName.ToLower())
+					if (Message.ToLower().StartsWith(@class.PetData.Name.ToLower() + " ") && User.GetClient().GetHabbo().Username.ToLower() == base.GetRoomUser().PetData.OwnerName.ToLower())
 					{
-						string key = string_0.Substring(@class.PetData.Name.ToLower().Length + 1);
+						string key = Message.Substring(@class.PetData.Name.ToLower().Length + 1);
 						if ((@class.PetData.Energy >= 10 && this.method_4() < 6) || @class.PetData.Level >= 15)
 						{
 							@class.Statusses.Clear();
@@ -224,57 +229,57 @@ namespace Phoenix.HabboHotel.RoomBots
 									break;
 								case 6:
 								{
-									int int_ = RoomUser_0.X;
-									int int_2 = RoomUser_0.Y;
-									if (RoomUser_0.RotBody == 4)
+									int int_ = User.X;
+									int int_2 = User.Y;
+									if (User.RotBody == 4)
 									{
-										int_2 = RoomUser_0.Y + 1;
+										int_2 = User.Y + 1;
 									}
 									else
 									{
-										if (RoomUser_0.RotBody == 0)
+										if (User.RotBody == 0)
 										{
-											int_2 = RoomUser_0.Y - 1;
+											int_2 = User.Y - 1;
 										}
 										else
 										{
-											if (RoomUser_0.RotBody == 6)
+											if (User.RotBody == 6)
 											{
-												int_ = RoomUser_0.X - 1;
+												int_ = User.X - 1;
 											}
 											else
 											{
-												if (RoomUser_0.RotBody == 2)
+												if (User.RotBody == 2)
 												{
-													int_ = RoomUser_0.X + 1;
+													int_ = User.X + 1;
 												}
 												else
 												{
-													if (RoomUser_0.RotBody == 3)
+													if (User.RotBody == 3)
 													{
-														int_ = RoomUser_0.X + 1;
-														int_2 = RoomUser_0.Y + 1;
+														int_ = User.X + 1;
+														int_2 = User.Y + 1;
 													}
 													else
 													{
-														if (RoomUser_0.RotBody == 1)
+														if (User.RotBody == 1)
 														{
-															int_ = RoomUser_0.X + 1;
-															int_2 = RoomUser_0.Y - 1;
+															int_ = User.X + 1;
+															int_2 = User.Y - 1;
 														}
 														else
 														{
-															if (RoomUser_0.RotBody == 7)
+															if (User.RotBody == 7)
 															{
-																int_ = RoomUser_0.X - 1;
-																int_2 = RoomUser_0.Y - 1;
+																int_ = User.X - 1;
+																int_2 = User.Y - 1;
 															}
 															else
 															{
-																if (RoomUser_0.RotBody == 5)
+																if (User.RotBody == 5)
 																{
-																	int_ = RoomUser_0.X - 1;
-																	int_2 = RoomUser_0.Y + 1;
+																	int_ = User.X - 1;
+																	int_2 = User.Y + 1;
 																}
 															}
 														}
@@ -359,9 +364,9 @@ namespace Phoenix.HabboHotel.RoomBots
 				}
 			}
 		}
-		public override void OnUserShout(RoomUser RoomUser_0, string string_0)
-		{
-		}
+
+        public override void OnUserShout(RoomUser User, string Message) { }
+
 		public override void OnTimerTick()
 		{
 			if (this.int_2 <= 0)
@@ -535,7 +540,7 @@ namespace Phoenix.HabboHotel.RoomBots
 					if (num == 2)
 					{
 						@class.Statusses.Clear();
-						if (base.GetRoomUser().BotData.RoomUser_0 == null)
+						if (base.GetRoomUser().BotData.RoomUser == null)
 						{
 							if (@class.PetData.Type == 13u)
 							{
@@ -556,49 +561,49 @@ namespace Phoenix.HabboHotel.RoomBots
 					}
 					switch (@class.PetData.Type)
 					{
-					case 0u:
+					case 0:
 						@class.Chat(null, array[random.Next(0, array.Length - 1)], false);
 						break;
-					case 1u:
+					case 1:
 						@class.Chat(null, array2[random.Next(0, array2.Length - 1)], false);
 						break;
-					case 2u:
+					case 2:
 						@class.Chat(null, array3[random.Next(0, array3.Length - 1)], false);
 						break;
-					case 3u:
+					case 3:
 						@class.Chat(null, array4[random.Next(0, array4.Length - 1)], false);
 						break;
-					case 4u:
+					case 4:
 						@class.Chat(null, array5[random.Next(0, array5.Length - 1)], false);
 						break;
-					case 5u:
+					case 5:
 						@class.Chat(null, array6[random.Next(0, array6.Length - 1)], false);
 						break;
-					case 6u:
+					case 6:
 						@class.Chat(null, array7[random.Next(0, array7.Length - 1)], false);
 						break;
-					case 7u:
+					case 7:
 						@class.Chat(null, array8[random.Next(0, array8.Length - 1)], false);
 						break;
-					case 8u:
+					case 8:
 						@class.Chat(null, array9[random.Next(0, array9.Length - 1)], false);
 						break;
-					case 9u:
+					case 9:
 						@class.Chat(null, array10[random.Next(0, array10.Length - 1)], false);
 						break;
-					case 10u:
+					case 10:
 						@class.Chat(null, array11[random.Next(0, array11.Length - 1)], false);
 						break;
-					case 11u:
+					case 11:
 						@class.Chat(null, array12[random.Next(0, array12.Length - 1)], false);
 						break;
-					case 12u:
+					case 12:
 						@class.Chat(null, array13[random.Next(0, array13.Length - 1)], false);
 						break;
-					case 13u:
+					case 13:
 						@class.Chat(null, array14[random.Next(0, array14.Length - 1)], false);
 						break;
-					case 14u:
+					case 14:
 						@class.Chat(null, array15[random.Next(0, array15.Length - 1)], false);
 						break;
 					default:
@@ -615,7 +620,7 @@ namespace Phoenix.HabboHotel.RoomBots
 			if (this.int_3 <= 0)
 			{
 				base.GetRoomUser().PetData.PetEnergy(-10);
-				if (base.GetRoomUser().BotData.RoomUser_0 == null)
+				if (base.GetRoomUser().BotData.RoomUser == null)
 				{
 					this.method_5(0, 0, true);
 				}

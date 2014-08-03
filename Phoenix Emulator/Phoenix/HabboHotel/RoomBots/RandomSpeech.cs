@@ -1,7 +1,7 @@
 using System;
 namespace Phoenix.HabboHotel.RoomBots
 {
-	internal sealed class RandomSpeech
+	internal class RandomSpeech
 	{
 		internal string Message;
 		internal bool Shout;

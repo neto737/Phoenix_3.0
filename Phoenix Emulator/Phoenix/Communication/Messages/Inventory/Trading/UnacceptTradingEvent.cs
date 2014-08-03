@@ -14,7 +14,7 @@ namespace Phoenix.Communication.Messages.Inventory.Trading
 				Trade class2 = @class.method_76(Session.GetHabbo().Id);
 				if (class2 != null)
 				{
-					class2.method_5(Session.GetHabbo().Id);
+					class2.Unaccept(Session.GetHabbo().Id);
 				}
 			}
 		}

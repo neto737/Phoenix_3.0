@@ -25,7 +25,7 @@ namespace Phoenix.HabboHotel.Items
 			Message.AppendUInt(this.Id);
 			Message.AppendStringWithBreak(this.Item.Type.ToString().ToUpper());
 			Message.AppendUInt(this.Id);
-			Message.AppendInt32(this.Item.Sprite);
+			Message.AppendInt32(this.Item.SpriteId);
 			if (this.Item.Name.Contains("a2 "))
 			{
 				Message.AppendInt32(3);

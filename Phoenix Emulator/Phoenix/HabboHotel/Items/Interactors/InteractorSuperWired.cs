@@ -20,7 +20,7 @@ namespace Phoenix.HabboHotel.Items.Interactors
 				Message.AppendInt32(0);
 				Message.AppendInt32(0);
 				Message.AppendInt32(0);
-				Message.AppendInt32(RoomItem_0.GetBaseItem().Sprite);
+				Message.AppendInt32(RoomItem_0.GetBaseItem().SpriteId);
 				Message.AppendUInt(RoomItem_0.Id);
 				Message.AppendStringWithBreak(RoomItem_0.Extra1);
 				Message.AppendStringWithBreak("HHSAHH");

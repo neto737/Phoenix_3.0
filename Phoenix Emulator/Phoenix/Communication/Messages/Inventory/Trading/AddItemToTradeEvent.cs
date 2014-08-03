@@ -16,7 +16,7 @@ namespace Phoenix.Communication.Messages.Inventory.Trading
 				UserItem class3 = Session.GetHabbo().GetInventoryComponent().GetItem(Event.PopWiredUInt());
 				if (class2 != null && class3 != null)
 				{
-					class2.method_2(Session.GetHabbo().Id, class3);
+					class2.OfferItem(Session.GetHabbo().Id, class3);
 				}
 			}
 		}

@@ -1612,9 +1612,9 @@ namespace Phoenix.HabboHotel.Misc
                                     return true;
                                 }
                             }
-                            if (TargetRoomUser3.BotData.RoomUser_0 == null)
+                            if (TargetRoomUser3.BotData.RoomUser == null)
                             {
-                                TargetRoomUser3.BotData.RoomUser_0 = TargetRoomUser;
+                                TargetRoomUser3.BotData.RoomUser = TargetRoomUser;
                                 TargetRoomUser.class34_1 = TargetRoomUser3.BotData;
                                 TargetRoomUser.X = TargetRoomUser3.X;
                                 TargetRoomUser.Y = TargetRoomUser3.Y;
@@ -1642,7 +1642,7 @@ namespace Phoenix.HabboHotel.Misc
                             if (TargetRoomUser.class34_1 != null)
                             {
                                 Session.GetHabbo().GetAvatarEffectsInventoryComponent().ApplyEffect(-1, true);
-                                TargetRoomUser.class34_1.RoomUser_0 = null;
+                                TargetRoomUser.class34_1.RoomUser = null;
                                 TargetRoomUser.class34_1 = null;
                                 TargetRoomUser.Z -= 1.0;
                                 TargetRoomUser.Statusses.Clear();

@@ -8,319 +8,336 @@ using Phoenix.HabboHotel.Rooms;
 using Phoenix.Storage;
 namespace Phoenix.HabboHotel.Rooms
 {
-	internal sealed class Trade
+	internal class Trade
 	{
-		private TradeUser[] class65_0;
-		private int int_0;
-		private uint uint_0;
-		private uint uint_1;
-		private uint uint_2;
-		public bool Boolean_0
+		private TradeUser[] Users;
+		private int TradeStage;
+		private uint RoomId;
+
+		private uint oneId;
+		private uint twoId;
+
+		public bool AllUsersAccepted
 		{
 			get
 			{
-				bool result;
-				for (int i = 0; i < this.class65_0.Length; i++)
+				for (int i = 0; i < this.Users.Length; i++)
 				{
-					if (this.class65_0[i] != null && !this.class65_0[i].Boolean_0)
+					if (Users[i] != null && !Users[i].HasAccepted)
 					{
-						result = false;
-						return result;
+						return false;
 					}
 				}
-				result = true;
-				return result;
+				return true;
 			}
 		}
-		public Trade(uint uint_3, uint uint_4, uint uint_5)
+
+		public Trade(uint mUserOneId, uint mUserTwoId, uint mRoomId)
 		{
-			this.uint_1 = uint_3;
-			this.uint_2 = uint_4;
-			this.class65_0 = new TradeUser[2];
-			this.class65_0[0] = new TradeUser(uint_3, uint_5);
-			this.class65_0[1] = new TradeUser(uint_4, uint_5);
-			this.int_0 = 1;
-			this.uint_0 = uint_5;
-			TradeUser[] array = this.class65_0;
-			for (int i = 0; i < array.Length; i++)
-			{
-				TradeUser @class = array[i];
-				if (!@class.method_0().Statusses.ContainsKey("trd"))
-				{
-					@class.method_0().AddStatus("trd", "");
-					@class.method_0().UpdateNeeded = true;
-				}
-			}
-			ServerMessage Message = new ServerMessage(104u);
-			Message.AppendUInt(uint_3);
+			this.oneId = mUserOneId;
+			this.twoId = mUserTwoId;
+
+			this.Users = new TradeUser[2];
+			this.Users[0] = new TradeUser(mUserOneId, mRoomId);
+			this.Users[1] = new TradeUser(mUserTwoId, mRoomId);
+			this.TradeStage = 1;
+			this.RoomId = mRoomId;
+
+            foreach (TradeUser User in Users)
+            {
+                if (!User.GetRoomUser().Statusses.ContainsKey("trd"))
+                {
+                    User.GetRoomUser().AddStatus("trd", "");
+                    User.GetRoomUser().UpdateNeeded = true;
+                }
+            }
+
+			ServerMessage Message = new ServerMessage(104);
+			Message.AppendUInt(mUserOneId);
 			Message.AppendBoolean(true);
-			Message.AppendUInt(uint_4);
+			Message.AppendUInt(mUserTwoId);
 			Message.AppendBoolean(true);
-			this.method_13(Message);
+			this.SendMessageToUsers(Message);
 		}
-		public bool method_0(uint uint_3)
+
+		public bool ContainsUser(uint Id)
 		{
-			bool result;
-			for (int i = 0; i < this.class65_0.Length; i++)
+			for (int i = 0; i < Users.Length; i++)
 			{
-				if (this.class65_0[i] != null && this.class65_0[i].UserId == uint_3)
+				if (Users[i] != null && Users[i].UserId == Id)
 				{
-					result = true;
-					return result;
+					return true;
 				}
 			}
-			result = false;
-			return result;
+			return false;
 		}
-		public TradeUser method_1(uint uint_3)
+
+		public TradeUser GetTradeUser(uint Id)
 		{
-			TradeUser result;
-			for (int i = 0; i < this.class65_0.Length; i++)
+			for (int i = 0; i < Users.Length; i++)
 			{
-				if (this.class65_0[i] != null && this.class65_0[i].UserId == uint_3)
+				if (Users[i] != null && Users[i].UserId == Id)
 				{
-					result = this.class65_0[i];
-					return result;
+					return Users[i];
 				}
 			}
-			result = null;
-			return result;
+            return null;
 		}
-		public void method_2(uint uint_3, UserItem class39_0)
+
+		public void OfferItem(uint UserId, UserItem Item)
 		{
-			TradeUser @class = this.method_1(uint_3);
-			if (@class != null && class39_0 != null && class39_0.GetBaseItem().AllowTrade && !@class.Boolean_0 && this.int_0 == 1)
-			{
-				this.method_8();
-				@class.OfferedItems.Add(class39_0);
-				this.method_9();
-			}
+            TradeUser User = GetTradeUser(UserId);
+
+            if (User == null || Item == null || !Item.GetBaseItem().AllowTrade || User.HasAccepted || TradeStage != 1)
+            {
+                return;
+            }
+
+            ClearAccepted();
+
+            User.OfferedItems.Add(Item);
+            UpdateTradeWindow();
 		}
-		public void method_3(uint uint_3, UserItem class39_0)
+
+		public void TakeBackItem(uint UserId, UserItem Item)
 		{
-			TradeUser @class = this.method_1(uint_3);
-			if (@class != null && class39_0 != null && !@class.Boolean_0 && this.int_0 == 1)
-			{
-				this.method_8();
-				@class.OfferedItems.Remove(class39_0);
-				this.method_9();
-			}
+            TradeUser User = GetTradeUser(UserId);
+
+            if (User == null || Item == null || User.HasAccepted || TradeStage != 1)
+            {
+                return;
+            }
+
+            ClearAccepted();
+
+            User.OfferedItems.Remove(Item);
+            UpdateTradeWindow();
 		}
-		public void method_4(uint uint_3)
-		{
-			TradeUser @class = this.method_1(uint_3);
-			if (@class != null && this.int_0 == 1)
-			{
-				@class.Boolean_0 = true;
-				ServerMessage Message = new ServerMessage(109u);
-				Message.AppendUInt(uint_3);
-				Message.AppendBoolean(true);
-				this.method_13(Message);
-				if (this.Boolean_0)
-				{
-					this.method_13(new ServerMessage(111u));
-					this.int_0++;
-					this.method_8();
-				}
-			}
-		}
-		public void method_5(uint uint_3)
-		{
-			TradeUser @class = this.method_1(uint_3);
-			if (@class != null && this.int_0 == 1 && !this.Boolean_0)
-			{
-				@class.Boolean_0 = false;
-				ServerMessage Message = new ServerMessage(109u);
-				Message.AppendUInt(uint_3);
-				Message.AppendBoolean(false);
-				this.method_13(Message);
-			}
-		}
-		public void method_6(uint uint_3)
-		{
-			TradeUser @class = this.method_1(uint_3);
-			if (@class != null && this.int_0 == 2)
-			{
-				@class.Boolean_0 = true;
-				ServerMessage Message = new ServerMessage(109u);
-				Message.AppendUInt(uint_3);
-				Message.AppendBoolean(true);
-				this.method_13(Message);
-				if (this.Boolean_0)
-				{
-					this.int_0 = 999;
-					Task task = new Task(new Action(this.method_7));
-					task.Start();
-				}
-			}
-		}
-		private void method_7()
+
+        public void Accept(uint UserId)
+        {
+            TradeUser User = GetTradeUser(UserId);
+
+            if (User == null || TradeStage != 1)
+            {
+                return;
+            }
+
+            User.HasAccepted = true;
+
+            ServerMessage Message = new ServerMessage(109);
+            Message.AppendUInt(UserId);
+            Message.AppendBoolean(true);
+            SendMessageToUsers(Message);
+
+            if (AllUsersAccepted)
+            {
+                SendMessageToUsers(new ServerMessage(111));
+                TradeStage++;
+                ClearAccepted();
+            }
+        }
+
+        public void Unaccept(uint UserId)
+        {
+            TradeUser User = GetTradeUser(UserId);
+
+            if (User == null || TradeStage != 1 || AllUsersAccepted)
+            {
+                return;
+            }
+
+            User.HasAccepted = false;
+
+            ServerMessage Message = new ServerMessage(109);
+            Message.AppendUInt(UserId);
+            Message.AppendBoolean(false);
+            SendMessageToUsers(Message);
+        }
+
+        public void CompleteTrade(uint UserId)
+        {
+            TradeUser User = GetTradeUser(UserId);
+
+            if (User == null || TradeStage != 2)
+            {
+                return;
+            }
+
+            User.HasAccepted = true;
+
+            ServerMessage Message = new ServerMessage(109);
+            Message.AppendUInt(UserId);
+            Message.AppendBoolean(true);
+            SendMessageToUsers(Message);
+
+            if (this.AllUsersAccepted)
+            {
+                TradeStage = 999;
+                Task Trade = new Task(new Action(TradeTask));
+                Trade.Start();
+            }
+        }
+
+		private void TradeTask()
 		{
 			try
 			{
-				this.method_10();
-				this.method_11();
+				this.DeliverItems();
+				this.CloseTradeClean();
 			}
 			catch (Exception ex)
 			{
                 Logging.LogThreadException(ex.ToString(), "Trade task");
 			}
 		}
-		public void method_8()
+
+        public void ClearAccepted()
+        {
+            foreach (TradeUser User in Users)
+            {
+                User.HasAccepted = false;
+            }
+        }
+
+        public void UpdateTradeWindow()
+        {
+            ServerMessage Message = new ServerMessage(108);
+
+            foreach (TradeUser User in Users)
+            {
+                Message.AppendUInt(User.UserId);
+                Message.AppendInt32(User.OfferedItems.Count);
+
+                foreach (UserItem Item in User.OfferedItems)
+                {
+                    Message.AppendUInt(Item.Id);
+                    Message.AppendStringWithBreak(Item.GetBaseItem().Type.ToString().ToLower());
+                    Message.AppendUInt(Item.Id);
+                    Message.AppendInt32(Item.GetBaseItem().SpriteId);
+                    Message.AppendBoolean(true);
+                    Message.AppendBoolean(true);
+                    Message.AppendStringWithBreak("");
+                    Message.AppendBoolean(false);
+                    Message.AppendBoolean(false);
+                    Message.AppendBoolean(false);
+
+                    if (Item.GetBaseItem().Type == 's')
+                    {
+                        Message.AppendInt32(-1);
+                    }
+                }
+            }
+
+            SendMessageToUsers(Message);
+        }
+
+		public void DeliverItems()
 		{
-			using (TimedLock.Lock(this.class65_0))
+			List<UserItem> ItemsOne = this.GetTradeUser(this.oneId).OfferedItems;
+			List<UserItem> ItemsTwo = this.GetTradeUser(this.twoId).OfferedItems;
+			foreach (UserItem I in ItemsOne)
 			{
-				TradeUser[] array = this.class65_0;
-				for (int i = 0; i < array.Length; i++)
+				if (this.GetTradeUser(this.oneId).GetClient().GetHabbo().GetInventoryComponent().GetItem(I.Id) == null)
 				{
-					TradeUser @class = array[i];
-					@class.Boolean_0 = false;
-				}
-			}
-		}
-		public void method_9()
-		{
-			ServerMessage Message = new ServerMessage(108u);
-			using (TimedLock.Lock(this.class65_0))
-			{
-				for (int i = 0; i < this.class65_0.Length; i++)
-				{
-					TradeUser @class = this.class65_0[i];
-					if (@class != null)
-					{
-						Message.AppendUInt(@class.UserId);
-						Message.AppendInt32(@class.OfferedItems.Count);
-						using (TimedLock.Lock(@class.OfferedItems))
-						{
-							foreach (UserItem current in @class.OfferedItems)
-							{
-								Message.AppendUInt(current.Id);
-								Message.AppendStringWithBreak(current.GetBaseItem().Type.ToString().ToLower());
-								Message.AppendUInt(current.Id);
-								Message.AppendInt32(current.GetBaseItem().Sprite);
-								Message.AppendBoolean(true);
-								Message.AppendBoolean(true);
-								Message.AppendStringWithBreak("");
-								Message.AppendBoolean(false);
-								Message.AppendBoolean(false);
-								Message.AppendBoolean(false);
-								if (current.GetBaseItem().Type == 's')
-								{
-									Message.AppendInt32(-1);
-								}
-							}
-						}
-					}
-				}
-			}
-			this.method_13(Message);
-		}
-		public void method_10()
-		{
-			List<UserItem> list_ = this.method_1(this.uint_1).OfferedItems;
-			List<UserItem> list_2 = this.method_1(this.uint_2).OfferedItems;
-			foreach (UserItem current in list_)
-			{
-				if (this.method_1(this.uint_1).method_1().GetHabbo().GetInventoryComponent().GetItem(current.Id) == null)
-				{
-					this.method_1(this.uint_1).method_1().SendNotif("Trade failed.");
-					this.method_1(this.uint_2).method_1().SendNotif("Trade failed.");
+					this.GetTradeUser(this.oneId).GetClient().SendNotif("Trade failed.");
+					this.GetTradeUser(this.twoId).GetClient().SendNotif("Trade failed.");
 					return;
 				}
 			}
-			foreach (UserItem current in list_2)
+
+			foreach (UserItem I in ItemsTwo)
 			{
-				if (this.method_1(this.uint_2).method_1().GetHabbo().GetInventoryComponent().GetItem(current.Id) == null)
+				if (this.GetTradeUser(this.twoId).GetClient().GetHabbo().GetInventoryComponent().GetItem(I.Id) == null)
 				{
-					this.method_1(this.uint_1).method_1().SendNotif("Trade failed.");
-					this.method_1(this.uint_2).method_1().SendNotif("Trade failed.");
+					this.GetTradeUser(this.oneId).GetClient().SendNotif("Trade failed.");
+					this.GetTradeUser(this.twoId).GetClient().SendNotif("Trade failed.");
 					return;
 				}
 			}
-			this.method_1(this.uint_2).method_1().GetHabbo().GetInventoryComponent().method_18();
-			this.method_1(this.uint_1).method_1().GetHabbo().GetInventoryComponent().method_18();
-			foreach (UserItem current in list_)
+
+			this.GetTradeUser(this.twoId).GetClient().GetHabbo().GetInventoryComponent().method_18();
+			this.GetTradeUser(this.oneId).GetClient().GetHabbo().GetInventoryComponent().method_18();
+			foreach (UserItem I in ItemsOne)
 			{
-				using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					@class.ExecuteQuery(string.Concat(new object[]
+					adapter.ExecuteQuery(string.Concat(new object[]
 					{
 						"UPDATE items SET room_id = '0', user_id = '",
-						this.method_1(this.uint_2).method_1().GetHabbo().Id,
+						this.GetTradeUser(this.twoId).GetClient().GetHabbo().Id,
 						"' WHERE Id = '",
-						current.Id,
+						I.Id,
 						"' LIMIT 1"
 					}));
 				}
-				this.method_1(this.uint_1).method_1().GetHabbo().GetInventoryComponent().RemoveItem(current.Id, this.method_1(this.uint_2).method_1().GetHabbo().Id, true);
-				this.method_1(this.uint_2).method_1().GetHabbo().GetInventoryComponent().method_11(current.Id, current.BaseItem, current.ExtraData, false);
+				this.GetTradeUser(this.oneId).GetClient().GetHabbo().GetInventoryComponent().RemoveItem(I.Id, this.GetTradeUser(this.twoId).GetClient().GetHabbo().Id, true);
+				this.GetTradeUser(this.twoId).GetClient().GetHabbo().GetInventoryComponent().AddItem(I.Id, I.BaseItem, I.ExtraData, false);
 			}
-			foreach (UserItem current in list_2)
+
+			foreach (UserItem I in ItemsTwo)
 			{
-				using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					@class.ExecuteQuery(string.Concat(new object[]
+					adapter.ExecuteQuery(string.Concat(new object[]
 					{
 						"UPDATE items SET room_id = '0', user_id = '",
-						this.method_1(this.uint_1).method_1().GetHabbo().Id,
+						this.GetTradeUser(this.oneId).GetClient().GetHabbo().Id,
 						"' WHERE Id = '",
-						current.Id,
+						I.Id,
 						"' LIMIT 1"
 					}));
 				}
-				this.method_1(this.uint_2).method_1().GetHabbo().GetInventoryComponent().RemoveItem(current.Id, this.method_1(this.uint_1).method_1().GetHabbo().Id, true);
-				this.method_1(this.uint_1).method_1().GetHabbo().GetInventoryComponent().method_11(current.Id, current.BaseItem, current.ExtraData, false);
+				this.GetTradeUser(this.twoId).GetClient().GetHabbo().GetInventoryComponent().RemoveItem(I.Id, this.GetTradeUser(this.oneId).GetClient().GetHabbo().Id, true);
+				this.GetTradeUser(this.oneId).GetClient().GetHabbo().GetInventoryComponent().AddItem(I.Id, I.BaseItem, I.ExtraData, false);
 			}
-			this.method_1(this.uint_1).method_1().GetHabbo().GetInventoryComponent().UpdateItems(true);
-			this.method_1(this.uint_2).method_1().GetHabbo().GetInventoryComponent().UpdateItems(true);
+			this.GetTradeUser(this.oneId).GetClient().GetHabbo().GetInventoryComponent().UpdateItems(true);
+			this.GetTradeUser(this.twoId).GetClient().GetHabbo().GetInventoryComponent().UpdateItems(true);
 
 		}
-		public void method_11()
+
+		public void CloseTradeClean()
 		{
-			for (int i = 0; i < this.class65_0.Length; i++)
+			for (int i = 0; i < this.Users.Length; i++)
 			{
-				TradeUser @class = this.class65_0[i];
-				if (@class != null && @class.method_0() != null)
+				TradeUser User = this.Users[i];
+				if (User != null && User.GetRoomUser() != null)
 				{
-					@class.method_0().RemoveStatus("trd");
-					@class.method_0().UpdateNeeded = true;
+					User.GetRoomUser().RemoveStatus("trd");
+					User.GetRoomUser().UpdateNeeded = true;
 				}
 			}
-			this.method_13(new ServerMessage(112u));
-			this.method_14().list_2.Remove(this);
+			this.SendMessageToUsers(new ServerMessage(112));
+			this.GetRoom().ActiveTrades.Remove(this);
 		}
-		public void method_12(uint uint_3)
+
+		public void CloseTrade(uint UserId)
 		{
-			for (int i = 0; i < this.class65_0.Length; i++)
+			for (int i = 0; i < this.Users.Length; i++)
 			{
-				TradeUser @class = this.class65_0[i];
-				if (@class != null && @class.method_0() != null)
+				TradeUser User = this.Users[i];
+				if (User != null && User.GetRoomUser() != null)
 				{
-					@class.method_0().RemoveStatus("trd");
-					@class.method_0().UpdateNeeded = true;
+					User.GetRoomUser().RemoveStatus("trd");
+					User.GetRoomUser().UpdateNeeded = true;
 				}
 			}
-			ServerMessage Message = new ServerMessage(110u);
-			Message.AppendUInt(uint_3);
-			this.method_13(Message);
+			ServerMessage Message = new ServerMessage(110);
+			Message.AppendUInt(UserId);
+			this.SendMessageToUsers(Message);
 		}
-		public void method_13(ServerMessage Message5_0)
+
+		public void SendMessageToUsers(ServerMessage Message)
 		{
-			if (this.class65_0 != null)
-			{
-				for (int i = 0; i < this.class65_0.Length; i++)
-				{
-					TradeUser @class = this.class65_0[i];
-					if (@class != null && @class != null && @class.method_1() != null)
-					{
-						@class.method_1().SendMessage(Message5_0);
-					}
-				}
-			}
+            foreach (TradeUser User in Users)
+            {
+                User.GetClient().SendMessage(Message);
+            }
 		}
-		private Room method_14()
+
+		private Room GetRoom()
 		{
-			return PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(this.uint_0);
+			return PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(this.RoomId);
 		}
 	}
 }

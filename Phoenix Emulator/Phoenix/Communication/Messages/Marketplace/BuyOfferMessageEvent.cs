@@ -43,7 +43,7 @@ namespace Phoenix.Communication.Messages.Marketplace
 						int num2 = 0;
 						try
 						{
-							num2 = @class.ReadInt32("SELECT Id FROM catalog_marketplace_data WHERE daysago = 0 AND sprite = " + class2.Sprite + " LIMIT 1;");
+							num2 = @class.ReadInt32("SELECT Id FROM catalog_marketplace_data WHERE daysago = 0 AND sprite = " + class2.SpriteId + " LIMIT 1;");
 						}
 						catch
 						{
@@ -64,31 +64,31 @@ namespace Phoenix.Communication.Messages.Marketplace
 							@class.ExecuteQuery(string.Concat(new object[]
 							{
 								"INSERT INTO catalog_marketplace_data (sprite, sold, avgprice, daysago) VALUES ('",
-								class2.Sprite,
+								class2.SpriteId,
 								"', 1, ",
 								(int)dataRow["total_price"],
 								", 0)"
 							}));
 						}
-						if (PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.ContainsKey(class2.Sprite) && PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.ContainsKey(class2.Sprite))
+						if (PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.ContainsKey(class2.SpriteId) && PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.ContainsKey(class2.SpriteId))
 						{
-							int num3 = PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1[class2.Sprite];
-							int num4 = PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0[class2.Sprite];
+							int num3 = PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1[class2.SpriteId];
+							int num4 = PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0[class2.SpriteId];
 							num4 += (int)dataRow["total_price"];
-							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.Remove(class2.Sprite);
-							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.Add(class2.Sprite, num4);
-							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.Remove(class2.Sprite);
-							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.Add(class2.Sprite, num3 + 1);
+							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.Remove(class2.SpriteId);
+							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.Add(class2.SpriteId, num4);
+							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.Remove(class2.SpriteId);
+							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.Add(class2.SpriteId, num3 + 1);
 						}
 						else
 						{
-							if (!PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.ContainsKey(class2.Sprite))
+							if (!PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.ContainsKey(class2.SpriteId))
 							{
-								PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.Add(class2.Sprite, (int)dataRow["total_price"]);
+								PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.Add(class2.SpriteId, (int)dataRow["total_price"]);
 							}
-							if (!PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.ContainsKey(class2.Sprite))
+							if (!PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.ContainsKey(class2.SpriteId))
 							{
-								PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.Add(class2.Sprite, 1);
+								PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.Add(class2.SpriteId, 1);
 							}
 						}
 					}
@@ -100,7 +100,7 @@ namespace Phoenix.Communication.Messages.Marketplace
 					Message.AppendInt32(0);
 					Message.AppendInt32(1);
 					Message.AppendStringWithBreak(class2.Type.ToString());
-					Message.AppendInt32(class2.Sprite);
+					Message.AppendInt32(class2.SpriteId);
 					Message.AppendStringWithBreak("");
 					Message.AppendInt32(1);
 					Message.AppendInt32(-1);
