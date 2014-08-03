@@ -131,10 +131,10 @@ namespace Phoenix.HabboHotel.Achievements
                 {
                     int num = AchievementManager.smethod_2(@class.Dynamic_badgelevel, @class.PixelMultiplier, int_0);
                     int num2 = AchievementManager.smethod_2(@class.ScoreBase, @class.PixelMultiplier, int_0);
-                    using (TimedLock.Lock(Session.GetHabbo().GetBadgeComponent().List_0))
+                    using (TimedLock.Lock(Session.GetHabbo().GetBadgeComponent().BadgeList))
                     {
                         List<string> list = new List<string>();
-                        foreach (Badge current in Session.GetHabbo().GetBadgeComponent().List_0)
+                        foreach (Badge current in Session.GetHabbo().GetBadgeComponent().BadgeList)
                         {
                             if (current.Code.StartsWith(@class.BadgeCode))
                             {

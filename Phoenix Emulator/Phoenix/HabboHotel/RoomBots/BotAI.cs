@@ -7,39 +7,33 @@ namespace Phoenix.HabboHotel.RoomBots
 	internal abstract class BotAI
 	{
 		public int BaseId;
-		private int int_1;
-		private uint uint_0;
-		public BotAI()
+		private int RoomUserId;
+		private uint RoomId;
+
+        public BotAI() { }
+
+		public void Init(int mBaseId, int mRoomUserId, uint mRoomId)
 		{
+			this.BaseId = mBaseId;
+			this.RoomUserId = mRoomUserId;
+			this.RoomId = mRoomId;
 		}
-		public void Init(int int_2, int int_3, uint uint_1)
-		{
-			this.BaseId = int_2;
-			this.int_1 = int_3;
-			this.uint_0 = uint_1;
-		}
-		public Room method_1()
-		{
-			return PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(this.uint_0);
-		}
+
+        public Room GetRoom()
+        {
+            return PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(RoomId);
+        }
+
 		public RoomUser GetRoomUser()
 		{
-			return this.method_1().method_52(this.int_1);
+			return this.GetRoom().GetRoomUserByVirtualId(RoomUserId);
 		}
-		public RoomBot method_3()
+
+		public RoomBot GetBotData()
 		{
-			RoomUser @class = this.GetRoomUser();
-			RoomBot result;
-			if (@class == null)
-			{
-				result = null;
-			}
-			else
-			{
-				result = this.GetRoomUser().BotData;
-			}
-			return result;
+            return GetRoomUser().BotData;
 		}
+
 		public abstract void OnSelfEnterRoom();
 		public abstract void OnSelfLeaveRoom(bool Kicked);
 		public abstract void OnUserEnterRoom(RoomUser User);

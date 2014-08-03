@@ -7,37 +7,36 @@ namespace Phoenix.HabboHotel.RoomBots
 		private uint Id;
 		public uint BotId;
 		public List<string> Keywords;
-		public string Response;
+		public string ResponseText;
 		public string ResponseType;
 		public int ServeId;
-		public BotResponse(uint Id, uint BotId, string Keywords, string ResponseText, string ResponseType, int ServeId)
+
+		public BotResponse(uint mId, uint mBotId, string mKeywords, string mResponseText, string mResponseType, int mServeId)
 		{
-			this.Id = Id;
-			this.BotId = BotId;
+			this.Id = mId;
+			this.BotId = mBotId;
 			this.Keywords = new List<string>();
-			this.Response = ResponseText;
-			this.ResponseType = ResponseType;
-			this.ServeId = ServeId;
-			string[] keywordsArray = Keywords.Split(new char[]	{ ';' });
+			this.ResponseText = mResponseText;
+			this.ResponseType = mResponseType;
+			this.ServeId = mServeId;
+			string[] keywordsArray = mKeywords.Split(new char[]	{ ';' });
 			for (int i = 0; i < keywordsArray.Length; i++)
 			{
 				string text = keywordsArray[i];
 				this.Keywords.Add(text.ToLower());
 			}
 		}
-		public bool method_0(string string_2)
-		{
-			using (TimedLock.Lock(this.Keywords))
-			{
-				foreach (string current in this.Keywords)
-				{
-					if (string_2.ToLower().Contains(current.ToLower()))
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
+
+        public bool KeywordMatched(string Message)
+        {
+            foreach (string Keyword in Keywords)
+            {
+                if (Message.ToLower().Contains(Keyword.ToLower()))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 	}
 }

@@ -52,7 +52,7 @@ namespace Phoenix.HabboHotel.RoomBots
 						}
 						else
 						{
-							enum2_ = AIType.const_1;
+							enum2_ = AIType.Guide;
 						}
 					}
 					else
@@ -95,7 +95,7 @@ namespace Phoenix.HabboHotel.RoomBots
 			{
 				foreach (RoomBot current in this.list_0)
 				{
-					if (current.Id == uint_0)
+					if (current.BotId == uint_0)
 					{
 						result = current;
 						return result;

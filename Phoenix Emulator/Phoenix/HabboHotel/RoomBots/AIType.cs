@@ -4,7 +4,7 @@ namespace Phoenix.HabboHotel.RoomBots
 	internal enum AIType
 	{
 		Pet,
-		const_1,
+		Guide,
 		const_2,
 		const_3
 	}

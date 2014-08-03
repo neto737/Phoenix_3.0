@@ -16,60 +16,60 @@ namespace Phoenix.HabboHotel.Items.Interactors
 		{
 			if (Session != null)
 			{
-				RoomUser @class = Session.GetHabbo().CurrentRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
-				Room class2 = Item.GetRoom();
-				if (Item.GetRoom().method_99(Item.GetX, Item.GetY, @class.X, @class.Y))
+				RoomUser roomUserByHabbo = Session.GetHabbo().CurrentRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+				Room room = Item.GetRoom();
+				if (Item.GetRoom().method_99(Item.GetX, Item.GetY, roomUserByHabbo.X, roomUserByHabbo.Y))
 				{
-					Item.GetRoom().method_10(@class, Item);
+					Item.GetRoom().method_10(roomUserByHabbo, Item);
 					int num = Item.GetX;
 					int num2 = Item.GetY;
 					Item.ExtraData = "11";
-					if (@class.RotBody == 4)
+					if (roomUserByHabbo.RotBody == 4)
 					{
 						num2--;
 					}
 					else
 					{
-						if (@class.RotBody == 0)
+						if (roomUserByHabbo.RotBody == 0)
 						{
 							num2++;
 						}
 						else
 						{
-							if (@class.RotBody == 6)
+							if (roomUserByHabbo.RotBody == 6)
 							{
 								num++;
 							}
 							else
 							{
-								if (@class.RotBody == 2)
+								if (roomUserByHabbo.RotBody == 2)
 								{
 									num--;
 								}
 								else
 								{
-									if (@class.RotBody == 3)
+									if (roomUserByHabbo.RotBody == 3)
 									{
 										num--;
 										num2--;
 									}
 									else
 									{
-										if (@class.RotBody == 1)
+										if (roomUserByHabbo.RotBody == 1)
 										{
 											num--;
 											num2++;
 										}
 										else
 										{
-											if (@class.RotBody == 7)
+											if (roomUserByHabbo.RotBody == 7)
 											{
 												num++;
 												num2++;
 											}
 											else
 											{
-												if (@class.RotBody == 5)
+												if (roomUserByHabbo.RotBody == 5)
 												{
 													num++;
 													num2--;
@@ -81,8 +81,8 @@ namespace Phoenix.HabboHotel.Items.Interactors
 							}
 						}
 					}
-					@class.MoveTo(Item.GetX, Item.GetY);
-					class2.method_79(null, Item, num, num2, 0, false, true, true);
+					roomUserByHabbo.MoveTo(Item.GetX, Item.GetY);
+					room.method_79(null, Item, num, num2, 0, false, true, true);
 				}
 			}
 		}

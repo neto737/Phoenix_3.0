@@ -16,7 +16,7 @@ namespace Phoenix.Communication.Messages.Rooms.Action
 				for (int i = 0; i < @class.UserList.Length; i++)
 				{
 					RoomUser class2 = @class.UserList[i];
-					if (class2 != null && (class2.IsBot && class2.BotData.AiType == AIType.const_1))
+					if (class2 != null && (class2.IsBot && class2.BotData.AiType == AIType.Guide))
 					{
 						ServerMessage Message = new ServerMessage(33u);
 						Message.AppendInt32(4009);

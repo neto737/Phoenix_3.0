@@ -45,13 +45,13 @@ namespace Phoenix.HabboHotel.RoomBots
 			RoomUser @class = base.GetRoomUser();
 			if (bool_0)
 			{
-				int int_6 = PhoenixEnvironment.GetRandomNumber(0, base.method_1().Model.MapSizeX);
-				int int_7 = PhoenixEnvironment.GetRandomNumber(0, base.method_1().Model.MapSizeY);
+				int int_6 = PhoenixEnvironment.GetRandomNumber(0, base.GetRoom().Model.MapSizeX);
+				int int_7 = PhoenixEnvironment.GetRandomNumber(0, base.GetRoom().Model.MapSizeY);
 				@class.MoveTo(int_6, int_7);
 			}
 			else
 			{
-				if (int_4 < base.method_1().Model.MapSizeX && int_5 < base.method_1().Model.MapSizeY && int_4 >= 0 && int_5 >= 0)
+				if (int_4 < base.GetRoom().Model.MapSizeX && int_5 < base.GetRoom().Model.MapSizeY && int_4 >= 0 && int_5 >= 0)
 				{
 					@class.MoveTo(int_4, int_5);
 				}
@@ -68,12 +68,12 @@ namespace Phoenix.HabboHotel.RoomBots
 		}
 		public override void OnSelfLeaveRoom(bool bool_0)
 		{
-			if (base.method_3().RoomUser_0 != null)
+			if (base.GetBotData().RoomUser_0 != null)
 			{
-				RoomUser RoomUser_ = base.method_3().RoomUser_0;
-				if (RoomUser_.class34_1 != null && RoomUser_ == base.method_3().RoomUser_0)
+				RoomUser RoomUser_ = base.GetBotData().RoomUser_0;
+				if (RoomUser_.class34_1 != null && RoomUser_ == base.GetBotData().RoomUser_0)
 				{
-					base.method_3().RoomUser_0 = null;
+					base.GetBotData().RoomUser_0 = null;
 					RoomUser_.GetClient().GetHabbo().GetAvatarEffectsInventoryComponent().ApplyEffect(-1, true);
 					RoomUser_.class34_1 = null;
 					RoomUser_.Target = null;
@@ -147,16 +147,16 @@ namespace Phoenix.HabboHotel.RoomBots
 			if (Session != null && Session.GetHabbo() != null)
 			{
 				string string_ = Session.GetHabbo().Username;
-				RoomUser @class = base.method_1().GetRoomUserByHabbo(Session.GetHabbo().Id);
-				if (base.method_3().RoomUser_0 != null && @class != null && @class.class34_1 != null && @class == base.method_3().RoomUser_0)
+				RoomUser @class = base.GetRoom().GetRoomUserByHabbo(Session.GetHabbo().Id);
+				if (base.GetBotData().RoomUser_0 != null && @class != null && @class.class34_1 != null && @class == base.GetBotData().RoomUser_0)
 				{
-					base.method_3().RoomUser_0 = null;
+					base.GetBotData().RoomUser_0 = null;
 				}
 				try
 				{
-					if (string_.ToLower() == base.GetRoomUser().PetData.OwnerName.ToLower() && string_.ToLower() != base.method_1().Owner.ToLower())
+					if (string_.ToLower() == base.GetRoomUser().PetData.OwnerName.ToLower() && string_.ToLower() != base.GetRoom().Owner.ToLower())
 					{
-						base.method_1().method_6(base.GetRoomUser().PetData.VirtualId, false);
+						base.GetRoom().RemoveBot(base.GetRoomUser().PetData.VirtualId, false);
 						Session.GetHabbo().GetInventoryComponent().method_7(base.GetRoomUser().PetData);
 					}
 				}

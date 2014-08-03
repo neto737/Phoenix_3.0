@@ -6,111 +6,107 @@ namespace Phoenix.HabboHotel.RoomBots
 {
 	internal sealed class GenericBot : BotAI
 	{
-		private int int_2;
-		private int int_3;
-		public GenericBot(int int_4)
+		private int SpeechTimer;
+		private int ActionTimer;
+
+		public GenericBot(int VirtualId)
 		{
-			this.int_2 = new Random((int_4 ^ 2) + DateTime.Now.Millisecond).Next(10, 250);
-			this.int_3 = new Random((int_4 ^ 2) + DateTime.Now.Millisecond).Next(10, 30);
+			this.SpeechTimer = new Random((VirtualId ^ 2) + DateTime.Now.Millisecond).Next(10, 250);
+			this.ActionTimer = new Random((VirtualId ^ 2) + DateTime.Now.Millisecond).Next(10, 30);
 		}
-		public override void OnSelfEnterRoom()
-		{
-		}
-		public override void OnSelfLeaveRoom(bool bool_0)
-		{
-		}
-		public override void OnUserEnterRoom(RoomUser RoomUser_0)
-		{
-		}
-		public override void OnUserLeaveRoom(GameClient Session)
-		{
-		}
-		public override void OnUserSay(RoomUser RoomUser_0, string string_0)
-		{
-			if (base.method_1().method_100(base.GetRoomUser().X, base.GetRoomUser().Y, RoomUser_0.X, RoomUser_0.Y) <= 8)
-			{
-				BotResponse @class = base.method_3().method_2(string_0);
-				if (@class != null)
-				{
-					string text = base.method_1().VariablePhxMagic(RoomUser_0, @class.Response);
-					string text2 = @class.ResponseType.ToLower();
-					if (text2 != null)
-					{
-						if (!(text2 == "say"))
-						{
-							if (!(text2 == "shout"))
-							{
-								if (text2 == "whisper")
-								{
-									ServerMessage Message = new ServerMessage(25u);
-									Message.AppendInt32(base.GetRoomUser().VirtualId);
-									Message.AppendStringWithBreak(text);
-									Message.AppendBoolean(false);
-									RoomUser_0.GetClient().SendMessage(Message);
-								}
-							}
-							else
-							{
-								base.GetRoomUser().Chat(null, text, true);
-							}
-						}
-						else
-						{
-							base.GetRoomUser().Chat(null, text, false);
-						}
-					}
-					if (@class.ServeId >= 1)
-					{
-						RoomUser_0.CarryItem(@class.ServeId);
-					}
-				}
-			}
-		}
-		public override void OnUserShout(RoomUser RoomUser_0, string string_0)
-		{
-		}
+        public override void OnSelfEnterRoom() { }
+        public override void OnSelfLeaveRoom(bool Kicked) { }
+        public override void OnUserEnterRoom(RoomUser User) { }
+        public override void OnUserLeaveRoom(GameClient Session) { }
+
+        public override void OnUserSay(RoomUser User, string msg)
+        {
+            if (base.GetRoom().TileDistance(base.GetRoomUser().X, base.GetRoomUser().Y, User.X, User.Y) > 8)
+            {
+                return;
+            }
+
+            BotResponse Response = base.GetBotData().GetResponse(msg);
+
+            if (Response == null)
+            {
+                return;
+            }
+
+            switch (Response.ResponseType.ToLower())
+            {
+                case "say":
+                    GetRoomUser().Chat(null, Response.ResponseText, false);
+                    break;
+
+                case "shout":
+                    GetRoomUser().Chat(null, Response.ResponseText, true);
+                    break;
+
+                case "whisper":
+                    ServerMessage TellMsg = new ServerMessage(25);
+                    TellMsg.AppendInt32(GetRoomUser().VirtualId);
+                    TellMsg.AppendStringWithBreak(Response.ResponseText);
+                    TellMsg.AppendBoolean(false);
+
+                    User.GetClient().SendMessage(TellMsg);
+                    break;
+            }
+
+            if (Response.ServeId >= 1)
+            {
+                User.CarryItem(Response.ServeId);
+            }
+        }
+
+        public override void OnUserShout(RoomUser User, string Message) { }
+
 		public override void OnTimerTick()
 		{
-			if (this.int_2 <= 0)
+			if (this.SpeechTimer <= 0)
 			{
-				if (base.method_3().list_0.Count > 0)
+				if (base.GetBotData().RandomSpeech.Count > 0)
 				{
-					RandomSpeech @class = base.method_3().method_3();
-					base.GetRoomUser().Chat(null, @class.Message, @class.Shout);
+					RandomSpeech Speech = base.GetBotData().GetRandomSpeech();
+					base.GetRoomUser().Chat(null, Speech.Message, Speech.Shout);
 				}
-				this.int_2 = PhoenixEnvironment.GetRandomNumber(10, 300);
+				this.SpeechTimer = PhoenixEnvironment.GetRandomNumber(10, 300);
 			}
 			else
 			{
-				this.int_2--;
+				this.SpeechTimer--;
 			}
-			if (this.int_3 <= 0)
-			{
-				string text = base.method_3().WalkMode.ToLower();
-				if (text != null && !(text == "stand"))
-				{
-					if (!(text == "freeroam"))
-					{
-						if (text == "specified_range")
-						{
-							int int_ = PhoenixEnvironment.GetRandomNumber(base.method_3().min_x, base.method_3().max_x);
-							int int_2 = PhoenixEnvironment.GetRandomNumber(base.method_3().min_y, base.method_3().max_y);
-							base.GetRoomUser().MoveTo(int_, int_2);
-						}
-					}
-					else
-					{
-						int int_ = PhoenixEnvironment.GetRandomNumber(0, base.method_1().Model.MapSizeX);
-						int int_2 = PhoenixEnvironment.GetRandomNumber(0, base.method_1().Model.MapSizeY);
-						base.GetRoomUser().MoveTo(int_, int_2);
-					}
-				}
-				this.int_3 = PhoenixEnvironment.GetRandomNumber(1, 30);
-			}
-			else
-			{
-				this.int_3--;
-			}
+
+            if (this.ActionTimer <= 0)
+            {
+                int randomX = 0;
+                int randomY = 0;
+
+                switch (GetBotData().WalkingMode.ToLower())
+                {
+                    default:
+                    case "stand":
+                        // (8) Why is my life so boring?
+                        break;
+
+                    case "freeroam":
+                        randomX = PhoenixEnvironment.GetRandomNumber(0, GetRoom().Model.MapSizeX);
+                        randomY = PhoenixEnvironment.GetRandomNumber(0, GetRoom().Model.MapSizeY);
+                        GetRoomUser().MoveTo(randomX, randomY);
+                        break;
+
+                    case "specified_range":
+                        randomX = PhoenixEnvironment.GetRandomNumber(GetBotData().minX, GetBotData().maxX);
+                        randomY = PhoenixEnvironment.GetRandomNumber(GetBotData().minY, GetBotData().maxY);
+                        GetRoomUser().MoveTo(randomX, randomY);
+                        break;
+                }
+                ActionTimer = PhoenixEnvironment.GetRandomNumber(1, 30);
+            }
+            else
+            {
+                this.ActionTimer--;
+            }
 		}
 	}
 }

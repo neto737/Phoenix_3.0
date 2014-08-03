@@ -9,7 +9,7 @@ namespace Phoenix.Communication.Messages.Inventory.Badges
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			Session.GetHabbo().GetBadgeComponent().method_5();
+			Session.GetHabbo().GetBadgeComponent().ResetSlots();
 			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
 				adapter.ExecuteQuery("UPDATE user_badges SET badge_slot = '0' WHERE user_id = '" + Session.GetHabbo().Id + "'");
@@ -28,7 +28,7 @@ namespace Phoenix.Communication.Messages.Inventory.Badges
 				{
 					PhoenixEnvironment.GetGame().GetQuestManager().ProgressUserQuest(16u, Session);
 				}
-				Session.GetHabbo().GetBadgeComponent().method_0(text).Slot = num;
+				Session.GetHabbo().GetBadgeComponent().GetBadge(text).Slot = num;
 				using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
 				{
 					@class.AddParamWithValue("slotid", num);
@@ -44,8 +44,8 @@ namespace Phoenix.Communication.Messages.Inventory.Badges
 			}
 			ServerMessage Message = new ServerMessage(228u);
 			Message.AppendUInt(Session.GetHabbo().Id);
-			Message.AppendInt32(Session.GetHabbo().GetBadgeComponent().Int32_1);
-			foreach (Badge current in Session.GetHabbo().GetBadgeComponent().List_0)
+			Message.AppendInt32(Session.GetHabbo().GetBadgeComponent().EquippedCount);
+			foreach (Badge current in Session.GetHabbo().GetBadgeComponent().BadgeList)
 			{
 				if (current.Slot > 0)
 				{

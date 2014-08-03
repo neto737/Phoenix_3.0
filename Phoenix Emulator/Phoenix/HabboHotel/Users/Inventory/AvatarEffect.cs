@@ -12,16 +12,16 @@ namespace Phoenix.HabboHotel.Users.Inventory
         {
             get
             {
-                if (!this.Activated)
+                if (!Activated)
                 {
                     return -1;
                 }
-                double num = PhoenixEnvironment.GetUnixTimestamp() - this.StampActivated;
-                if (num >= this.TotalDuration)
+                double diff = PhoenixEnvironment.GetUnixTimestamp() - StampActivated;
+                if (diff >= this.TotalDuration)
                 {
                     return 0;
                 }
-                return (this.TotalDuration - ((int)num));
+                return (TotalDuration - ((int)diff));
             }
         }
 
@@ -29,11 +29,11 @@ namespace Phoenix.HabboHotel.Users.Inventory
         {
             get
             {
-                if (this.TimeLeft == -1)
+                if (TimeLeft == -1)
                 {
                     return false;
                 }
-                return (this.TimeLeft <= 0);
+                return (TimeLeft <= 0);
             }
         }
 

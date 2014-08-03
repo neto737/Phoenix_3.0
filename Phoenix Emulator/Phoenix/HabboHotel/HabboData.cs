@@ -4,7 +4,7 @@ using Phoenix.Util;
 using Phoenix.Storage;
 namespace Phoenix.HabboHotel.Users.UserDataManagement
 {
-	internal sealed class HabboData
+	internal class HabboData
 	{
 		private bool mUserFound;
 		private DataRow mUserInformation;
@@ -93,7 +93,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
 						this.mUserEffects = adapter.ReadDataTable("SELECT user_effects.effect_id,user_effects.total_duration,user_effects.is_activated,user_effects.activated_stamp FROM user_effects WHERE user_id =  " + num);
 						this.mUserFriends = adapter.ReadDataTable("SELECT users.Id,users.username,users.motto,users.look,users.last_online FROM users JOIN messenger_friendships ON users.Id = messenger_friendships.user_two_id WHERE messenger_friendships.user_one_id = '" + num + "'");
 						this.mUserRequests = adapter.ReadDataTable("SELECT messenger_requests.Id,messenger_requests.from_id,users.username FROM users JOIN messenger_requests ON users.Id = messenger_requests.from_id WHERE messenger_requests.to_id = '" + num + "'");
-						adapter.AddParamWithValue("name", (string)this.mUserInformation["username"]);
+						adapter.AddParamWithValue("name", this.mUserInformation["username"]);
 						this.mUsersRooms = adapter.ReadDataTable("SELECT * FROM rooms WHERE owner = @name ORDER BY Id ASC LIMIT " + GlobalClass.MaxRoomsPerUser);
 						this.mUserPets = adapter.ReadDataTable("SELECT Id, user_id, room_id, name, type, race, color, expirience, energy, nutrition, respect, createstamp, x, y, z FROM user_pets WHERE user_id = " + num + " AND room_id = 0");
                         this.mFriendStream = adapter.ReadDataTable("SELECT friend_stream.id, friend_stream.type, friend_stream.userid, friend_stream.gender, friend_stream.look, friend_stream.time, friend_stream.data, friend_stream.data_extra FROM friend_stream JOIN messenger_friendships ON friend_stream.userid = messenger_friendships.user_two_id WHERE messenger_friendships.user_one_id = '" + num + "' ORDER BY friend_stream.time DESC LIMIT 15"); //FriendStream fix
@@ -132,6 +132,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
                 return this.mUserFound;
             }
         }
+
         internal DataRow GetHabboDataRow
         {
             get
@@ -139,6 +140,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
                 return this.mUserInformation;
             }
         }
+
         internal DataTable GetAchievementData
         {
             get
@@ -146,6 +148,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
                 return this.mAchievementData;
             }
         }
+
         internal DataTable GetUserFavouriteRooms
         {
             get
@@ -153,6 +156,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
                 return this.mUserFavouriteRooms;
             }
         }
+
         internal DataTable GetUserIgnores
         {
             get
@@ -160,6 +164,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
                 return this.mUserIgnores;
             }
         }
+
         internal DataTable GetUserTags
         {
             get
@@ -167,6 +172,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
                 return this.mUsertags;
             }
         }
+
         internal DataTable GetSupscriptionData
         {
             get
@@ -174,6 +180,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
                 return this.mSubscriptionData;
             }
         }
+
         internal DataTable GetUserBadges
         {
             get
@@ -181,6 +188,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
                 return this.mUserBadges;
             }
         }
+
         internal DataTable GetUserInventory
         {
             get
@@ -188,6 +196,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
                 return this.mUserInventory;
             }
         }
+
         internal DataTable GetUserEffects
         {
             get
@@ -195,6 +204,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
                 return this.mUserEffects;
             }
         }
+
         internal DataTable GetUserFriends
         {
             get
@@ -202,6 +212,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
                 return this.mUserFriends;
             }
         }
+
         internal DataTable GetUserRequests
         {
             get
@@ -209,6 +220,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
                 return this.mUserRequests;
             }
         }
+
         internal DataTable GetUsersRooms
         {
             get
@@ -220,6 +232,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
                 this.mUsersRooms = value;
             }
         }
+
         internal DataTable GetUserPets
         {
             get
@@ -227,6 +240,7 @@ namespace Phoenix.HabboHotel.Users.UserDataManagement
                 return this.mUserPets;
             }
         }
+
         internal DataTable GetFriendStream //FriendStream fix
         {
             get

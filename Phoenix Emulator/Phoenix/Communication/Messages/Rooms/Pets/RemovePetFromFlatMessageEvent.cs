@@ -77,7 +77,7 @@ namespace Phoenix.Communication.Messages.Rooms.Pets
 						class2.PetData.DBState = DatabaseUpdateState.Updated;
 					}
 					Session.GetHabbo().GetInventoryComponent().method_7(class2.PetData);
-					@class.method_6(class2.VirtualId, false);
+					@class.RemoveBot(class2.VirtualId, false);
 					class2.RoomId = 0u;
 				}
 			}

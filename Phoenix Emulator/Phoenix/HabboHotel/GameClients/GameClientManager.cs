@@ -655,13 +655,13 @@ namespace Phoenix.HabboHotel.GameClients
 			list.Add(Message);
 			return list;
 		}
-		internal void RecordCmdLogs(GameClient Session, string string_0, string string_1)
+		internal void RecordCmdLogs(GameClient Session, string Command, string ExtraData)
 		{
             if (GlobalClass.RecordCmdlogs)
 			{
 				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					adapter.AddParamWithValue("extra_data", string_1);
+					adapter.AddParamWithValue("extra_data", ExtraData);
 					adapter.ExecuteQuery(string.Concat(new object[]
 					{
 						"INSERT INTO cmdlogs (user_id,user_name,command,extra_data,timestamp) VALUES ('",
@@ -669,7 +669,7 @@ namespace Phoenix.HabboHotel.GameClients
 						"','",
 						Session.GetHabbo().Username,
 						"','",
-						string_0,
+						Command,
 						"', @extra_data, UNIX_TIMESTAMP())"
 					}));
 				}

@@ -10,7 +10,8 @@ namespace Phoenix.HabboHotel.Users.Badges
 	internal sealed class BadgeComponent
 	{
 		private List<Badge> Badges;
-		private uint uint_0;
+		private uint UserId;
+
 		public int Count
 		{
 			get
@@ -18,118 +19,127 @@ namespace Phoenix.HabboHotel.Users.Badges
 				return this.Badges.Count;
 			}
 		}
-		public int Int32_1
+
+		public int EquippedCount
 		{
 			get
 			{
-				int num = 0;
-				foreach (Badge current in this.Badges)
+				int i = 0;
+				foreach (Badge current in Badges)
 				{
 					if (current.Slot > 0)
 					{
-						num++;
+						i++;
 					}
 				}
-				return num;
+				return i;
 			}
 		}
-		public List<Badge> List_0
+
+		public List<Badge> BadgeList
 		{
 			get
 			{
 				return this.Badges;
 			}
 		}
-		public BadgeComponent(uint uint_1, HabboData class12_0)
+
+		public BadgeComponent(uint mUserId, HabboData Data)
 		{
-			this.Badges = new List<Badge>();
-			this.uint_0 = uint_1;
-			DataTable dataTable_ = class12_0.GetUserBadges;
-			if (dataTable_ != null)
+			Badges = new List<Badge>();
+			UserId = mUserId;
+			DataTable data = Data.GetUserBadges;
+			if (data != null)
 			{
-				foreach (DataRow dataRow in dataTable_.Rows)
+				foreach (DataRow Row in data.Rows)
 				{
-					this.Badges.Add(new Badge((string)dataRow["badge_id"], (int)dataRow["badge_slot"]));
+					Badges.Add(new Badge((string)Row["badge_id"], (int)Row["badge_slot"]));
 				}
 			}
 		}
-		public Badge method_0(string string_0)
+
+		public Badge GetBadge(string Badge)
 		{
-			Badge result;
-			foreach (Badge current in this.Badges)
+			foreach (Badge B in Badges)
 			{
-				if (string_0.ToLower() == current.Code.ToLower())
+				if (Badge.ToLower() == B.Code.ToLower())
 				{
-					result = current;
-					return result;
+					return B;
 				}
 			}
-			result = null;
-			return result;
+			return null;
 		}
-		public bool HasBadge(string string_0)
+
+        public Boolean HasBadge(string Badge)
 		{
-			return this.method_0(string_0) != null;
+			return this.GetBadge(Badge) != null;
 		}
-		public void GiveBadge(GameClient Session, string string_0, bool bool_0)
+
+        public void GiveBadge(GameClient Session, string Badge, Boolean InDatabase)
 		{
-			this.GiveBadge(string_0, 0, bool_0);
-			ServerMessage Message = new ServerMessage(832u);
+			this.GiveBadge(Badge, 0, InDatabase);
+			ServerMessage Message = new ServerMessage(832);
 			Message.AppendInt32(1);
 			Message.AppendInt32(4);
 			Message.AppendInt32(1);
-			Message.AppendUInt(PhoenixEnvironment.GetGame().GetAchievementManager().BadgeID(string_0));
+			Message.AppendUInt(PhoenixEnvironment.GetGame().GetAchievementManager().BadgeID(Badge));
 			Session.SendMessage(Message);
 		}
-		public void GiveBadge(string string_0, int int_0, bool bool_0)
-		{
-			if (!this.HasBadge(string_0))
-			{
-				if (bool_0)
-				{
-					using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
-					{
-						@class.AddParamWithValue("badge", string_0);
-						@class.ExecuteQuery(string.Concat(new object[]
+
+        public void GiveBadge(string Badge, int Slot, bool InDatabase)
+        {
+            if (HasBadge(Badge))
+            {
+                return;
+            }
+            if (InDatabase)
+            {
+                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                {
+                    adapter.AddParamWithValue("badge", Badge);
+                    adapter.ExecuteQuery(string.Concat(new object[]
 						{
 							"INSERT INTO user_badges (user_id,badge_id,badge_slot) VALUES ('",
-							this.uint_0,
+							UserId,
 							"',@badge,'",
-							int_0,
+							Slot,
 							"')"
 						}));
-					}
-				}
-				this.Badges.Add(new Badge(string_0, int_0));
+                }
+            }
+            Badges.Add(new Badge(Badge, Slot));
+        }
+
+		public void method_4(string Badge, int Slot)
+		{
+			Badge B = GetBadge(Badge);
+			if (B != null)
+			{
+				B.Slot = Slot;
 			}
 		}
-		public void method_4(string string_0, int int_0)
+
+		public void ResetSlots()
 		{
-			Badge @class = this.method_0(string_0);
-			if (@class != null)
+			foreach (Badge Badge in this.Badges)
 			{
-				@class.Slot = int_0;
+				Badge.Slot = 0;
 			}
 		}
-		public void method_5()
+
+		public void RemoveBadge(string Badge)
 		{
-			foreach (Badge current in this.Badges)
+			if (HasBadge(Badge))
 			{
-				current.Slot = 0;
-			}
-		}
-		public void RemoveBadge(string string_0)
-		{
-			if (this.HasBadge(string_0))
-			{
-				using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					@class.AddParamWithValue("badge", string_0);
-					@class.ExecuteQuery("DELETE FROM user_badges WHERE badge_id = @badge AND user_id = '" + this.uint_0 + "' LIMIT 1");
+					adapter.AddParamWithValue("badge", Badge);
+					adapter.ExecuteQuery("DELETE FROM user_badges WHERE badge_id = @badge AND user_id = '" + UserId + "' LIMIT 1");
 				}
-				this.Badges.Remove(this.method_0(string_0));
+				this.Badges.Remove(this.GetBadge(Badge));
 			}
 		}
+
 		public ServerMessage Serialize()
 		{
 			List<Badge> EquippedBadges = new List<Badge>();
@@ -145,10 +155,10 @@ namespace Phoenix.HabboHotel.Users.Badges
 				}
 			}
 			Message.AppendInt32(EquippedBadges.Count);
-			foreach (Badge current in EquippedBadges)
+			foreach (Badge Badge in EquippedBadges)
 			{
-				Message.AppendInt32(current.Slot);
-				Message.AppendStringWithBreak(current.Code);
+				Message.AppendInt32(Badge.Slot);
+				Message.AppendStringWithBreak(Badge.Code);
 			}
 			return Message;
 		}

@@ -6,26 +6,32 @@ namespace Phoenix.HabboHotel.RoomBots
 {
 	internal sealed class RoomBot
 	{
-		public uint Id;
+		public uint BotId;
 		public uint RoomId;
+
 		public AIType AiType;
-		public string WalkMode;
+		public string WalkingMode;
+
 		public string Name;
 		public string Motto;
 		public string Look;
 		public int EffectId;
+
 		public bool bool_0;
-		public int x;
-		public int y;
-		public double z;
-		public int Rotation;
-		public int min_x;
-		public int max_x;
-		public int min_y;
-		public int max_y;
-		public List<RandomSpeech> list_0;
-		public List<BotResponse> list_1;
+		public int X;
+		public int Y;
+		public double Z;
+		public int Rot;
+
+		public int minX;
+		public int maxX;
+		public int minY;
+		public int maxY;
+
+		public List<RandomSpeech> RandomSpeech;
+		public List<BotResponse> Responses;
 		public RoomUser RoomUser_0;
+
 		public bool IsPet
 		{
 			get
@@ -33,6 +39,7 @@ namespace Phoenix.HabboHotel.RoomBots
 				return this.AiType == AIType.Pet;
 			}
 		}
+
 		public bool Boolean_1
 		{
 			get
@@ -40,81 +47,84 @@ namespace Phoenix.HabboHotel.RoomBots
 				return this.AiType == AIType.const_3;
 			}
 		}
+
 		public RoomBot(uint Id, uint RoomId, AIType AiType, string WalkingMode, string Name, string Motto, string Look, int X, int Y, int Z, int Rotation, int Min_X, int Min_Y, int Max_X, int Max_Y, ref List<RandomSpeech> BotSpeeches, ref List<BotResponse> BotResponses, int EffectId)
 		{
-			this.Id = Id;
+			this.BotId = Id;
 			this.RoomId = RoomId;
 			this.AiType = AiType;
-			this.WalkMode = WalkingMode;
+			this.WalkingMode = WalkingMode;
 			this.Name = Name;
 			this.Motto = Motto;
 			this.Look = Look;
-			this.x = X;
-			this.y = Y;
-			this.z = (double)Z;
-			this.Rotation = Rotation;
-			this.min_x = Min_X;
-			this.min_y = Min_Y;
-			this.max_x = Max_X;
-			this.max_y = Max_Y;
+			this.X = X;
+			this.Y = Y;
+			this.Z = (double)Z;
+			this.Rot = Rotation;
+			this.minX = Min_X;
+			this.minY = Min_Y;
+			this.maxX = Max_X;
+			this.maxY = Max_Y;
 			this.EffectId = EffectId;
 			this.bool_0 = true;
 			this.RoomUser_0 = null;
 			this.LookRandomSpeech(BotSpeeches);
 			this.LoadResponses(BotResponses);
 		}
-		public void LookRandomSpeech(List<RandomSpeech> list_2)
+
+		public void LookRandomSpeech(List<RandomSpeech> RandomSpeech)
 		{
-			this.list_0 = new List<RandomSpeech>();
-			foreach (RandomSpeech current in list_2)
+			this.RandomSpeech = new List<RandomSpeech>();
+			foreach (RandomSpeech Speech in RandomSpeech)
 			{
-				if (current.Id == this.Id)
+				if (Speech.Id == this.BotId)
 				{
-					this.list_0.Add(current);
+					this.RandomSpeech.Add(Speech);
 				}
 			}
 		}
-		public void LoadResponses(List<BotResponse> list_2)
+
+		public void LoadResponses(List<BotResponse> Responses)
 		{
-			this.list_1 = new List<BotResponse>();
-			foreach (BotResponse current in list_2)
+			this.Responses = new List<BotResponse>();
+			foreach (BotResponse Response in Responses)
 			{
-				if (current.BotId == this.Id)
+				if (Response.BotId == this.BotId)
 				{
-					this.list_1.Add(current);
+					this.Responses.Add(Response);
 				}
 			}
 		}
-		public BotResponse method_2(string string_4)
+
+        public BotResponse GetResponse(string Message)
+        {
+            foreach (BotResponse Response in Responses)
+            {
+                if (Response.KeywordMatched(Message))
+                {
+                    return Response;
+                }
+            }
+            return null;
+        }
+
+		public RandomSpeech GetRandomSpeech()
 		{
-			using (TimedLock.Lock(this.list_1))
-			{
-				foreach (BotResponse current in this.list_1)
-				{
-					if (current.method_0(string_4))
-					{
-						return current;
-					}
-				}
-			}
-			return null;
+			return RandomSpeech[PhoenixEnvironment.GetRandomNumber(0, RandomSpeech.Count - 1)];
 		}
-		public RandomSpeech method_3()
-		{
-			return this.list_0[PhoenixEnvironment.GetRandomNumber(0, this.list_0.Count - 1)];
-		}
-		public BotAI method_4(int int_8)
+
+		public BotAI GenerateBotAI(int VirtualId)
 		{
 			switch (this.AiType)
 			{
 			case AIType.Pet:
-				return new PetBot(int_8);
-			case AIType.const_1:
+				return new PetBot(VirtualId);
+			case AIType.Guide:
 				return new GuideBot();
 			case AIType.const_3:
-				return new GuideBotMovement(int_8);
+				return new GuideBotMovement(VirtualId);
 			}
-			return new GenericBot(int_8);
+			return new GenericBot(VirtualId);
 		}
 	}
 }

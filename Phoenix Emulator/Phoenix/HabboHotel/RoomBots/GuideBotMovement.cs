@@ -34,9 +34,9 @@ namespace Phoenix.HabboHotel.RoomBots
 		{
 			if (this.int_2 <= 0)
 			{
-				if (base.method_3().list_0.Count > 0)
+				if (base.GetBotData().RandomSpeech.Count > 0)
 				{
-					RandomSpeech @class = base.method_3().method_3();
+					RandomSpeech @class = base.GetBotData().GetRandomSpeech();
 					base.GetRoomUser().Chat(null, @class.Message, @class.Shout);
 				}
 				this.int_2 = PhoenixEnvironment.GetRandomNumber(10, 300);
@@ -47,22 +47,22 @@ namespace Phoenix.HabboHotel.RoomBots
 			}
 			if (this.int_3 <= 0)
 			{
-				string text = base.method_3().WalkMode.ToLower();
+				string text = base.GetBotData().WalkingMode.ToLower();
 				if (text != null && !(text == "stand"))
 				{
 					if (!(text == "freeroam"))
 					{
 						if (text == "specified_range")
 						{
-							int int_ = PhoenixEnvironment.GetRandomNumber(base.method_3().min_x, base.method_3().max_x);
-							int int_2 = PhoenixEnvironment.GetRandomNumber(base.method_3().min_y, base.method_3().max_y);
+							int int_ = PhoenixEnvironment.GetRandomNumber(base.GetBotData().minX, base.GetBotData().maxX);
+							int int_2 = PhoenixEnvironment.GetRandomNumber(base.GetBotData().minY, base.GetBotData().maxY);
 							base.GetRoomUser().MoveTo(int_, int_2);
 						}
 					}
 					else
 					{
-						int int_ = PhoenixEnvironment.GetRandomNumber(0, base.method_1().Model.MapSizeX);
-						int int_2 = PhoenixEnvironment.GetRandomNumber(0, base.method_1().Model.MapSizeY);
+						int int_ = PhoenixEnvironment.GetRandomNumber(0, base.GetRoom().Model.MapSizeX);
+						int int_2 = PhoenixEnvironment.GetRandomNumber(0, base.GetRoom().Model.MapSizeY);
 						base.GetRoomUser().MoveTo(int_, int_2);
 					}
 				}

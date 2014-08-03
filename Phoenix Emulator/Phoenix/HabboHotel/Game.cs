@@ -20,7 +20,7 @@ using Phoenix.HabboHotel.Guilds;
 using Phoenix.HabboHotel.SoundMachine;
 namespace Phoenix.HabboHotel
 {
-	internal sealed class Game
+	internal class Game
 	{
 		private GameClientManager ClientManager;
 		private ModerationBanManager BanManager;
@@ -100,33 +100,27 @@ namespace Phoenix.HabboHotel
 		public void DatabaseCleanup(DatabaseClient adapter, int serverStatus)
 		{
 			Logging.Write(TextManager.GetText("emu_cleandb"));
-			bool flag = true;
+			bool debug = true;
 			try
 			{
 				if (int.Parse(PhoenixEnvironment.GetConfig().data["debug"]) == 1)
 				{
-					flag = false;
+					debug = false;
 				}
 			}
 			catch
 			{
 			}
-			if (flag)
+			if (debug)
 			{
 				adapter.ExecuteQuery("UPDATE users SET online = '0' WHERE online != '0'");
 				adapter.ExecuteQuery("UPDATE rooms SET users_now = '0' WHERE users_now != '0'");
 				adapter.ExecuteQuery("UPDATE user_roomvisits SET exit_timestamp = UNIX_TIMESTAMP() WHERE exit_timestamp <= 0");
-				adapter.ExecuteQuery(string.Concat(new object[]
-				{
-					"UPDATE server_status SET status = '",
-					serverStatus,
-					"', users_online = '0', rooms_loaded = '0', server_ver = '",
-					PhoenixEnvironment.PrettyVersion,
-					"', stamp = UNIX_TIMESTAMP() LIMIT 1;"
-				}));
+				adapter.ExecuteQuery(string.Concat(new object[] { "UPDATE server_status SET status = '", serverStatus, "', users_online = '0', rooms_loaded = '0', server_ver = '", PhoenixEnvironment.PrettyVersion, "', stamp = UNIX_TIMESTAMP() LIMIT 1;" }));
 			}
 			Logging.WriteLine("completed!");
 		}
+
 		public void Destroy()
 		{
 			if (Task != null)
@@ -157,96 +151,112 @@ namespace Phoenix.HabboHotel
 			AdvertisementManager = null;
 			PixelManager = null;
 		}
+
 		public GameClientManager GetClientManager()
 		{
 			return ClientManager;
 		}
+
 		public ModerationBanManager GetBanManager()
 		{
 			return BanManager;
 		}
+
 		public RoleManager GetRoleManager()
 		{
 			return RoleManager;
 		}
+
 		public HelpTool GetHelpTool()
 		{
 			return HelpTool;
 		}
+
 		public Catalog GetCatalog()
 		{
 			return Catalog;
 		}
+
 		public Navigator GetNavigator()
 		{
 			return Navigator;
 		}
+
 		public ItemManager GetItemManager()
 		{
 			return ItemManager;
 		}
+
 		public RoomManager GetRoomManager()
 		{
 			return RoomManager;
 		}
+
 		public AdvertisementManager GetAdvertisementManager()
 		{
 			return AdvertisementManager;
 		}
+
 		public PixelManager GetPixelManager()
 		{
 			return PixelManager;
 		}
+
 		public AchievementManager GetAchievementManager()
 		{
 			return AchievementManager;
 		}
+
 		public ModerationTool GetModerationTool()
 		{
 			return ModerationTool;
 		}
+
 		public BotManager GetBotManager()
 		{
 			return BotManager;
 		}
+
 		internal NavigatorCache GetNavigatorCache()
 		{
 			return NavigatorCache;
 		}
+
 		public QuestManager GetQuestManager()
 		{
 			return QuestManager;
 		}
+
 		public void LoadSettings(DatabaseClient adapter)
 		{
 			Logging.Write("Loading your settings..");
-			DataRow dataRow = adapter.ReadDataRow("SELECT * FROM server_settings LIMIT 1");
-			GlobalClass.MaxRoomsPerUser = (int)dataRow["MaxRoomsPerUser"];
-			GlobalClass.Motd = (string)dataRow["motd"];
-			GlobalClass.Timer = (int)dataRow["timer"];
-			GlobalClass.Credits = (int)dataRow["credits"];
-			GlobalClass.Pixels = (int)dataRow["pixels"];
-			GlobalClass.Points = (int)dataRow["points"];
-			GlobalClass.pixels_max = (int)dataRow["pixels_max"];
-			GlobalClass.credits_max = (int)dataRow["credits_max"];
-			GlobalClass.points_max = (int)dataRow["points_max"];
-			GlobalClass.MaxPetsPerRoom = (int)dataRow["MaxPetsPerRoom"];
-			GlobalClass.MaxMarketPlacePrice = (int)dataRow["MaxMarketPlacePrice"];
-			GlobalClass.MarketPlaceTax = (int)dataRow["MarketPlaceTax"];
-			GlobalClass.AntiDDoSEnabled = PhoenixEnvironment.EnumToBool(dataRow["enable_antiddos"].ToString());
-			GlobalClass.VIPclothesforHCusers = PhoenixEnvironment.EnumToBool(dataRow["vipclothesforhcusers"].ToString());
-			GlobalClass.RecordChatlogs = PhoenixEnvironment.EnumToBool(dataRow["enable_chatlogs"].ToString());
-			GlobalClass.RecordCmdlogs = PhoenixEnvironment.EnumToBool(dataRow["enable_cmdlogs"].ToString());
-			GlobalClass.RecordRoomVisits = PhoenixEnvironment.EnumToBool(dataRow["enable_roomlogs"].ToString());
-			GlobalClass.ExternalLinkMode = (string)dataRow["enable_externalchatlinks"];
-			GlobalClass.SecureSessions = PhoenixEnvironment.EnumToBool(dataRow["enable_securesessions"].ToString());
-			GlobalClass.AllowFriendlyFurni = PhoenixEnvironment.EnumToBool(dataRow["allow_friendfurnidrops"].ToString());
-			GlobalClass.cmdRedeemCredits = PhoenixEnvironment.EnumToBool(dataRow["enable_cmd_redeemcredits"].ToString());
-			GlobalClass.UnloadCrashedRooms = PhoenixEnvironment.EnumToBool(dataRow["unload_crashedrooms"].ToString());
-			GlobalClass.ShowUsersAndRoomsInAbout = PhoenixEnvironment.EnumToBool(dataRow["ShowUsersAndRoomsInAbout"].ToString());
-			GlobalClass.IdleSleep = (int)dataRow["idlesleep"];
-			GlobalClass.IdleKick = (int)dataRow["idlekick"];
-			GlobalClass.UseIP_Last = PhoenixEnvironment.EnumToBool(dataRow["ip_lastforbans"].ToString());
+			DataRow Row = adapter.ReadDataRow("SELECT * FROM server_settings LIMIT 1");
+			GlobalClass.MaxRoomsPerUser = (int)Row["MaxRoomsPerUser"];
+			GlobalClass.Motd = (string)Row["motd"];
+			GlobalClass.Timer = (int)Row["timer"];
+			GlobalClass.Credits = (int)Row["credits"];
+			GlobalClass.Pixels = (int)Row["pixels"];
+			GlobalClass.Points = (int)Row["points"];
+			GlobalClass.pixels_max = (int)Row["pixels_max"];
+			GlobalClass.credits_max = (int)Row["credits_max"];
+			GlobalClass.points_max = (int)Row["points_max"];
+			GlobalClass.MaxPetsPerRoom = (int)Row["MaxPetsPerRoom"];
+			GlobalClass.MaxMarketPlacePrice = (int)Row["MaxMarketPlacePrice"];
+			GlobalClass.MarketPlaceTax = (int)Row["MarketPlaceTax"];
+			GlobalClass.AntiDDoSEnabled = PhoenixEnvironment.EnumToBool(Row["enable_antiddos"].ToString());
+			GlobalClass.VIPclothesforHCusers = PhoenixEnvironment.EnumToBool(Row["vipclothesforhcusers"].ToString());
+			GlobalClass.RecordChatlogs = PhoenixEnvironment.EnumToBool(Row["enable_chatlogs"].ToString());
+			GlobalClass.RecordCmdlogs = PhoenixEnvironment.EnumToBool(Row["enable_cmdlogs"].ToString());
+			GlobalClass.RecordRoomVisits = PhoenixEnvironment.EnumToBool(Row["enable_roomlogs"].ToString());
+			GlobalClass.ExternalLinkMode = (string)Row["enable_externalchatlinks"];
+			GlobalClass.SecureSessions = PhoenixEnvironment.EnumToBool(Row["enable_securesessions"].ToString());
+			GlobalClass.AllowFriendlyFurni = PhoenixEnvironment.EnumToBool(Row["allow_friendfurnidrops"].ToString());
+			GlobalClass.cmdRedeemCredits = PhoenixEnvironment.EnumToBool(Row["enable_cmd_redeemcredits"].ToString());
+			GlobalClass.UnloadCrashedRooms = PhoenixEnvironment.EnumToBool(Row["unload_crashedrooms"].ToString());
+			GlobalClass.ShowUsersAndRoomsInAbout = PhoenixEnvironment.EnumToBool(Row["ShowUsersAndRoomsInAbout"].ToString());
+			GlobalClass.IdleSleep = (int)Row["idlesleep"];
+			GlobalClass.IdleKick = (int)Row["idlekick"];
+			GlobalClass.UseIP_Last = PhoenixEnvironment.EnumToBool(Row["ip_lastforbans"].ToString());
 			Logging.WriteLine("completed!");
 		}
 	}

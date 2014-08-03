@@ -6,6 +6,7 @@ namespace Phoenix.HabboHotel.RoomBots
 		internal string Message;
 		internal bool Shout;
 		internal uint Id;
+
 		public RandomSpeech(string Message, bool Shout, uint Id)
 		{
 			this.Id = Id;

@@ -19,10 +19,10 @@ namespace Phoenix.Communication.Messages.Users
 					{
 						ServerMessage Message = new ServerMessage(228u);
 						Message.AppendUInt(class2.GetClient().GetHabbo().Id);
-						Message.AppendInt32(class2.GetClient().GetHabbo().GetBadgeComponent().Int32_1);
-						using (TimedLock.Lock(class2.GetClient().GetHabbo().GetBadgeComponent().List_0))
+						Message.AppendInt32(class2.GetClient().GetHabbo().GetBadgeComponent().EquippedCount);
+						using (TimedLock.Lock(class2.GetClient().GetHabbo().GetBadgeComponent().BadgeList))
 						{
-							foreach (Badge current in class2.GetClient().GetHabbo().GetBadgeComponent().List_0)
+							foreach (Badge current in class2.GetClient().GetHabbo().GetBadgeComponent().BadgeList)
 							{
 								if (current.Slot > 0)
 								{

@@ -438,23 +438,23 @@ namespace Phoenix.HabboHotel.Rooms
             RoomUser user = new RoomUser(Convert.ToUInt32(num + 100000), this.RoomId, this.int_7++, true);
             user.CurrentFurniFX = num;
             this.UserList[num] = user;
-            if (Bot.x > 0 && Bot.y > 0 && Bot.x < this.Model.MapSizeX && Bot.y < this.Model.MapSizeY)
+            if (Bot.X > 0 && Bot.Y > 0 && Bot.X < this.Model.MapSizeX && Bot.Y < this.Model.MapSizeY)
             {
-                user.SetPos(Bot.x, Bot.y, Bot.z);
-                user.SetRot(Bot.Rotation);
+                user.SetPos(Bot.X, Bot.Y, Bot.Z);
+                user.SetRot(Bot.Rot);
             }
             else
             {
-                Bot.x = this.Model.int_0;
-                Bot.y = this.Model.int_1;
+                Bot.X = this.Model.int_0;
+                Bot.Y = this.Model.int_1;
                 user.SetPos(this.Model.int_0, this.Model.int_1, this.Model.double_0);
                 user.SetRot(this.Model.int_2);
             }
             user.BotData = Bot;
-            user.BotAI = Bot.method_4(user.VirtualId);
+            user.BotAI = Bot.GenerateBotAI(user.VirtualId);
             if (user.IsPet)
             {
-                user.BotAI.Init((int)Bot.Id, user.VirtualId, this.RoomId);
+                user.BotAI.Init((int)Bot.BotId, user.VirtualId, this.RoomId);
                 user.PetData = PetData;
                 user.PetData.VirtualId = user.VirtualId;
             }
@@ -475,9 +475,9 @@ namespace Phoenix.HabboHotel.Rooms
         {
             return Array.IndexOf<RoomUser>(this.UserList, null);
         }
-        public void method_6(int int_17, bool bool_13)
+        public void RemoveBot(int int_17, bool bool_13)
         {
-            RoomUser @class = this.method_52(int_17);
+            RoomUser @class = this.GetRoomUserByVirtualId(int_17);
             if (@class != null && @class.IsBot)
             {
                 @class.BotAI.OnSelfLeaveRoom(bool_13);
@@ -3738,7 +3738,7 @@ namespace Phoenix.HabboHotel.Rooms
         {
             this.UsersNow = this.UserCount;
         }
-        public RoomUser method_52(int int_17)
+        public RoomUser GetRoomUserByVirtualId(int int_17)
         {
             RoomUser result;
             for (int i = 0; i < this.UserList.Length; i++)
@@ -5513,9 +5513,9 @@ namespace Phoenix.HabboHotel.Rooms
                     {
                         if (User.IsBot)
                         {
-                            User.BotData.x = User.X;
-                            User.BotData.y = User.Y;
-                            User.BotData.z = User.Z;
+                            User.BotData.X = User.X;
+                            User.BotData.Y = User.Y;
+                            User.BotData.Z = User.Z;
                         }
                         else
                         {
@@ -6435,7 +6435,7 @@ namespace Phoenix.HabboHotel.Rooms
         {
             return (Math.Abs(int_17 - int_19) <= 1 && Math.Abs(int_18 - int_20) <= 1) || (int_17 == int_19 && int_18 == int_20);
         }
-        public int method_100(int int_17, int int_18, int int_19, int int_20)
+        public int TileDistance(int int_17, int int_18, int int_19, int int_20)
         {
             return Math.Abs(int_17 - int_19) + Math.Abs(int_18 - int_20);
         }

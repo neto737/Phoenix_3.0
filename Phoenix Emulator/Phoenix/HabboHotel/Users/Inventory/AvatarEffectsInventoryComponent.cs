@@ -23,6 +23,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 				return this.Effects.Count;
 			}
 		}
+
 		public AvatarEffectsInventoryComponent(uint UserId, GameClient pClient, HabboData UserData)
 		{
 			this.Session = pClient;
@@ -59,6 +60,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 				}
 			}
 		}
+
 		public void AddEffect(int int_1, int int_2)
 		{
 			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
@@ -80,6 +82,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			Message.AppendInt32(int_2);
 			this.GetClient().SendMessage(Message);
 		}
+
 		public void method_1(int int_1)
 		{
 			AvatarEffect @class = this.GetEffect(int_1, true);
@@ -106,6 +109,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 				}
 			}
 		}
+
 		public void ApplyEffect(int EffectId, bool bool_0)
 		{
 			if (this.HasEffect(EffectId, true) || bool_0)
@@ -129,6 +133,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 				}
 			}
 		}
+
 		public void EnableEffect(int EffectId)
 		{
 			AvatarEffect Effect = this.GetEffect(EffectId, false);
@@ -162,6 +167,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 				}
 			}
 		}
+
 		public bool HasEffect(int EffectId, bool IfEnabledOnly)
 		{
 			if (EffectId == -1 || EffectId == 28 || EffectId == 29)
@@ -183,6 +189,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 				return false;
 			}
 		}
+
 		public AvatarEffect GetEffect(int int_1, bool bool_0)
 		{
 			using (TimedLock.Lock(this.Effects))
@@ -197,6 +204,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			}
 			return null;
 		}
+
 		public ServerMessage method_6()
 		{
 			ServerMessage Message = new ServerMessage(460);
@@ -213,6 +221,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			}
 			return Message;
 		}
+
 		public void method_7()
 		{
 			using (TimedLock.Lock(this.Effects))
@@ -231,10 +240,12 @@ namespace Phoenix.HabboHotel.Users.Inventory
 				}
 			}
 		}
+
 		private GameClient GetClient()
 		{
 			return this.Session;
 		}
+
 		private Room GetUserRoom()
 		{
 			return this.Session.GetHabbo().CurrentRoom;
