@@ -29,10 +29,10 @@ namespace Phoenix.HabboHotel.SoundMachine
 
         public void RemoveFromDatabase()
         {
-            using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+            using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
             {
-                @class.ExecuteQuery("DELETE FROM items_rooms_songs WHERE itemid = " + itemID); // <-- old
-                @class.ExecuteQuery("DELETE FROM items_jukebox_songs WHERE itemid = " + itemID); // <-- new
+                //adapter.ExecuteQuery("DELETE FROM items_rooms_songs WHERE itemid = " + itemID); // <-- old
+                adapter.ExecuteQuery("DELETE FROM items_jukebox_songs WHERE itemid = " + itemID); // <-- new
                 //@class.ExecuteQuery(string.Concat(new object[] { "INSERT INTO items (id, base_item) VALUES ('", itemID, "','", baseItem.UInt32_0, "')" }));
             }
         }
@@ -40,10 +40,10 @@ namespace Phoenix.HabboHotel.SoundMachine
         //public void SaveToDatabase(int roomID) // <-- old
         public void SaveToDatabase(int JukeboxID) // <-- new
         {
-            using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+            using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
             {
                 //@class.ExecuteQuery(string.Concat(new object[] { "INSERT INTO items_rooms_songs VALUES (", itemID, ",", roomID, ",", this.songID, ",", this.baseItem.UInt32_0, ")" })); // <-- old
-                @class.ExecuteQuery(string.Concat(new object[] { "INSERT INTO items_jukebox_songs VALUES (", itemID, ",", JukeboxID, ",", this.songID, ",", this.baseItem.UInt32_0, ")" })); // <-- new
+                adapter.ExecuteQuery(string.Concat(new object[] { "INSERT INTO items_jukebox_songs VALUES (", itemID, ",", JukeboxID, ",", this.songID, ",", this.baseItem.UInt32_0, ")" })); // <-- new
                 //@class.ExecuteQuery("DELETE FROM items WHERE id = '" + itemID + "'");
             }
         }

@@ -21,11 +21,11 @@ namespace Phoenix.Communication.Messages.Sound
 				}
 			}
 			Session.GetHabbo().Volume = num;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				@class.AddParamWithValue("user_id", Session.GetHabbo().Id);
-				@class.AddParamWithValue("volume", num);
-				@class.ExecuteQuery("UPDATE users SET volume = @volume WHERE Id = @user_id LIMIT 1;");
+				adapter.AddParamWithValue("user_id", Session.GetHabbo().Id);
+				adapter.AddParamWithValue("volume", num);
+				adapter.ExecuteQuery("UPDATE users SET volume = @volume WHERE Id = @user_id LIMIT 1;");
 			}
 		}
 	}

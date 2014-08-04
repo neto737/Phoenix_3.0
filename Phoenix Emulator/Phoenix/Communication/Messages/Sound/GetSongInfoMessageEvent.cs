@@ -10,7 +10,7 @@ internal sealed class GetSongInfoMessageEvent : MessageEvent
 		public void parse(GameClient Session, ClientMessage Event)
 		{
 			int num = Event.PopWiredInt32();
-			ServerMessage Message = new ServerMessage(300u);
+			ServerMessage Message = new ServerMessage(300);
 			Message.AppendInt32(num);
 			if (num > 0)
 			{

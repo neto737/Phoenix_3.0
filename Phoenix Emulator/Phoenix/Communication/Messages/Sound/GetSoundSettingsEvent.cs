@@ -7,7 +7,7 @@ namespace Phoenix.Communication.Messages.Sound
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			ServerMessage Message = new ServerMessage(308u);
+			ServerMessage Message = new ServerMessage(308);
 			Message.AppendInt32(Session.GetHabbo().Volume);
 			Message.AppendBoolean(false);
 			Session.SendMessage(Message);

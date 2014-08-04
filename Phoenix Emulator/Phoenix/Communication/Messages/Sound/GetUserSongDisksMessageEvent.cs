@@ -36,7 +36,7 @@ namespace Phoenix.Communication.Messages.Sound
                 Message.AppendInt32(@class.Id);
             }*/
 
-            ServerMessage Message = new ServerMessage(333u);
+            ServerMessage Message = new ServerMessage(333);
             Message.AppendInt32(list.Count);
             foreach (UserItem current2 in list) //MUN OMA
             {

@@ -31,7 +31,7 @@ namespace Phoenix.Communication.Messages.Sound
                             {
                                 //diskItem.SaveToDatabase((int)currentRoom.Id); // <-- old
                                 diskItem.SaveToDatabase((int)roomMusicController.LinkedItemId); // <-- new
-                                Session.GetHabbo().GetInventoryComponent().RemoveItem((uint)num, 0u, true);
+                                Session.GetHabbo().GetInventoryComponent().RemoveItem((uint)num, 0, true);
                                 Session.GetHabbo().GetInventoryComponent().UpdateItems(true);
                                 Session.SendMessage(JukeboxDiscksComposer.Compose(roomMusicController.PlaylistCapacity, roomMusicController.Playlist.Values.ToList<SongInstance>()));
                             }
