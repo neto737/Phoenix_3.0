@@ -16,38 +16,40 @@ using Phoenix.Storage;
 namespace Phoenix.HabboHotel.GameClients
 {
 	internal sealed class GameClientManager
-	{
-		private Task task_0;
+    {
+        #region Fields
+        private Task task_0;
 		private GameClient[] Session;
 		private Hashtable hashtable_0;
 		private Hashtable hashtable_1;
 		private Timer timer_0;
 		private List<TcpConnection> list_0;
-		public int ClientCount
+        #endregion
+
+        public int connectionCount
 		{
 			get
 			{
-				int result;
 				if (this.Session == null)
 				{
-					result = 0;
+					return 0;
 				}
 				else
 				{
-					int num = 0;
+					int clients = 0;
 					for (int i = 0; i < this.Session.Length; i++)
 					{
 						if (this.Session[i] != null && this.Session[i].GetHabbo() != null && !string.IsNullOrEmpty(this.Session[i].GetHabbo().Username))
 						{
-							num++;
+							clients++;
 						}
 					}
-					num++;
-					result = num;
+					clients++;
+					return clients;
 				}
-				return result;
 			}
 		}
+
 		public GameClientManager(int int_0)
 		{
 			this.hashtable_0 = new Hashtable();
@@ -56,6 +58,7 @@ namespace Phoenix.HabboHotel.GameClients
 			this.list_0 = new List<TcpConnection>();
 			this.timer_0 = new Timer(new TimerCallback(this.method_4), null, 500, 500);
 		}
+
 		public void method_0(uint uint_0, string string_0, GameClient class16_1)
 		{
 			this.hashtable_0[uint_0] = class16_1;
@@ -68,23 +71,21 @@ namespace Phoenix.HabboHotel.GameClients
 		}
 		public GameClient GetClientByHabbo(uint uint_0)
 		{
-			GameClient result;
 			if (this.Session == null || this.hashtable_0 == null)
 			{
-				result = null;
+				return null;
 			}
 			else
 			{
 				if (this.hashtable_0.ContainsKey(uint_0))
 				{
-					result = (GameClient)this.hashtable_0[uint_0];
+					return (GameClient)this.hashtable_0[uint_0];
 				}
 				else
 				{
-					result = null;
+					return null;
 				}
 			}
-			return result;
 		}
 		public GameClient GetClientByHabbo(string string_0)
 		{
@@ -128,6 +129,7 @@ namespace Phoenix.HabboHotel.GameClients
                 Logging.LogThreadException(ex.ToString(), "Disconnector task");
 			}
 		}
+
 		internal void AddGameClient(TcpConnection Message1_0)
 		{
 			if (!this.list_0.Contains(Message1_0))
@@ -160,7 +162,7 @@ namespace Phoenix.HabboHotel.GameClients
 			if (Session != null)
 			{
 				PhoenixEnvironment.GetConnectionManager().DropConnection(uint_0);
-				Session.method_11();
+				Session.Stop();
 				this.Session[(int)((UIntPtr)uint_0)] = null;
 			}
 		}
@@ -181,8 +183,8 @@ namespace Phoenix.HabboHotel.GameClients
 		}
 		private void method_12()
 		{
-			int num = int.Parse(PhoenixEnvironment.GetConfig().data["client.ping.interval"]);
-			if (num <= 100)
+			int pingInterval = int.Parse(PhoenixEnvironment.GetConfig().data["client.ping.interval"]);
+			if (pingInterval <= 100)
 			{
 				throw new ArgumentException("Invalid configuration value for ping interval! Must be above 100 miliseconds.");
 			}
@@ -235,7 +237,7 @@ namespace Phoenix.HabboHotel.GameClients
 				{
                     Logging.LogThreadException(ex.ToString(), "Connection checker task");
 				}
-				Thread.Sleep(num);
+				Thread.Sleep(pingInterval);
 			}
 		}
 		internal void method_13()

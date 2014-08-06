@@ -19,7 +19,7 @@ namespace Phoenix.HabboHotel.Items.Interactors
 			if (UserHasRight && Item.ExtraData != "-1")
 			{
 				Item.ExtraData = "-1";
-				Item.method_4();
+				Item.UpdateState();
 				Item.ReqUpdate(10);
 			}
 		}

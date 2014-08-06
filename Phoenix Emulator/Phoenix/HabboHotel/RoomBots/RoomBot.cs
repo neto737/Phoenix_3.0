@@ -68,11 +68,11 @@ namespace Phoenix.HabboHotel.RoomBots
 			this.EffectId = EffectId;
 			this.bool_0 = true;
 			this.RoomUser = null;
-			this.LookRandomSpeech(BotSpeeches);
+			this.LoadRandomSpeech(BotSpeeches);
 			this.LoadResponses(BotResponses);
 		}
 
-		public void LookRandomSpeech(List<RandomSpeech> RandomSpeech)
+		public void LoadRandomSpeech(List<RandomSpeech> RandomSpeech)
 		{
 			this.RandomSpeech = new List<RandomSpeech>();
 			foreach (RandomSpeech Speech in RandomSpeech)
@@ -113,18 +113,18 @@ namespace Phoenix.HabboHotel.RoomBots
 			return RandomSpeech[PhoenixEnvironment.GetRandomNumber(0, RandomSpeech.Count - 1)];
 		}
 
-		public BotAI GenerateBotAI(int VirtualId)
-		{
-			switch (this.AiType)
-			{
-			case AIType.Pet:
-				return new PetBot(VirtualId);
-			case AIType.Guide:
-				return new GuideBot();
-			case AIType.const_3:
-				return new GuideBotMovement(VirtualId);
-			}
-			return new GenericBot(VirtualId);
-		}
+        public BotAI GenerateBotAI(int VirtualId)
+        {
+            switch (AiType)
+            {
+                case AIType.Pet:
+                    return new PetBot(VirtualId);
+                case AIType.Guide:
+                    return new GuideBot();
+                case AIType.const_3:
+                    return new GuideBotMovement(VirtualId);
+            }
+            return new GenericBot(VirtualId);
+        }
 	}
 }

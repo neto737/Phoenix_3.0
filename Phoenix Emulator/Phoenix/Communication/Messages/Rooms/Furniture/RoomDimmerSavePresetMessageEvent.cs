@@ -38,7 +38,7 @@ namespace Phoenix.Communication.Messages.Rooms.Furniture
 						@class.MoodlightData.CurrentPreset = num;
 						@class.MoodlightData.method_2(num, string_, int_, bool_);
 						class2.ExtraData = @class.MoodlightData.method_7();
-						class2.method_4();
+						class2.UpdateState();
 					}
 				}
 			}

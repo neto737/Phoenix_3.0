@@ -60,7 +60,7 @@ namespace Phoenix.HabboHotel.Items.Interactors
 					}
 				}
 				RoomItem_0.ExtraData = num.ToString();
-				RoomItem_0.method_4();
+				RoomItem_0.UpdateState();
 			}
 		}
 	}

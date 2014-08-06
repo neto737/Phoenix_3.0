@@ -17,19 +17,24 @@ namespace Phoenix.HabboHotel.GameClients
 	internal class GameClient
 	{
 		private uint Id;
+
 		private TcpConnection Connection;
 		private GameClientMessageHandler MessageHandler;
+
 		private Habbo Habbo;
-		public bool PongOK;
+
+        public Boolean PongOK;
 		internal bool bool_1 = false;
-		private bool bool_2 = false;
-		public uint UInt32_0
+		private bool Disconnected = false;
+
+		public uint ConnectionID
 		{
 			get
 			{
 				return this.Id;
 			}
 		}
+
 		public bool Boolean_0
 		{
 			get
@@ -37,40 +42,48 @@ namespace Phoenix.HabboHotel.GameClients
 				return this.Habbo != null;
 			}
 		}
+
 		public GameClient(uint ClientId, ref TcpConnection pConnection)
 		{
-			this.Id = ClientId;
-			this.Connection = pConnection;
+			Id = ClientId;
+			Connection = pConnection;
 		}
+
 		public TcpConnection GetConnection()
 		{
-			return this.Connection;
+			return Connection;
 		}
+
 		public GameClientMessageHandler GetMessageHandler()
 		{
-			return this.MessageHandler;
+			return MessageHandler;
 		}
+
 		public Habbo GetHabbo()
 		{
-			return this.Habbo;
+			return Habbo;
 		}
+
 		public void StartConnection()
 		{
-			if (this.Connection != null)
+			if (Connection != null)
 			{
 				this.PongOK = true;
 				TcpConnection.RouteReceivedDataCallback dataRouter = new TcpConnection.RouteReceivedDataCallback(this.HandleConnectionData);
 				this.Connection.Start(dataRouter);
 			}
 		}
+
 		internal void InitHandler()
 		{
 			this.MessageHandler = new GameClientMessageHandler(this);
 		}
+
 		internal ServerMessage GenerateUsersRoomNaviPacket()
 		{
 			return PhoenixEnvironment.GetGame().GetNavigator().GetDynamicNavigatorPacket(this, -3);
 		}
+
 		internal void Login(string AuthTicket)
 		{
 			try
@@ -364,39 +377,43 @@ namespace Phoenix.HabboHotel.GameClients
 				}
 			}
 		}
+
 		public void SendBanMessage(string Message)
 		{
-			ServerMessage message = new ServerMessage(35u);
+			ServerMessage message = new ServerMessage(35);
 			message.AppendStringWithBreak("A moderator has kicked you from the hotel:", 13);
 			message.AppendStringWithBreak(Message);
 			this.SendMessage(message);
 		}
+
 		public void SendNotif(string Message)
 		{
 			this.SendNotif(Message, 0);
 		}
+
 		public void SendNotif(string Message, int Type)
 		{
 			ServerMessage nMessage = new ServerMessage();
 			switch (Type)
 			{
 			case 0:
-				nMessage.Init(161u);
+				nMessage.Init(161);
 				break;
 			case 1:
-				nMessage.Init(139u);
+				nMessage.Init(139);
 				break;
 			case 2:
-				nMessage.Init(810u);
-				nMessage.AppendUInt(1u);
+				nMessage.Init(810);
+				nMessage.AppendUInt(1);
 				break;
 			default:
-				nMessage.Init(161u);
+				nMessage.Init(161);
 				break;
 			}
 			nMessage.AppendStringWithBreak(Message);
 			this.GetConnection().SendMessage(nMessage);
 		}
+
 		public void SendNotif(string Message, string Url)
 		{
 			ServerMessage message = new ServerMessage(161);
@@ -404,7 +421,8 @@ namespace Phoenix.HabboHotel.GameClients
 			message.AppendStringWithBreak(Url);
 			this.GetConnection().SendMessage(message);
 		}
-		public void method_11()
+
+		public void Stop()
 		{
 			if (this.Connection != null)
 			{
@@ -413,7 +431,7 @@ namespace Phoenix.HabboHotel.GameClients
 			}
 			if (this.GetHabbo() != null)
 			{
-				this.Habbo.method_9();
+				this.Habbo.OnDisconnect();
 				this.Habbo = null;
 			}
 			if (this.GetMessageHandler() != null)
@@ -422,44 +440,41 @@ namespace Phoenix.HabboHotel.GameClients
 				this.MessageHandler = null;
 			}
 		}
+
 		public void Disconnect()
 		{
-			if (!this.bool_2)
+			if (!Disconnected)
 			{
 				PhoenixEnvironment.GetGame().GetClientManager().StopClient(this.Id);
-				this.bool_2 = true;
+				Disconnected = true;
 			}
 		}
-		public void HandleConnectionData(ref byte[] byte_0)
+
+		public void HandleConnectionData(ref byte[] data)
 		{
-			if (byte_0[0] == 64)
+			if (data[0] == 64)
 			{
-				int i = 0;
-				while (i < byte_0.Length)
+				int pos = 0;
+				while (pos < data.Length)
 				{
 					try
 					{
-						int num = Base64Encoding.DecodeInt32(new byte[]
+						int MessageLength = Base64Encoding.DecodeInt32(new byte[] { data[pos++], data[pos++], data[pos++] });
+						uint MessageId = Base64Encoding.DecodeUInt32(new byte[] { data[pos++], data[pos++] });
+
+						byte[] Content = new byte[MessageLength - 2];
+
+						for (int i = 0; i < Content.Length; i++)
 						{
-							byte_0[i++],
-							byte_0[i++],
-							byte_0[i++]
-						});
-						uint uint_ = Base64Encoding.DecodeUInt32(new byte[]
-						{
-							byte_0[i++],
-							byte_0[i++]
-						});
-						byte[] array = new byte[num - 2];
-						for (int j = 0; j < array.Length; j++)
-						{
-							array[j] = byte_0[i++];
+							Content[i] = data[i++];
 						}
+
 						if (this.MessageHandler == null)
 						{
-							this.InitHandler();
+							InitHandler();
 						}
-						ClientMessage @class = new ClientMessage(uint_, array);
+
+						ClientMessage @class = new ClientMessage(MessageId, Content);
 						if (@class != null)
 						{
 							try
@@ -469,7 +484,7 @@ namespace Phoenix.HabboHotel.GameClients
 									Logging.WriteLine(string.Concat(new object[]
 									{
 										"[",
-										this.UInt32_0,
+										this.ConnectionID,
 										"] --> [",
 										@class.Id,
 										"] ",
@@ -504,11 +519,12 @@ namespace Phoenix.HabboHotel.GameClients
 				}
 			}
 		}
-		public void SendMessage(ServerMessage Message5_0)
+
+		public void SendMessage(ServerMessage Message)
 		{
-			if (Message5_0 != null && this.GetConnection() != null)
+			if (Message != null && this.GetConnection() != null)
 			{
-				this.GetConnection().SendMessage(Message5_0);
+				this.GetConnection().SendMessage(Message);
 			}
 		}
 	}

@@ -198,9 +198,9 @@ namespace Phoenix.HabboHotel.Items
 		{
 			get
 			{
-				string text = this.GetBaseItem().InteractionType.ToLower();
+				string pType = this.GetBaseItem().InteractionType.ToLower();
 				FurniInteractor result;
-				switch (text)
+				switch (pType)
 				{
 				case "ball":
 					result = new InteractorFootball();
@@ -627,7 +627,7 @@ namespace Phoenix.HabboHotel.Items
 					{
 						int num = PhoenixEnvironment.GetRandomNumber(0, 7);
 						this.ExtraData = num.ToString();
-						this.method_4();
+						this.UpdateState();
 						break;
 					}
 					case "dice":
@@ -650,13 +650,13 @@ namespace Phoenix.HabboHotel.Items
 							int num = PhoenixEnvironment.GetRandomNumber(1, 6);
 							this.ExtraData = num.ToString();
 						}
-						this.method_4();
+						this.UpdateState();
 						break;
 					case "habbowheel":
 					{
 						int num = PhoenixEnvironment.GetRandomNumber(1, 10);
 						this.ExtraData = num.ToString();
-						this.method_4();
+						this.UpdateState();
 						break;
 					}
 					case "loveshuffler":
@@ -814,7 +814,7 @@ namespace Phoenix.HabboHotel.Items
 			this.int_4 = int_5;
 			this.bool_1 = true;
 		}
-		internal void method_4()
+		internal void UpdateState()
 		{
 			this.UpdateState(true, true);
 		}
@@ -836,12 +836,12 @@ namespace Phoenix.HabboHotel.Items
 				else
 				{
 					Message.Init(85u);
-					this.method_6(Message);
+					this.Serialize(Message);
 				}
 				this.GetRoom().SendMessage(Message, null);
 			}
 		}
-		internal void method_6(ServerMessage Message5_0)
+		internal void Serialize(ServerMessage Message5_0)
 		{
 			if (this.IsFloorItem)
 			{

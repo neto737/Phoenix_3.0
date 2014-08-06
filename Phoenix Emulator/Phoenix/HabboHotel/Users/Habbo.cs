@@ -468,7 +468,7 @@ namespace Phoenix.HabboHotel.Users
 				}
 			}
 		}
-		public void method_9()
+		public void OnDisconnect()
 		{
 			if (!this.bool_9)
 			{

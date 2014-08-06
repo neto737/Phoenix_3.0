@@ -71,7 +71,7 @@ namespace Phoenix.HabboHotel.Items.Interactors
 					}
 				}
 				Item.ExtraData = num2.ToString();
-				Item.method_4();
+				Item.UpdateState();
 				Item.GetRoom().GenerateMaps();
 			}
 		}

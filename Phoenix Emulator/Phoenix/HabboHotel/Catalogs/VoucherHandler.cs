@@ -45,23 +45,23 @@ namespace Phoenix.Catalogs
 					adapter.AddParamWithValue("code", Code);
 					row = adapter.ReadDataRow("SELECT * FROM vouchers WHERE code = @code LIMIT 1");
 				}
-				int num = (int)row["credits"];
-				int num2 = (int)row["pixels"];
-				int num3 = (int)row["vip_points"];
+				int Credits = (int)row["credits"];
+				int Pixels = (int)row["pixels"];
+				int Points = (int)row["vip_points"];
 				this.DeleteVoucher(Code);
-				if (num > 0)
+				if (Credits > 0)
 				{
-					Session.GetHabbo().Credits += num;
+					Session.GetHabbo().Credits += Credits;
 					Session.GetHabbo().UpdateCreditsBalance(true);
 				}
-				if (num2 > 0)
+				if (Pixels > 0)
 				{
-					Session.GetHabbo().ActivityPoints += num2;
+					Session.GetHabbo().ActivityPoints += Pixels;
 					Session.GetHabbo().UpdateActivityPointsBalance(true);
 				}
-				if (num3 > 0)
+				if (Points > 0)
 				{
-					Session.GetHabbo().shells += num3;
+					Session.GetHabbo().shells += Points;
 					Session.GetHabbo().UpdateShellsBalance(false, true);
 				}
 				Session.SendMessage(new ServerMessage(212));

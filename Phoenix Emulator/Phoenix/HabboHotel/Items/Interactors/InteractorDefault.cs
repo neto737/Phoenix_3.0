@@ -90,7 +90,7 @@ namespace Phoenix.HabboHotel.Items.Interactors
 				}
 				double double_ = Item.Double_1;
 				Item.ExtraData = num2.ToString();
-				Item.method_4();
+				Item.UpdateState();
 				if (double_ != Item.Double_1)
 				{
 					Dictionary<int, AffectedTile> dictionary = Item.Dictionary_0;

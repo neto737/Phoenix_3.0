@@ -159,21 +159,21 @@ namespace Phoenix.HabboHotel.Catalogs
 			ServerMessage Message = new ServerMessage(615u);
 			foreach (MarketplaceOffers current in this.list_1)
 			{
-				if (dictionary.ContainsKey(current.int_0))
+				if (dictionary.ContainsKey(current.Sprite))
 				{
-					if (dictionary[current.int_0].int_1 > current.int_1)
+					if (dictionary[current.Sprite].TotalPrice > current.TotalPrice)
 					{
-						dictionary.Remove(current.int_0);
-						dictionary.Add(current.int_0, current);
+						dictionary.Remove(current.Sprite);
+						dictionary.Add(current.Sprite, current);
 					}
-					int num = dictionary2[current.int_0];
-					dictionary2.Remove(current.int_0);
-					dictionary2.Add(current.int_0, num + 1);
+					int num = dictionary2[current.Sprite];
+					dictionary2.Remove(current.Sprite);
+					dictionary2.Add(current.Sprite, num + 1);
 				}
 				else
 				{
-					dictionary.Add(current.int_0, current);
-					dictionary2.Add(current.int_0, 1);
+					dictionary.Add(current.Sprite, current);
+					dictionary2.Add(current.Sprite, 1);
 				}
 			}
 			if (dictionary.Count > 0)
@@ -184,15 +184,15 @@ namespace Phoenix.HabboHotel.Catalogs
 					while (enumerator2.MoveNext())
 					{
 						KeyValuePair<int, MarketplaceOffers> current2 = enumerator2.Current;
-						Message.AppendUInt(current2.Value.uint_0);
+						Message.AppendUInt(current2.Value.OfferID);
 						Message.AppendInt32(1);
-						Message.AppendInt32(current2.Value.int_2);
-						Message.AppendInt32(current2.Value.int_0);
+						Message.AppendInt32(current2.Value.ItemType);
+						Message.AppendInt32(current2.Value.Sprite);
 						Message.AppendStringWithBreak("");
-						Message.AppendInt32(current2.Value.int_1);
-						Message.AppendInt32(current2.Value.int_0);
-						Message.AppendInt32(this.method_8(current2.Value.int_0));
-						Message.AppendInt32(dictionary2[current2.Value.int_0]);
+						Message.AppendInt32(current2.Value.TotalPrice);
+						Message.AppendInt32(current2.Value.Sprite);
+						Message.AppendInt32(this.method_8(current2.Value.Sprite));
+						Message.AppendInt32(dictionary2[current2.Value.Sprite]);
 					}
 					return Message;
 				}
@@ -206,21 +206,21 @@ namespace Phoenix.HabboHotel.Catalogs
 			Dictionary<int, int> dictionary2 = new Dictionary<int, int>();
 			foreach (MarketplaceOffers current in this.list_1)
 			{
-				if (dictionary.ContainsKey(current.int_0))
+				if (dictionary.ContainsKey(current.Sprite))
 				{
-					if (dictionary[current.int_0].int_1 > current.int_1)
+					if (dictionary[current.Sprite].TotalPrice > current.TotalPrice)
 					{
-						dictionary.Remove(current.int_0);
-						dictionary.Add(current.int_0, current);
+						dictionary.Remove(current.Sprite);
+						dictionary.Add(current.Sprite, current);
 					}
-					int num = dictionary2[current.int_0];
-					dictionary2.Remove(current.int_0);
-					dictionary2.Add(current.int_0, num + 1);
+					int num = dictionary2[current.Sprite];
+					dictionary2.Remove(current.Sprite);
+					dictionary2.Add(current.Sprite, num + 1);
 				}
 				else
 				{
-					dictionary.Add(current.int_0, current);
-					dictionary2.Add(current.int_0, 1);
+					dictionary.Add(current.Sprite, current);
+					dictionary2.Add(current.Sprite, 1);
 				}
 			}
 			int result;

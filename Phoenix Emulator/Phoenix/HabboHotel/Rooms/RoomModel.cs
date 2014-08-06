@@ -8,106 +8,112 @@ namespace Phoenix.HabboHotel.Rooms
 	internal sealed class RoomModel
 	{
 		public string Name;
-		public int int_0;
-		public int int_1;
-		public double double_0;
-		public int int_2;
-		public string string_1;
-		public SquareState[,] squareState;
-		public double[,] double_1;
-		public int[,] int_3;
+		public int DoorX;
+		public int DoorY;
+		public double DoorZ;
+		public int DoorOrientation;
+		public string Heightmap;
+		public SquareState[,] SqState;
+		public double[,] SqFloorHeight;
+		public int[,] SqSeatRot;
 		public int MapSizeX;
 		public int MapSizeY;
-		public string string_2;
-		public bool bool_0;
-		public RoomModel(string string_3, int int_6, int int_7, double double_2, int int_8, string string_4, string string_5, bool bool_1)
+		public string StaticFurniMap;
+		public bool ClubOnly;
+
+		public RoomModel(string mName, int mDoorX, int mDoorY, double mDoorZ, int mDoorOrientation, string mHeightmap, string mStaticFurniMap, bool mClubOnly)
 		{
-			this.Name = string_3;
-			this.int_0 = int_6;
-			this.int_1 = int_7;
-			this.double_0 = double_2;
-			this.int_2 = int_8;
-			this.string_1 = string_4.ToLower();
-			this.string_2 = string_5;
-			string[] array = string_4.Split(new char[]
+			this.Name = mName;
+
+			this.DoorX = mDoorX;
+			this.DoorY = mDoorY;
+			this.DoorZ = mDoorZ;
+			this.DoorOrientation = mDoorOrientation;
+
+			this.Heightmap = mHeightmap.ToLower();
+			this.StaticFurniMap = mStaticFurniMap;
+
+            string[] tmpHeightmap = mHeightmap.Split(Convert.ToChar(13));
+
+			this.MapSizeX = tmpHeightmap[0].Length;
+			this.MapSizeY = tmpHeightmap.Length;
+
+			this.ClubOnly = mClubOnly;
+
+			SqState = new SquareState[MapSizeX, MapSizeY];
+			SqFloorHeight = new double[MapSizeX, MapSizeY];
+			SqSeatRot = new int[MapSizeX, MapSizeY];
+
+			for (int y = 0; y < this.MapSizeY; y++)
 			{
-				Convert.ToChar(13)
-			});
-			this.MapSizeX = array[0].Length;
-			this.MapSizeY = array.Length;
-			this.bool_0 = bool_1;
-			this.squareState = new SquareState[this.MapSizeX, this.MapSizeY];
-			this.double_1 = new double[this.MapSizeX, this.MapSizeY];
-			this.int_3 = new int[this.MapSizeX, this.MapSizeY];
-			for (int i = 0; i < this.MapSizeY; i++)
-			{
-				if (i > 0)
+				if (y > 0)
 				{
-					array[i] = array[i].Substring(1);
+					tmpHeightmap[y] = tmpHeightmap[y].Substring(1);
 				}
-				for (int j = 0; j < this.MapSizeX; j++)
+				for (int x = 0; x < this.MapSizeX; x++)
 				{
-					string text = array[i].Substring(j, 1).Trim().ToLower();
-					if (text == "x")
+					string Square = tmpHeightmap[y].Substring(x, 1).Trim().ToLower();
+					if (Square == "x")
 					{
-						this.squareState[j, i] = SquareState.BLOCKED;
+						this.SqState[x, y] = SquareState.BLOCKED;
 					}
 					else
 					{
-						if (this.method_0(text, NumberStyles.Integer))
+						if (this.method_0(Square, NumberStyles.Integer))
 						{
-							this.squareState[j, i] = SquareState.OPEN;
-							this.double_1[j, i] = double.Parse(text);
+							this.SqState[x, y] = SquareState.OPEN;
+							this.SqFloorHeight[x, y] = double.Parse(Square);
 						}
 					}
 				}
 			}
-			this.double_1[int_6, int_7] = double_2;
-			int num = 0;
+			this.SqFloorHeight[mDoorX, mDoorY] = mDoorZ;
+
+			int pointer = 0;
 			int num2 = 0;
-			if (string_5 != "")
+			if (mStaticFurniMap != "")
 			{
-				num2 = OldEncoding.decodeVL64(string_5);
+				num2 = OldEncoding.decodeVL64(mStaticFurniMap);
 			}
-			num += OldEncoding.encodeVL64(num2).Length;
+			pointer += OldEncoding.encodeVL64(num2).Length;
 			for (int k = 0; k < num2; k++)
 			{
-				string_5.Substring(num);
-				int num3 = OldEncoding.decodeVL64(string_5.Substring(num));
-				num += OldEncoding.encodeVL64(num3).Length;
-				string_5.Substring(num, 1);
-				num++;
-				int.Parse(string_5.Substring(num).Split(new char[]
+				mStaticFurniMap.Substring(pointer);
+				int num3 = OldEncoding.decodeVL64(mStaticFurniMap.Substring(pointer));
+				pointer += OldEncoding.encodeVL64(num3).Length;
+				mStaticFurniMap.Substring(pointer, 1);
+				pointer++;
+				int.Parse(mStaticFurniMap.Substring(pointer).Split(new char[]
 				{
 					Convert.ToChar(2)
 				})[0]);
-				num += string_5.Substring(num).Split(new char[]
+				pointer += mStaticFurniMap.Substring(pointer).Split(new char[]
 				{
 					Convert.ToChar(2)
 				})[0].Length;
-				num++;
-				string text2 = string_5.Substring(num).Split(new char[]
+				pointer++;
+				string text2 = mStaticFurniMap.Substring(pointer).Split(new char[]
 				{
 					Convert.ToChar(2)
 				})[0];
-				num += string_5.Substring(num).Split(new char[]
+				pointer += mStaticFurniMap.Substring(pointer).Split(new char[]
 				{
 					Convert.ToChar(2)
 				})[0].Length;
-				num++;
-				int j = OldEncoding.decodeVL64(string_5.Substring(num));
-				num += OldEncoding.encodeVL64(j).Length;
-				int i = OldEncoding.decodeVL64(string_5.Substring(num));
-				num += OldEncoding.encodeVL64(i).Length;
-				int num4 = OldEncoding.decodeVL64(string_5.Substring(num));
-				num += OldEncoding.encodeVL64(num4).Length;
-				int num5 = OldEncoding.decodeVL64(string_5.Substring(num));
-				num += OldEncoding.encodeVL64(num5).Length;
-				this.squareState[j, i] = SquareState.BLOCKED;
+				pointer++;
+				int j = OldEncoding.decodeVL64(mStaticFurniMap.Substring(pointer));
+				pointer += OldEncoding.encodeVL64(j).Length;
+				int i = OldEncoding.decodeVL64(mStaticFurniMap.Substring(pointer));
+				pointer += OldEncoding.encodeVL64(i).Length;
+				int num4 = OldEncoding.decodeVL64(mStaticFurniMap.Substring(pointer));
+				pointer += OldEncoding.encodeVL64(num4).Length;
+				int num5 = OldEncoding.decodeVL64(mStaticFurniMap.Substring(pointer));
+				pointer += OldEncoding.encodeVL64(num5).Length;
+				this.SqState[j, i] = SquareState.BLOCKED;
 				if (text2.Contains("bench") || text2.Contains("chair") || text2.Contains("stool") || text2.Contains("seat") || text2.Contains("sofa"))
 				{
-					this.squareState[j, i] = SquareState.SEAT;
-					this.int_3[j, i] = num5;
+					this.SqState[j, i] = SquareState.SEAT;
+					this.SqSeatRot[j, i] = num5;
 				}
 			}
 		}
@@ -119,7 +125,7 @@ namespace Phoenix.HabboHotel.Rooms
 		public ServerMessage method_1()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
-			string[] array = this.string_1.Split("\r\n".ToCharArray());
+			string[] array = this.Heightmap.Split("\r\n".ToCharArray());
 			for (int i = 0; i < array.Length; i++)
 			{
 				string text = array[i];
@@ -136,7 +142,7 @@ namespace Phoenix.HabboHotel.Rooms
 		public ServerMessage method_2()
 		{
 			ServerMessage Message = new ServerMessage(470u);
-			string[] array = this.string_1.Split(new char[]
+			string[] array = this.Heightmap.Split(new char[]
 			{
 				Convert.ToChar(13)
 			});
@@ -149,9 +155,9 @@ namespace Phoenix.HabboHotel.Rooms
 				for (int j = 0; j < this.MapSizeX; j++)
 				{
 					string text = array[i].Substring(j, 1).Trim().ToLower();
-					if (this.int_0 == j && this.int_1 == i)
+					if (this.DoorX == j && this.DoorY == i)
 					{
-						text = string.Concat((int)this.double_0);
+						text = string.Concat((int)this.DoorZ);
 					}
 					Message.AppendString(text);
 				}

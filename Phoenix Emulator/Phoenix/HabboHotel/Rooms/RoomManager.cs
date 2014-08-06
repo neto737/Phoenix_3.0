@@ -448,7 +448,7 @@ namespace Phoenix.HabboHotel.Rooms
 			}
 			else
 			{
-				if (this.Models[string_1].bool_0 && !Session.GetHabbo().GetSubscriptionManager().HasSubscription("habbo_club") && !Session.GetHabbo().GetSubscriptionManager().HasSubscription("habbo_vip"))
+				if (this.Models[string_1].ClubOnly && !Session.GetHabbo().GetSubscriptionManager().HasSubscription("habbo_club") && !Session.GetHabbo().GetSubscriptionManager().HasSubscription("habbo_vip"))
 				{
 					Session.SendNotif("You must be an Phoenix Club member to use that room layout.");
 					result = null;

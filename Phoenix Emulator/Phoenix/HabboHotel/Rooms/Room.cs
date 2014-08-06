@@ -445,10 +445,10 @@ namespace Phoenix.HabboHotel.Rooms
             }
             else
             {
-                Bot.X = this.Model.int_0;
-                Bot.Y = this.Model.int_1;
-                user.SetPos(this.Model.int_0, this.Model.int_1, this.Model.double_0);
-                user.SetRot(this.Model.int_2);
+                Bot.X = this.Model.DoorX;
+                Bot.Y = this.Model.DoorY;
+                user.SetPos(this.Model.DoorX, this.Model.DoorY, this.Model.DoorZ);
+                user.SetRot(this.Model.DoorOrientation);
             }
             user.BotData = Bot;
             user.BotAI = Bot.GenerateBotAI(user.VirtualId);
@@ -1170,7 +1170,7 @@ namespace Phoenix.HabboHotel.Rooms
             {
                 string_10 = Regex.Replace(string_10, "#ROOMID#", this.Id.ToString(), RegexOptions.IgnoreCase);
             }
-            int num = PhoenixEnvironment.GetGame().GetClientManager().ClientCount + -1;
+            int num = PhoenixEnvironment.GetGame().GetClientManager().connectionCount + -1;
             int int32_ = PhoenixEnvironment.GetGame().GetRoomManager().LoadedRoomsCount;
             if (string_10.ToUpper().Contains("#ONLINECOUNT#"))
             {
@@ -1998,19 +1998,19 @@ namespace Phoenix.HabboHotel.Rooms
                     this.byte_2[j, i] = 0;
                     this.byte_1[j, i] = 0;
                     this.mBedMap[j, i] = new Coord(j, i);
-                    if (j == this.Model.int_0 && i == this.Model.int_1)
+                    if (j == this.Model.DoorX && i == this.Model.DoorY)
                     {
                         this.byte_0[j, i] = 3;
                     }
                     else
                     {
-                        if (this.Model.squareState[j, i] == SquareState.OPEN)
+                        if (this.Model.SqState[j, i] == SquareState.OPEN)
                         {
                             this.byte_0[j, i] = 1;
                         }
                         else
                         {
-                            if (this.Model.squareState[j, i] == SquareState.SEAT)
+                            if (this.Model.SqState[j, i] == SquareState.SEAT)
                             {
                                 this.byte_0[j, i] = 3;
                             }
@@ -2079,7 +2079,7 @@ namespace Phoenix.HabboHotel.Rooms
                                     }
                                     else
                                     {
-                                        if (@class.Double_0 <= this.Model.double_1[@class.GetX, @class.GetY] + 0.1 && @class.GetBaseItem().InteractionType.ToLower() == "gate" && @class.ExtraData == "1")
+                                        if (@class.Double_0 <= this.Model.SqFloorHeight[@class.GetX, @class.GetY] + 0.1 && @class.GetBaseItem().InteractionType.ToLower() == "gate" && @class.ExtraData == "1")
                                         {
                                             if (this.byte_0[@class.GetX, @class.GetY] != 3)
                                             {
@@ -2156,7 +2156,7 @@ namespace Phoenix.HabboHotel.Rooms
                                                 }
                                                 else
                                                 {
-                                                    if (@class.Double_0 <= this.Model.double_1[@class.GetX, @class.GetY] + 0.1 && @class.GetBaseItem().InteractionType.ToLower() == "gate" && @class.ExtraData == "1")
+                                                    if (@class.Double_0 <= this.Model.SqFloorHeight[@class.GetX, @class.GetY] + 0.1 && @class.GetBaseItem().InteractionType.ToLower() == "gate" && @class.ExtraData == "1")
                                                     {
                                                         if (this.byte_0[current.X, current.Y] != 3)
                                                         {
@@ -2223,7 +2223,7 @@ namespace Phoenix.HabboHotel.Rooms
                     }
                 }
             }
-            this.byte_0[this.Model.int_0, this.Model.int_1] = 3;
+            this.byte_0[this.Model.DoorX, this.Model.DoorY] = 3;
         }
         public void method_23()
         {
@@ -2793,7 +2793,7 @@ namespace Phoenix.HabboHotel.Rooms
                                             class3.BotData.RoomUser.Z = class3.SetZ + 1.0;
                                             class3.BotData.RoomUser.SetStep = false;
                                             class3.BotData.RoomUser.RemoveStatus("mv");
-                                            if (class3.X == this.Model.int_0 && class3.Y == this.Model.int_1 && !list.Contains(class3.BotData.RoomUser.HabboId))
+                                            if (class3.X == this.Model.DoorX && class3.Y == this.Model.DoorY && !list.Contains(class3.BotData.RoomUser.HabboId))
                                             {
                                                 list.Add(class3.BotData.RoomUser.HabboId);
                                             }
@@ -2808,7 +2808,7 @@ namespace Phoenix.HabboHotel.Rooms
                                                 class3.X = class3.SetX;
                                                 class3.Y = class3.SetY;
                                                 class3.Z = class3.SetZ;
-                                                if (class3.X == this.Model.int_0 && class3.Y == this.Model.int_1 && !list.Contains(class3.HabboId) && !class3.IsBot)
+                                                if (class3.X == this.Model.DoorX && class3.Y == this.Model.DoorY && !list.Contains(class3.HabboId) && !class3.IsBot)
                                                 {
                                                     list.Add(class3.HabboId);
                                                 }
@@ -2821,7 +2821,7 @@ namespace Phoenix.HabboHotel.Rooms
                                     if (class3.IsWalking && !class3.bool_5 && class3.class34_1 == null)
                                     {
                                         num = 10;
-                                        SquarePoint @struct = DreamPathfinder.GetNextStep(class3.X, class3.Y, class3.GoalX, class3.GoalY, this.byte_0, this.double_1, this.class28_0.double_1, this.double_2, this.class28_0.MapSizeX, this.class28_0.MapSizeY, class3.AllowOverride, this.bool_5);
+                                        SquarePoint @struct = DreamPathfinder.GetNextStep(class3.X, class3.Y, class3.GoalX, class3.GoalY, this.byte_0, this.double_1, this.class28_0.SqFloorHeight, this.double_2, this.class28_0.MapSizeX, this.class28_0.MapSizeY, class3.AllowOverride, this.bool_5);
                                         num = 11;
                                         if (@struct.X != class3.X || @struct.Y != class3.Y)
                                         {
@@ -3098,7 +3098,7 @@ namespace Phoenix.HabboHotel.Rooms
                             if (list3.Count > 0 || class2 != null)
                             {
                                 List<RoomItem> list4 = this.method_45(gStruct1_.X, gStruct1_.Y);
-                                double num = this.Model.double_1[gStruct1_.X, gStruct1_.Y];
+                                double num = this.Model.SqFloorHeight[gStruct1_.X, gStruct1_.Y];
                                 int num2 = 0;
                                 int num3 = 0;
                                 bool flag = false;
@@ -3139,7 +3139,7 @@ namespace Phoenix.HabboHotel.Rooms
                                         }
                                         else
                                         {
-                                            double_ = current.Double_0 - @class.Double_1 + this.Model.double_1[gStruct1_.X, gStruct1_.Y];
+                                            double_ = current.Double_0 - @class.Double_1 + this.Model.SqFloorHeight[gStruct1_.X, gStruct1_.Y];
                                         }
                                         this.method_41(current, gStruct1_, @class.Id, double_);
                                         list.Add(current.Id);
@@ -3191,7 +3191,7 @@ namespace Phoenix.HabboHotel.Rooms
             }
             else
             {
-                if (this.Model.squareState[int_17, int_18] == SquareState.BLOCKED)
+                if (this.Model.SqState[int_17, int_18] == SquareState.BLOCKED)
                 {
                     result = false;
                 }
@@ -3223,7 +3223,7 @@ namespace Phoenix.HabboHotel.Rooms
             }
             else
             {
-                if (this.Model.squareState[int_17, int_18] == SquareState.BLOCKED)
+                if (this.Model.SqState[int_17, int_18] == SquareState.BLOCKED)
                 {
                     result = false;
                 }
@@ -3436,8 +3436,8 @@ namespace Phoenix.HabboHotel.Rooms
                 }
                 else
                 {
-                    @class.SetPos(this.Model.int_0, this.Model.int_1, this.Model.double_0);
-                    @class.SetRot(this.Model.int_2);
+                    @class.SetPos(this.Model.DoorX, this.Model.DoorY, this.Model.DoorZ);
+                    @class.SetRot(this.Model.DoorOrientation);
                     if (this.CheckRights(Session, true))
                     {
                         @class.AddStatus("flatctrl", "useradmin");
@@ -4970,7 +4970,7 @@ namespace Phoenix.HabboHotel.Rooms
                         return result;
                     }
                 }
-                double num = this.Model.double_1[int_17, int_18];
+                double num = this.Model.SqFloorHeight[int_17, int_18];
                 if (!bool_14)
                 {
                     if (RoomItem_0.Rot == int_19 && RoomItem_0.GetX == int_17 && RoomItem_0.GetY == int_18 && RoomItem_0.Double_0 != num)
@@ -4978,14 +4978,14 @@ namespace Phoenix.HabboHotel.Rooms
                         result = false;
                         return result;
                     }
-                    if (this.Model.squareState[int_17, int_18] != SquareState.OPEN)
+                    if (this.Model.SqState[int_17, int_18] != SquareState.OPEN)
                     {
                         result = false;
                         return result;
                     }
                     foreach (AffectedTile current in dictionary.Values)
                     {
-                        if (this.Model.squareState[current.X, current.Y] != SquareState.OPEN)
+                        if (this.Model.SqState[current.X, current.Y] != SquareState.OPEN)
                         {
                             result = false;
                             return result;
@@ -5014,7 +5014,7 @@ namespace Phoenix.HabboHotel.Rooms
                         goto IL_1FE;
                     }
                 }
-                if (this.Model.squareState[int_17, int_18] != SquareState.OPEN)
+                if (this.Model.SqState[int_17, int_18] != SquareState.OPEN)
                 {
                     result = false;
                     return result;
@@ -5144,7 +5144,7 @@ namespace Phoenix.HabboHotel.Rooms
                         this.mWallItems.Add(RoomItem_0.Id, RoomItem_0);
                     }
                     ServerMessage Message5_ = new ServerMessage(93u);
-                    RoomItem_0.method_6(Message5_);
+                    RoomItem_0.Serialize(Message5_);
                     this.SendMessage(Message5_, null);
                     string text = RoomItem_0.GetBaseItem().InteractionType.ToLower();
                     switch (text)
@@ -5270,7 +5270,7 @@ namespace Phoenix.HabboHotel.Rooms
                         }
                     }
                     ServerMessage Message5_ = new ServerMessage(95u);
-                    RoomItem_0.method_6(Message5_);
+                    RoomItem_0.Serialize(Message5_);
                     this.SendMessage(Message5_, null);
                 }
                 this.GenerateMaps();
@@ -5344,7 +5344,7 @@ namespace Phoenix.HabboHotel.Rooms
                     }
                 }
                 ServerMessage Message5_ = new ServerMessage(83u);
-                RoomItem_0.method_6(Message5_);
+                RoomItem_0.Serialize(Message5_);
                 this.SendMessage(Message5_, null);
             }
             else
@@ -5358,7 +5358,7 @@ namespace Phoenix.HabboHotel.Rooms
             {
                 RoomItem_0.string_7 = string_10;
                 ServerMessage Message5_ = new ServerMessage(85u);
-                RoomItem_0.method_6(Message5_);
+                RoomItem_0.Serialize(Message5_);
                 this.SendMessage(Message5_, null);
             }
             return true;
@@ -5420,8 +5420,8 @@ namespace Phoenix.HabboHotel.Rooms
                         }
                     }
                 }
-                double num3 = this.Model.double_1[int_17, int_18];
-                double num4 = num - this.Model.double_1[int_17, int_18];
+                double num3 = this.Model.SqFloorHeight[int_17, int_18];
+                double num4 = num - this.Model.SqFloorHeight[int_17, int_18];
                 if (flag2)
                 {
                     num4 -= num2;
@@ -5572,7 +5572,7 @@ namespace Phoenix.HabboHotel.Rooms
                                 User.UpdateNeeded = true;
                             }
                             num = 8;
-                            if (this.Model.squareState[User.X, User.Y] == SquareState.SEAT)
+                            if (this.Model.SqState[User.X, User.Y] == SquareState.SEAT)
                             {
                                 if (!User.Statusses.ContainsKey("sit"))
                                 {
@@ -5591,9 +5591,9 @@ namespace Phoenix.HabboHotel.Rooms
                                     }
                                 }
                                 num = 9;
-                                User.Z = this.Model.double_1[User.X, User.Y];
-                                User.RotHead = this.Model.int_3[User.X, User.Y];
-                                User.RotBody = this.Model.int_3[User.X, User.Y];
+                                User.Z = this.Model.SqFloorHeight[User.X, User.Y];
+                                User.RotHead = this.Model.SqSeatRot[User.X, User.Y];
+                                User.RotBody = this.Model.SqSeatRot[User.X, User.Y];
                                 if (User.IsBot && User.BotData.RoomUser != null)
                                 {
                                     User.BotData.RoomUser.Z = User.Z + 1.0;

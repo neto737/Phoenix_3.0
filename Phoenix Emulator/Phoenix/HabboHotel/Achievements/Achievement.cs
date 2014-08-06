@@ -11,6 +11,7 @@ namespace Phoenix.HabboHotel.Achievements
 		public int ScoreBase;
 		public double PixelMultiplier;
 		public bool DynamicBadgeLevel;
+
 		public Achievement(uint mId, string mType, int mLevels, string mBadgeCode, int mDynamic_badgelevel, double mPixelMultiplier, bool mDynamicBadgeLevel, int mScoreBase)
 		{
 			this.Id = mId;

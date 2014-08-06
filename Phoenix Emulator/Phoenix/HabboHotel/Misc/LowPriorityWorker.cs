@@ -21,7 +21,7 @@ namespace Phoenix.HabboHotel.Misc
                 {
                     TimeSpan span = (TimeSpan)(DateTime.Now - PhoenixEnvironment.ServerStarted);
                     int Status = 1;
-                    int UsersCount = PhoenixEnvironment.GetGame().GetClientManager().ClientCount + -1;
+                    int UsersCount = PhoenixEnvironment.GetGame().GetClientManager().connectionCount + -1;
                     int loadedRoomsCount = PhoenixEnvironment.GetGame().GetRoomManager().LoadedRoomsCount;
                     bool flag = true;
                     try

@@ -31,9 +31,9 @@ namespace Phoenix.Communication.Messages.Rooms.Engine
 						{
 							Session.GetMessageHandler().ClearRoomLoading();
 							ServerMessage Message = new ServerMessage(30u);
-							if (class2.Model.string_2 != "")
+							if (class2.Model.StaticFurniMap != "")
 							{
-								Message.AppendStringWithBreak(class2.Model.string_2);
+								Message.AppendStringWithBreak(class2.Model.StaticFurniMap);
 							}
 							else
 							{
@@ -48,14 +48,14 @@ namespace Phoenix.Communication.Messages.Rooms.Engine
 								Message2.AppendInt32(hashtable_.Count);
 								foreach (RoomItem class3 in hashtable_.Values)
 								{
-									class3.method_6(Message2);
+									class3.Serialize(Message2);
 								}
 								Session.SendMessage(Message2);
 								ServerMessage Message3 = new ServerMessage(45u);
 								Message3.AppendInt32(hashtable_2.Count);
 								foreach (RoomItem class3 in hashtable_2.Values)
 								{
-									class3.method_6(Message3);
+									class3.Serialize(Message3);
 								}
 								Session.SendMessage(Message3);
 							}

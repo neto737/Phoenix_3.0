@@ -1966,7 +1966,7 @@ namespace Phoenix.HabboHotel.Misc
                         case 68: //CMD About
                             DateTime now = DateTime.Now;
                             TimeSpan timeSpan = now - PhoenixEnvironment.ServerStarted;
-                            int UsersOnline = PhoenixEnvironment.GetGame().GetClientManager().ClientCount + -1;
+                            int UsersOnline = PhoenixEnvironment.GetGame().GetClientManager().connectionCount + -1;
                             int RoomsLoaded = PhoenixEnvironment.GetGame().GetRoomManager().LoadedRoomsCount;
                             string UsersAndRooms = "";
                             if (GlobalClass.ShowUsersAndRoomsInAbout)

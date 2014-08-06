@@ -20,14 +20,14 @@ namespace Phoenix.HabboHotel.RoomBots
         public override void OnUserEnterRoom(RoomUser User) { }
         public override void OnUserLeaveRoom(GameClient Session) { }
 
-        public override void OnUserSay(RoomUser User, string msg)
+        public override void OnUserSay(RoomUser User, string Message)
         {
             if (base.GetRoom().TileDistance(base.GetRoomUser().X, base.GetRoomUser().Y, User.X, User.Y) > 8)
             {
                 return;
             }
 
-            BotResponse Response = base.GetBotData().GetResponse(msg);
+            BotResponse Response = base.GetBotData().GetResponse(Message);
 
             if (Response == null)
             {

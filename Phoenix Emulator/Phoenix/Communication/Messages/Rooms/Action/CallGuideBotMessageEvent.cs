@@ -33,7 +33,7 @@ namespace Phoenix.Communication.Messages.Rooms.Action
 				else
 				{
 					RoomUser class3 = @class.method_3(PhoenixEnvironment.GetGame().GetBotManager().GetBot(2u));
-					class3.SetPos(@class.Model.int_0, @class.Model.int_1, @class.Model.double_0);
+					class3.SetPos(@class.Model.DoorX, @class.Model.DoorY, @class.Model.DoorZ);
 					class3.UpdateNeeded = true;
 					RoomUser class4 = @class.GetRoomUserByHabbo(@class.Owner);
 					if (class4 != null)

@@ -30,7 +30,7 @@ namespace Phoenix.HabboHotel.Items.Interactors
 					if (Request == -1)
 					{
 						Item.ExtraData = "0";
-						Item.method_4();
+						Item.UpdateState();
 					}
 					else
 					{

@@ -17,7 +17,7 @@ namespace Phoenix.HabboHotel.Catalogs
 		}
 		public Item GetBaseItem()
 		{
-			return PhoenixEnvironment.GetGame().GetItemManager().GetItem(this.BaseId);
+			return PhoenixEnvironment.GetGame().GetItemManager().GetItem(BaseId);
 		}
 	}
 }

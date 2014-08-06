@@ -13,7 +13,7 @@ namespace Phoenix.HabboHotel.SoundMachine
     {
         public static ServerMessage Compose(int PlaylistCapacity, List<SongInstance> Playlist)
         {
-            ServerMessage message = new ServerMessage(334u);
+            ServerMessage message = new ServerMessage(334);
             message.AppendInt32(PlaylistCapacity);
             message.AppendInt32(Playlist.Count);
             foreach (SongInstance instance in Playlist)
@@ -26,7 +26,7 @@ namespace Phoenix.HabboHotel.SoundMachine
 
         public static ServerMessage ComposePlayingComposer(int SongId, int PlaylistItemNumber, int SyncTimestampMs)
         {
-            ServerMessage message = new ServerMessage(327u);
+            ServerMessage message = new ServerMessage(327);
             if (SongId == 0)
             {
                 message.AppendInt32(-1);
@@ -46,7 +46,7 @@ namespace Phoenix.HabboHotel.SoundMachine
 
         public static ServerMessage SerializeSongInventory(Hashtable songs)
         {
-            ServerMessage message = new ServerMessage(258u);
+            ServerMessage message = new ServerMessage(258);
             message.AppendInt32(songs.Count);
             foreach (UserItem item in songs.Values)
             {

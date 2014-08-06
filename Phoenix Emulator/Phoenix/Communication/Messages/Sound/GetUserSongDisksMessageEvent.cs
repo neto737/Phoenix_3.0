@@ -10,12 +10,12 @@ namespace Phoenix.Communication.Messages.Sound
     {
         public void parse(GameClient Session, ClientMessage Event)
         {
-            List<UserItem> list = new List<UserItem>();
+            List<UserItem> songs = new List<UserItem>();
             foreach (UserItem current in Session.GetHabbo().GetInventoryComponent().InventoryItems)
             {
                 if (current != null && !(current.GetBaseItem().Name != "song_disk") && !Session.GetHabbo().GetInventoryComponent().list_1.Contains(current.Id))
                 {
-                    list.Add(current);
+                    songs.Add(current);
                 }
             }
             /*ServerMessage Message = new ServerMessage(333u);
@@ -37,20 +37,20 @@ namespace Phoenix.Communication.Messages.Sound
             }*/
 
             ServerMessage Message = new ServerMessage(333);
-            Message.AppendInt32(list.Count);
-            foreach (UserItem current2 in list) //MUN OMA
+            Message.AppendInt32(songs.Count);
+            foreach (UserItem userItem in songs) //MUN OMA
             {
                 int int_ = 0;
-                if (current2.ExtraData.Length > 0)
+                if (userItem.ExtraData.Length > 0)
                 {
-                    int_ = int.Parse(current2.ExtraData);
+                    int_ = int.Parse(userItem.ExtraData);
                 }
                 SongData SongData = SongManager.GetSong(int_);
                 if (SongData == null)
                 {
                     return;
                 }
-                Message.AppendUInt(current2.Id);
+                Message.AppendUInt(userItem.Id);
                 Message.AppendInt32(SongData.Id);
             }
             Session.SendMessage(Message);
