@@ -93,7 +93,7 @@ namespace Phoenix.Communication.Messages.Marketplace
 						}
 					}
 					ServerMessage Message = new ServerMessage(67u);
-					Message.AppendUInt(class2.UInt32_0);
+					Message.AppendUInt(class2.ItemId);
 					Message.AppendStringWithBreak(class2.Name);
 					Message.AppendInt32((int)dataRow["total_price"]);
 					Message.AppendInt32(0);

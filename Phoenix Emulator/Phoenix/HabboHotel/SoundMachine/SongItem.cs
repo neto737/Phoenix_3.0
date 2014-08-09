@@ -43,7 +43,7 @@ namespace Phoenix.HabboHotel.SoundMachine
             using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
             {
                 //@class.ExecuteQuery(string.Concat(new object[] { "INSERT INTO items_rooms_songs VALUES (", itemID, ",", roomID, ",", this.songID, ",", this.baseItem.UInt32_0, ")" })); // <-- old
-                adapter.ExecuteQuery(string.Concat(new object[] { "INSERT INTO items_jukebox_songs VALUES (", itemID, ",", JukeboxID, ",", this.songID, ",", this.baseItem.UInt32_0, ")" })); // <-- new
+                adapter.ExecuteQuery(string.Concat(new object[] { "INSERT INTO items_jukebox_songs VALUES (", itemID, ",", JukeboxID, ",", this.songID, ",", this.baseItem.ItemId, ")" })); // <-- new
                 //@class.ExecuteQuery("DELETE FROM items WHERE id = '" + itemID + "'");
             }
         }

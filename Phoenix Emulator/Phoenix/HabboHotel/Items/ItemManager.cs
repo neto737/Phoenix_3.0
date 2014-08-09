@@ -8,10 +8,11 @@ namespace Phoenix.HabboHotel.Items
 {
 	internal sealed class ItemManager
 	{
-		private Dictionary<uint, Item> Item = new Dictionary<uint, Item>();
+		private Dictionary<uint, Item> Item;
 		//private Dictionary<int, Soundtrack> Sound;
 		public ItemManager()
 		{
+            Item = new Dictionary<uint, Item>();
 			//this.Sound = new Dictionary<int, Soundtrack>();
 		}
 		public void LoadItems(DatabaseClient adapter)
@@ -56,22 +57,21 @@ namespace Phoenix.HabboHotel.Items
             SongManager.Initialize();
             Logging.WriteLine("completed!");
 		}
-		public bool method_1(uint uint_0)
+		public bool ContainsItem(uint Id)
 		{
-			return this.Item.ContainsKey(uint_0);
+			return Item.ContainsKey(Id);
 		}
-		public Item GetItem(uint uint_0)
+
+		public Item GetItem(uint Id)
 		{
-			Item result;
-			if (this.method_1(uint_0))
+			if (this.ContainsItem(Id))
 			{
-				result = this.Item[uint_0];
+				return Item[Id];
 			}
 			else
 			{
-				result = null;
+				return null;
 			}
-			return result;
 		}
         //public bool method_3(int int_0)
         //{

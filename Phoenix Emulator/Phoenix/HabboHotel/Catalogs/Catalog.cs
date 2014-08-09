@@ -349,7 +349,7 @@ namespace Phoenix.HabboHotel.Catalogs
 									}
 								}
 								ServerMessage Message3 = new ServerMessage(67u);
-								Message3.AppendUInt(class2.GetBaseItem().UInt32_0);
+								Message3.AppendUInt(class2.GetBaseItem().ItemId);
 								Message3.AppendStringWithBreak(class2.GetBaseItem().Name);
 								Message3.AppendInt32(class2.CreditsCost);
 								Message3.AppendInt32(class2.PixelsCost);
@@ -384,7 +384,7 @@ namespace Phoenix.HabboHotel.Catalogs
 											"','",
 											num,
 											"','",
-											class4.UInt32_0,
+											class4.ItemId,
 											"',@gift_message,'')"
 										}));
 										class3.ExecuteQuery(string.Concat(new object[]
@@ -392,7 +392,7 @@ namespace Phoenix.HabboHotel.Catalogs
 											"INSERT INTO user_presents (item_id,base_id,amount,extra_data) VALUES ('",
 											num3,
 											"','",
-											class2.GetBaseItem().UInt32_0,
+											class2.GetBaseItem().ItemId,
 											"','",
 											class2.Amount,
 											"',@extra_data)"
@@ -595,7 +595,7 @@ namespace Phoenix.HabboHotel.Catalogs
 					"','",
 					uint_1,
 					"','",
-					class3.UInt32_0,
+					class3.ItemId,
 					"',@gift_message,'')"
 				}));
 				class4.ExecuteQuery(string.Concat(new object[]
@@ -603,7 +603,7 @@ namespace Phoenix.HabboHotel.Catalogs
 					"INSERT INTO user_presents (item_id,base_id,amount,extra_data) VALUES ('",
 					num,
 					"','",
-					class2.GetBaseItem().UInt32_0,
+					class2.GetBaseItem().ItemId,
 					"','",
 					class2.Amount,
 					"','')"
@@ -656,7 +656,7 @@ namespace Phoenix.HabboHotel.Catalogs
 								{
 									@class.ExecuteQuery("INSERT INTO room_items_moodlight (item_id,enabled,current_preset,preset_one,preset_two,preset_three) VALUES ('" + num + "','0','1','#000000,255,0','#000000,255,0','#000000,255,0')");
 								}
-								Session.GetHabbo().GetInventoryComponent().AddItem(num, Item.UInt32_0, string_0, bool_0);
+								Session.GetHabbo().GetInventoryComponent().AddItem(num, Item.ItemId, string_0, bool_0);
 							}
 							else
 							{
@@ -680,8 +680,8 @@ namespace Phoenix.HabboHotel.Catalogs
 										"')"
 									}));
 								}
-								Session.GetHabbo().GetInventoryComponent().AddItem(num2, Item.UInt32_0, "0", bool_0);
-								Session.GetHabbo().GetInventoryComponent().AddItem(num, Item.UInt32_0, "0", bool_0);
+								Session.GetHabbo().GetInventoryComponent().AddItem(num2, Item.ItemId, "0", bool_0);
+								Session.GetHabbo().GetInventoryComponent().AddItem(num, Item.ItemId, "0", bool_0);
 							}
 						}
 						else
@@ -721,7 +721,7 @@ namespace Phoenix.HabboHotel.Catalogs
 						i++;
 						continue;
 						IL_4CF:
-						Session.GetHabbo().GetInventoryComponent().AddItem(num, Item.UInt32_0, string_0, bool_0);
+						Session.GetHabbo().GetInventoryComponent().AddItem(num, Item.ItemId, string_0, bool_0);
 						goto IL_4EA;
 					}
 					Session.GetHabbo().GetInventoryComponent().UpdateItems(false);

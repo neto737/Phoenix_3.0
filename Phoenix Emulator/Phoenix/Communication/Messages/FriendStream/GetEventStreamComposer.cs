@@ -10,7 +10,7 @@ namespace Phoenix.Communication.Messages.FriendStream
     {
         public void parse(GameClient Session, ClientMessage message)
         {
-            ServerMessage response = new ServerMessage(950u);
+            ServerMessage response = new ServerMessage(950);
 
             Session.GetHabbo().GetHabboData.UpdateFriendStream();
 

@@ -48,6 +48,7 @@ namespace Phoenix.HabboHotel.Items
 		private bool bool_2;
 		private bool bool_3;
 		private bool bool_4;
+
 		internal Dictionary<int, AffectedTile> Dictionary_0
 		{
 			get
@@ -55,6 +56,7 @@ namespace Phoenix.HabboHotel.Items
 				return this.dictionary_0;
 			}
 		}
+
 		internal int GetX
 		{
 			get
@@ -62,6 +64,7 @@ namespace Phoenix.HabboHotel.Items
 				return this.mX;
 			}
 		}
+
 		internal int GetY
 		{
 			get
@@ -69,6 +72,7 @@ namespace Phoenix.HabboHotel.Items
 				return this.mY;
 			}
 		}
+
 		internal double Double_0
 		{
 			get
@@ -76,6 +80,7 @@ namespace Phoenix.HabboHotel.Items
 				return this.double_0;
 			}
 		}
+
 		internal bool IsRoller
 		{
 			get
@@ -83,6 +88,7 @@ namespace Phoenix.HabboHotel.Items
 				return this.bool_4;
 			}
 		}
+
 		internal Coord Coordinate
 		{
 			get
@@ -90,6 +96,7 @@ namespace Phoenix.HabboHotel.Items
 				return new Coord(this.mX, this.mY);
 			}
 		}
+
 		internal double Double_1
 		{
 			get
@@ -114,6 +121,7 @@ namespace Phoenix.HabboHotel.Items
 				return result;
 			}
 		}
+
 		internal bool IsWallItem
 		{
 			get
@@ -128,6 +136,7 @@ namespace Phoenix.HabboHotel.Items
 				return this.bool_3;
 			}
 		}
+
 		internal Coord SquareInFront
 		{
 			get
@@ -161,6 +170,7 @@ namespace Phoenix.HabboHotel.Items
 				return result;
 			}
 		}
+
 		internal Coord SquareBehind
 		{
 			get
@@ -194,109 +204,82 @@ namespace Phoenix.HabboHotel.Items
 				return result;
 			}
 		}
+
 		internal FurniInteractor Interactor
 		{
 			get
 			{
 				string pType = this.GetBaseItem().InteractionType.ToLower();
-				FurniInteractor result;
 				switch (pType)
 				{
-				case "ball":
-					result = new InteractorFootball();
-					return result;
+				case "ball":    
+                    return new InteractorFootball();
 				case "teleport":
-					result = new InteractorTeleport();
-					return result;
+					return new InteractorTeleport();
 				case "bottle":
-					result = new InteractorSpinningBottle();
-					return result;
+					return new InteractorSpinningBottle();
 				case "dice":
-					result = new InteractorDice();
-					return result;
+					return new InteractorDice();
 				case "habbowheel":
-					result = new InteractorHabboWheel();
-					return result;
+					return new InteractorHabboWheel();
 				case "loveshuffler":
-					result = new InteractorLoveShuffler();
-					return result;
+					return new InteractorLoveShuffler();
 				case "onewaygate":
-					result = new InteractorOneWayGate();
-					return result;
+					return new InteractorOneWayGate();
 				case "alert":
-					result = new Class89();
-					return result;
+					return new InteractorAlert();
 				case "vendingmachine":
-					result = new InteractorVendor();
-					return result;
+					return new InteractorVendor();
 				case "gate":
-					result = new InteractorGate(this.GetBaseItem().Modes);
-					return result;
+					return new InteractorGate(this.GetBaseItem().Modes);
 				case "scoreboard":
-					result = new InteractorScoreboard();
-					return result;
+					return new InteractorScoreboard();
 				case "counter":
-					result = new InteractorBanzaiScoreCounter();
-					return result;
+					return new InteractorBanzaiScoreCounter();
 				case "wired":
-					result = new WiredInteractor();
-					return result;
+					return new WiredInteractor();
 				case "wf_trg_onsay":
-					result = new InteractorWiredOnSay();
-					return result;
+					return new InteractorWiredOnSay();
 				case "wf_trg_enterroom":
-					result = new InteractorWiredEnterRoom();
-					return result;
+					return new InteractorWiredEnterRoom();
 				case "wf_act_saymsg":
 				case "wf_act_give_phx":
 				case "wf_cnd_phx":
-					result = new InteractorSuperWired();
-					return result;
+					return new InteractorSuperWired();
 				case "wf_trg_furnistate":
 				case "wf_trg_onfurni":
 				case "wf_trg_offfurni":
 				case "wf_act_moveuser":
 				case "wf_act_togglefurni":
-					result = new InteractorWiredTriggerState();
-					return result;
+					return new InteractorWiredTriggerState();
 				case "wf_trg_gameend":
 				case "wf_trg_gamestart":
-					result = new InteractorWiredTriggerGame();
-					return result;
+					return new InteractorWiredTriggerGame();
 				case "wf_trg_timer":
-					result = new InteractorWiredTriggerTimer();
-					return result;
+					return new InteractorWiredTriggerTimer();
 				case "wf_act_givepoints":
-					result = new InteractorWiredGivePoints();
-					return result;
+					return new InteractorWiredGivePoints();
 				case "wf_trg_attime":
-					result = new InteractorWiredAtTime();
-					return result;
+					return new InteractorWiredAtTime();
 				case "wf_trg_atscore":
-					result = new InteractorWiredAtScore();
-					return result;
+					return new InteractorWiredAtScore();
 				case "wf_act_moverotate":
-					result = new InteractorWiredMoveRotate();
-					return result;
+					return new InteractorWiredMoveRotate();
 				case "wf_act_matchfurni":
-					result = new InteractorWiredMatchFurni();
-					return result;
+					return new InteractorWiredMatchFurni();
 				case "wf_cnd_trggrer_on_frn":
 				case "wf_cnd_furnis_hv_avtrs":
 				case "wf_cnd_has_furni_on":
-					result = new InteractorWiredCondition();
-					return result;
+					return new InteractorWiredCondition();
 				case "puzzlebox":
-					result = new InteractorPuzzleBox();
-					return result;
+					return new InteractorPuzzleBox();
                 case "jukebox":
-                    result = new InteractorJukebox();
-                    return result;
+                    return new InteractorJukebox();
 				}
-				result = new InteractorDefault(this.GetBaseItem().Modes);
-				return result;
+                return new InteractorDefault(this.GetBaseItem().Modes);
 			}
 		}
+
 		public RoomItem(uint uint_5, uint uint_6, uint uint_7, string string_8, int int_5, int int_6, double double_1, int int_7, string string_9, Room class14_1)
 		{
 			this.Id = uint_5;

@@ -26,13 +26,15 @@ namespace Phoenix.HabboHotel.Items
 		public byte EffectF;
 		public List<int> VendingIds;
 		public int Modes;
-		public uint UInt32_0
+
+		public uint ItemId
 		{
 			get
 			{
 				return this.Id;
 			}
 		}
+
 		public Item(uint Id, int Sprite, string PublicName, string Name, string Type, int Width, int Length, double Height, bool Stackable, bool Walkable, bool IsSeat, bool AllowRecycle, bool AllowTrade, bool AllowMarketplaceSell, bool AllowGift, bool AllowInventoryStack, string InteractionType, int Modes, string VendingIds, string Height_Adjustable, byte EffectF, byte EffectM)
 		{
 			this.Id = Id;

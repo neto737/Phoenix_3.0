@@ -3,7 +3,7 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.HabboHotel.Items;
 namespace Phoenix.HabboHotel.Items.Interactors
 {
-	internal sealed class Class89 : FurniInteractor
+	internal sealed class InteractorAlert : FurniInteractor
 	{
 		public override void OnPlace(GameClient Session, RoomItem Item)
 		{

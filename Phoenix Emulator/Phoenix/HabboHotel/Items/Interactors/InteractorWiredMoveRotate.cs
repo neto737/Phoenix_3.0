@@ -6,52 +6,49 @@ namespace Phoenix.HabboHotel.Items.Interactors
 {
 	internal sealed class InteractorWiredMoveRotate : FurniInteractor
 	{
-		public override void OnPlace(GameClient Session, RoomItem RoomItem_0)
+        public override void OnPlace(GameClient Session, RoomItem Item) { }
+        public override void OnRemove(GameClient Session, RoomItem Item) { }
+
+		public override void OnTrigger(GameClient Session, RoomItem Item, int Request, bool UserHasRight)
 		{
-		}
-		public override void OnRemove(GameClient Session, RoomItem RoomItem_0)
-		{
-		}
-		public override void OnTrigger(GameClient Session, RoomItem RoomItem_0, int int_0, bool bool_0)
-		{
-			if (bool_0)
+			if (UserHasRight)
 			{
-				RoomItem_0.method_9();
-				ServerMessage Message = new ServerMessage(651u);
+				Item.method_9();
+				ServerMessage Message = new ServerMessage(651);
 				Message.AppendInt32(0);
 				Message.AppendInt32(5);
-				if (RoomItem_0.Extra4.Length > 0)
+				if (Item.Extra4.Length > 0)
 				{
-					Message.AppendString(RoomItem_0.Extra4);
+					Message.AppendString(Item.Extra4);
 				}
 				else
 				{
 					Message.AppendInt32(0);
 				}
-				Message.AppendInt32(RoomItem_0.GetBaseItem().SpriteId);
-				Message.AppendUInt(RoomItem_0.Id);
+				Message.AppendInt32(Item.GetBaseItem().SpriteId);
+				Message.AppendUInt(Item.Id);
 				Message.AppendStringWithBreak("");
 				Message.AppendString("J");
-				if (RoomItem_0.Extra1.Length > 0)
+				if (Item.Extra1.Length > 0)
 				{
-					Message.AppendInt32(Convert.ToInt32(RoomItem_0.Extra1));
+					Message.AppendInt32(Convert.ToInt32(Item.Extra1));
 				}
 				else
 				{
 					Message.AppendInt32(0);
 				}
-				if (RoomItem_0.Extra2.Length > 0)
+				if (Item.Extra2.Length > 0)
 				{
-					Message.AppendInt32(Convert.ToInt32(RoomItem_0.Extra2));
+					Message.AppendInt32(Convert.ToInt32(Item.Extra2));
 				}
 				else
 				{
 					Message.AppendInt32(0);
 				}
 				Message.AppendString("HPA");
-				if (RoomItem_0.Extra5.Length > 0)
+				if (Item.Extra5.Length > 0)
 				{
-					Message.AppendInt32(Convert.ToInt32(RoomItem_0.Extra5));
+					Message.AppendInt32(Convert.ToInt32(Item.Extra5));
 				}
 				else
 				{

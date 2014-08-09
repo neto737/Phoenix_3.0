@@ -6,14 +6,7 @@ namespace Phoenix.HabboHotel.Items.Interactors
 {
 	internal sealed class InteractorBanzaiScoreCounter : FurniInteractor
 	{
-		public override void OnPlace(GameClient Session, RoomItem Item)
-		{
-            //if (Item.team == Team.none)
-            //    return;
-
-            //Item.ExtraData = Item.GetRoom().GetGameManager()
-		}
-
+        public override void OnPlace(GameClient Session, RoomItem Item) { }
         public override void OnRemove(GameClient Session, RoomItem Item) { }
 
 		public override void OnTrigger(GameClient Session, RoomItem Item, int Request, bool UserHasRight)

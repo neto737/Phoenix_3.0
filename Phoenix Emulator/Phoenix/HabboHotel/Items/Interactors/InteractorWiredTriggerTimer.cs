@@ -4,14 +4,11 @@ using Phoenix.Messages;
 using Phoenix.HabboHotel.Items;
 namespace Phoenix.HabboHotel.Items.Interactors
 {
-	internal sealed class InteractorWiredTriggerTimer : FurniInteractor
+	class InteractorWiredTriggerTimer : FurniInteractor
 	{
-		public override void OnPlace(GameClient Session, RoomItem Item)
-		{
-		}
-		public override void OnRemove(GameClient Session, RoomItem Item)
-		{
-		}
+        public override void OnPlace(GameClient Session, RoomItem Item) { }
+        public override void OnRemove(GameClient Session, RoomItem Item) { }
+
 		public override void OnTrigger(GameClient Session, RoomItem Item, int Request, bool UserHasRight)
 		{
 			if (UserHasRight)

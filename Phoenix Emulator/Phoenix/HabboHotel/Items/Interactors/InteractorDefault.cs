@@ -9,6 +9,7 @@ namespace Phoenix.HabboHotel.Items.Interactors
 	internal sealed class InteractorDefault : FurniInteractor
 	{
 		private int Modes;
+
 		public InteractorDefault(int Modes)
 		{
 			this.Modes = Modes - 1;
@@ -17,6 +18,7 @@ namespace Phoenix.HabboHotel.Items.Interactors
 				this.Modes = 0;
 			}
 		}
+
 		public override void OnPlace(GameClient Session, RoomItem Item)
 		{
 		}

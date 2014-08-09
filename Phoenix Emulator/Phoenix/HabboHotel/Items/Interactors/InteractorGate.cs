@@ -8,6 +8,7 @@ namespace Phoenix.HabboHotel.Items.Interactors
 	internal sealed class InteractorGate : FurniInteractor
 	{
 		private int Modes;
+
 		public InteractorGate(int Modes)
 		{
 			this.Modes = Modes - 1;
@@ -16,12 +17,10 @@ namespace Phoenix.HabboHotel.Items.Interactors
 				this.Modes = 0;
 			}
 		}
-		public override void OnPlace(GameClient Session, RoomItem Item)
-		{
-		}
-		public override void OnRemove(GameClient Session, RoomItem Item)
-		{
-		}
+
+        public override void OnPlace(GameClient Session, RoomItem Item) { }
+        public override void OnRemove(GameClient Session, RoomItem Item) { }
+
 		public override void OnTrigger(GameClient Session, RoomItem Item, int Request, bool UserHasRight)
 		{
 			if (UserHasRight)
