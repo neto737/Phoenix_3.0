@@ -378,7 +378,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 		{
 			foreach (RoomItem current in list_2)
 			{
-				this.AddItem(current.Id, current.uint_2, current.ExtraData, false);
+				this.AddItem(current.Id, current.BaseItem, current.ExtraData, false);
 			}
 		}
 		internal void method_18()

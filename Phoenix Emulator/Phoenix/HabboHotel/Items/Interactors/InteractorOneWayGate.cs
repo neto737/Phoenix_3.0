@@ -46,7 +46,7 @@ namespace Phoenix.HabboHotel.Items.Interactors
 				}
 				else
 				{
-					if (Item.GetRoom().CanWalk(Item.SquareBehind.X, Item.SquareBehind.Y, Item.Double_0, true, false) && Item.InteractingUser == 0u)
+					if (Item.GetRoom().CanWalk(Item.SquareBehind.X, Item.SquareBehind.Y, Item.GetZ, true, false) && Item.InteractingUser == 0u)
 					{
 						Item.InteractingUser = roomUserByHabbo.HabboId;
 						roomUserByHabbo.CanWalk = false;

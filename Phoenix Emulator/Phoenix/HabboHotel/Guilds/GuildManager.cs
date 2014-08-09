@@ -19,11 +19,13 @@ namespace Phoenix.HabboHotel.Guilds
                 GuildManager.GuildList.Add((int)dataRow["Id"], new Guild((int)dataRow["Id"], dataRow, dbClient));
 			}
 			Logging.WriteLine("completed!");
-		}
+		
+
 		public static void ClearGroups()
 		{
 			GuildManager.GuildList.Clear();
 		}
+
         public static Guild GetGuild(int id)
         {
             if (GuildList.ContainsKey(id))
@@ -32,6 +34,7 @@ namespace Phoenix.HabboHotel.Guilds
             }
             return null;
         }
+
 		public static void UpdateGroup(DatabaseClient dbClient, int id)
 		{
             Guild guild = GuildManager.GetGuild(id);

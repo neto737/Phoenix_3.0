@@ -1368,7 +1368,7 @@ namespace Phoenix.HabboHotel.Rooms
                                                     RoomItem current4 = enumerator3.Current;
                                                     if (current4 != null)
                                                     {
-                                                        Dictionary<int, AffectedTile> dictionary = current4.Dictionary_0;
+                                                        Dictionary<int, AffectedTile> dictionary = current4.GetAffectedTiles;
                                                         if (dictionary == null)
                                                         {
                                                             dictionary = new Dictionary<int, AffectedTile>();
@@ -1418,7 +1418,7 @@ namespace Phoenix.HabboHotel.Rooms
                                             if (current4 != null)
                                             {
                                                 bool flag4 = false;
-                                                Dictionary<int, AffectedTile> dictionary = current4.Dictionary_0;
+                                                Dictionary<int, AffectedTile> dictionary = current4.GetAffectedTiles;
                                                 if (dictionary == null)
                                                 {
                                                     dictionary = new Dictionary<int, AffectedTile>();
@@ -1481,7 +1481,7 @@ namespace Phoenix.HabboHotel.Rooms
                                                 RoomItem current4 = enumerator3.Current;
                                                 if (current4 != null)
                                                 {
-                                                    Dictionary<int, AffectedTile> dictionary = current4.Dictionary_0;
+                                                    Dictionary<int, AffectedTile> dictionary = current4.GetAffectedTiles;
                                                     if (dictionary == null)
                                                     {
                                                         dictionary = new Dictionary<int, AffectedTile>();
@@ -1688,8 +1688,8 @@ namespace Phoenix.HabboHotel.Rooms
                                                 RoomUser_1.IsWalking = false;
                                                 RoomUser_1.SetX = class3.GetX;
                                                 RoomUser_1.SetY = class3.GetY;
-                                                RoomUser_1.SetZ = class3.Double_0;
-                                                RoomUser_1.SetPos(class3.GetX, class3.GetY, class3.Double_0);
+                                                RoomUser_1.SetZ = class3.GetZ;
+                                                RoomUser_1.SetPos(class3.GetX, class3.GetY, class3.GetZ);
                                                 RoomUser_1.UpdateNeeded = true;
                                                 if (!current2.dictionary_1.ContainsKey(RoomUser_1))
                                                 {
@@ -1713,7 +1713,7 @@ namespace Phoenix.HabboHotel.Rooms
                                                     {
                                                         this.byte_0[class2.X, class2.Y] = 1;
                                                         this.byte_0[class3.GetX, class3.GetY] = 1;
-                                                        class2.SetPos(class3.GetX, class3.GetY, class3.Double_0);
+                                                        class2.SetPos(class3.GetX, class3.GetY, class3.GetZ);
                                                         class2.UpdateNeeded = true;
                                                         if (!current2.dictionary_1.ContainsKey(class2))
                                                         {
@@ -1834,7 +1834,7 @@ namespace Phoenix.HabboHotel.Rooms
                                                     }
                                                     if (this.method_37(gstruct1_.X, gstruct1_.Y, true, true, false, true, false) && class3.GetBaseItem().InteractionType != "wf_trg_timer")
                                                     {
-                                                        this.method_41(class3, gstruct1_, current2.Id, class3.Double_0);
+                                                        this.method_41(class3, gstruct1_, current2.Id, class3.GetZ);
                                                     }
                                                 }
                                                 if (current2.Extra2.Length > 0 && current2.Extra2 != "0" && current2.Extra2 != "")
@@ -1954,7 +1954,7 @@ namespace Phoenix.HabboHotel.Rooms
                                                     }
                                                     if (flag6)
                                                     {
-                                                        this.method_40(class3, int_, int_2, current2.Id, class3.Double_0);
+                                                        this.method_40(class3, int_, int_2, current2.Id, class3.GetZ);
                                                     }
                                                     if (flag7)
                                                     {
@@ -2030,24 +2030,24 @@ namespace Phoenix.HabboHotel.Rooms
                             GameClient class2 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(this.Owner);
                             if (class2 != null)
                             {
-                                class2.GetHabbo().GetInventoryComponent().AddItem(@class.Id, @class.uint_2, @class.ExtraData, true);
+                                class2.GetHabbo().GetInventoryComponent().AddItem(@class.Id, @class.BaseItem, @class.ExtraData, true);
                             }
                         }
                         else
                         {
-                            if (@class.Double_1 > this.double_1[@class.GetX, @class.GetY])
+                            if (@class.TotalHeight > this.double_1[@class.GetX, @class.GetY])
                             {
-                                this.double_1[@class.GetX, @class.GetY] = @class.Double_1;
+                                this.double_1[@class.GetX, @class.GetY] = @class.TotalHeight;
                             }
                             if (@class.GetBaseItem().IsSeat)
                             {
-                                this.double_2[@class.GetX, @class.GetY] = @class.Double_1;
+                                this.double_2[@class.GetX, @class.GetY] = @class.TotalHeight;
                             }
                             if (@class.GetBaseItem().Height > 0.0 || @class.GetBaseItem().EffectF != 0 || @class.GetBaseItem().EffectM != 0 || @class.GetBaseItem().IsSeat || !(@class.GetBaseItem().InteractionType.ToLower() != "bed"))
                             {
-                                if (this.double_0[@class.GetX, @class.GetY] <= @class.Double_0)
+                                if (this.double_0[@class.GetX, @class.GetY] <= @class.GetZ)
                                 {
-                                    this.double_0[@class.GetX, @class.GetY] = @class.Double_0;
+                                    this.double_0[@class.GetX, @class.GetY] = @class.GetZ;
                                     if (@class.GetBaseItem().EffectF > 0)
                                     {
                                         this.byte_2[@class.GetX, @class.GetY] = @class.GetBaseItem().EffectF;
@@ -2079,7 +2079,7 @@ namespace Phoenix.HabboHotel.Rooms
                                     }
                                     else
                                     {
-                                        if (@class.Double_0 <= this.Model.SqFloorHeight[@class.GetX, @class.GetY] + 0.1 && @class.GetBaseItem().InteractionType.ToLower() == "gate" && @class.ExtraData == "1")
+                                        if (@class.GetZ <= this.Model.SqFloorHeight[@class.GetX, @class.GetY] + 0.1 && @class.GetBaseItem().InteractionType.ToLower() == "gate" && @class.ExtraData == "1")
                                         {
                                             if (this.byte_0[@class.GetX, @class.GetY] != 3)
                                             {
@@ -2106,24 +2106,24 @@ namespace Phoenix.HabboHotel.Rooms
                                 {
                                     this.byte_0[@class.GetX, @class.GetY] = 3;
                                 }
-                                Dictionary<int, AffectedTile> dictionary = @class.Dictionary_0;
+                                Dictionary<int, AffectedTile> dictionary = @class.GetAffectedTiles;
                                 if (dictionary == null)
                                 {
                                     dictionary = new Dictionary<int, AffectedTile>();
                                 }
                                 foreach (AffectedTile current in dictionary.Values)
                                 {
-                                    if (@class.Double_1 > this.double_1[current.X, current.Y])
+                                    if (@class.TotalHeight > this.double_1[current.X, current.Y])
                                     {
-                                        this.double_1[current.X, current.Y] = @class.Double_1;
+                                        this.double_1[current.X, current.Y] = @class.TotalHeight;
                                     }
                                     if (@class.GetBaseItem().IsSeat)
                                     {
-                                        this.double_2[current.X, current.Y] = @class.Double_1;
+                                        this.double_2[current.X, current.Y] = @class.TotalHeight;
                                     }
-                                    if (this.double_0[current.X, current.Y] <= @class.Double_0)
+                                    if (this.double_0[current.X, current.Y] <= @class.GetZ)
                                     {
-                                        this.double_0[current.X, current.Y] = @class.Double_0;
+                                        this.double_0[current.X, current.Y] = @class.GetZ;
                                         if (@class.GetBaseItem().EffectF > 0)
                                         {
                                             this.byte_2[current.X, current.Y] = @class.GetBaseItem().EffectF;
@@ -2156,7 +2156,7 @@ namespace Phoenix.HabboHotel.Rooms
                                                 }
                                                 else
                                                 {
-                                                    if (@class.Double_0 <= this.Model.SqFloorHeight[@class.GetX, @class.GetY] + 0.1 && @class.GetBaseItem().InteractionType.ToLower() == "gate" && @class.ExtraData == "1")
+                                                    if (@class.GetZ <= this.Model.SqFloorHeight[@class.GetX, @class.GetY] + 0.1 && @class.GetBaseItem().InteractionType.ToLower() == "gate" && @class.ExtraData == "1")
                                                     {
                                                         if (this.byte_0[current.X, current.Y] != 3)
                                                         {
@@ -2208,7 +2208,7 @@ namespace Phoenix.HabboHotel.Rooms
                     GameClient class2 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(this.Owner);
                     if (class2 != null)
                     {
-                        class2.GetHabbo().GetInventoryComponent().AddItem(@class.Id, @class.uint_2, @class.ExtraData, true);
+                        class2.GetHabbo().GetInventoryComponent().AddItem(@class.Id, @class.BaseItem, @class.ExtraData, true);
                     }
                 }
             }
@@ -2682,9 +2682,9 @@ namespace Phoenix.HabboHotel.Rooms
                         {
                             foreach (RoomItem class2 in this.Hashtable_0.Values)
                             {
-                                if (class2.bool_1)
+                                if (class2.UpdateNeeded)
                                 {
-                                    class2.method_2();
+                                    class2.ProcessUpdates();
                                 }
                             }
                         }
@@ -2700,9 +2700,9 @@ namespace Phoenix.HabboHotel.Rooms
                         {
                             foreach (RoomItem class2 in this.Hashtable_1.Values)
                             {
-                                if (class2.bool_1)
+                                if (class2.UpdateNeeded)
                                 {
-                                    class2.method_2();
+                                    class2.ProcessUpdates();
                                 }
                             }
                         }
@@ -3104,9 +3104,9 @@ namespace Phoenix.HabboHotel.Rooms
                                 bool flag = false;
                                 foreach (RoomItem current in list4)
                                 {
-                                    if (current.Double_1 > num)
+                                    if (current.TotalHeight > num)
                                     {
-                                        num = current.Double_1;
+                                        num = current.TotalHeight;
                                     }
                                     if (!current.IsRoller)
                                     {
@@ -3130,16 +3130,16 @@ namespace Phoenix.HabboHotel.Rooms
                                 foreach (RoomItem current in list3)
                                 {
                                     bool flag4 = current.GetBaseItem().InteractionType.ToLower() == "wf_trg_timer";
-                                    if (!current.IsRoller && !list.Contains(current.Id) && this.method_36(gStruct1_.X, gStruct1_.Y) && (!flag2 || !flag3) && @class.Double_0 < current.Double_0 && this.GetUserForSquare(gStruct1_.X, gStruct1_.Y) == null && (!flag4 || !flag))
+                                    if (!current.IsRoller && !list.Contains(current.Id) && this.method_36(gStruct1_.X, gStruct1_.Y) && (!flag2 || !flag3) && @class.GetZ < current.GetZ && this.GetUserForSquare(gStruct1_.X, gStruct1_.Y) == null && (!flag4 || !flag))
                                     {
                                         double double_;
                                         if (flag3)
                                         {
-                                            double_ = current.Double_0;
+                                            double_ = current.GetZ;
                                         }
                                         else
                                         {
-                                            double_ = current.Double_0 - @class.Double_1 + this.Model.SqFloorHeight[gStruct1_.X, gStruct1_.Y];
+                                            double_ = current.GetZ - @class.TotalHeight + this.Model.SqFloorHeight[gStruct1_.X, gStruct1_.Y];
                                         }
                                         this.method_41(current, gStruct1_, @class.Id, double_);
                                         list.Add(current.Id);
@@ -3333,7 +3333,7 @@ namespace Phoenix.HabboHotel.Rooms
             Message.AppendInt32(int_18);
             Message.AppendInt32(1);
             Message.AppendUInt(RoomItem_0.Id);
-            Message.AppendStringWithBreak(RoomItem_0.Double_0.ToString().Replace(',', '.'));
+            Message.AppendStringWithBreak(RoomItem_0.GetZ.ToString().Replace(',', '.'));
             Message.AppendStringWithBreak(double_3.ToString().Replace(',', '.'));
             Message.AppendUInt(uint_2);
             this.SendMessage(Message, null);
@@ -3454,7 +3454,7 @@ namespace Phoenix.HabboHotel.Rooms
                         RoomItem class2 = this.GetItem(@class.GetClient().GetHabbo().TeleporterId);
                         if (class2 != null)
                         {
-                            @class.SetPos(class2.GetX, class2.GetY, class2.Double_0);
+                            @class.SetPos(class2.GetX, class2.GetY, class2.GetZ);
                             @class.SetRot(class2.Rot);
                             class2.InteractingUser2 = Session.GetHabbo().Id;
                             class2.ExtraData = "2";
@@ -4156,7 +4156,7 @@ namespace Phoenix.HabboHotel.Rooms
 												"UPDATE items SET room_id = '",
 												this.RoomId,
 												"', base_item = '",
-												class2.uint_2,
+												class2.BaseItem,
 												"', extra_data = @extra_data",
 												class2.Id,
 												", x = '",
@@ -4164,7 +4164,7 @@ namespace Phoenix.HabboHotel.Rooms
 												"', y = '",
 												class2.GetY,
 												"', z = '",
-												class2.Double_0,
+												class2.GetZ,
 												"', rot = '",
 												class2.Rot,
 												"', wall_pos = '' WHERE Id = '",
@@ -4187,7 +4187,7 @@ namespace Phoenix.HabboHotel.Rooms
 												"UPDATE items SET room_id = '",
 												this.RoomId,
 												"', base_item = '",
-												class2.uint_2,
+												class2.BaseItem,
 												"', extra_data = @extra_data",
 												class2.Id,
 												", x = '0', y = '0', z = '0', rot = '0', wall_pos = @pos",
@@ -4214,7 +4214,7 @@ namespace Phoenix.HabboHotel.Rooms
 									"', y = '",
 									class2.GetY,
 									"', z = '",
-									class2.Double_0,
+									class2.GetZ,
 									"', rot = '",
 									class2.Rot,
 									"', wall_pos = '",
@@ -4541,7 +4541,7 @@ namespace Phoenix.HabboHotel.Rooms
 											"UPDATE items SET room_id = '",
 											this.RoomId,
 											"', base_item = '",
-											@class.uint_2,
+											@class.BaseItem,
 											"', extra_data = @extra_data",
 											@class.Id,
 											", x = '",
@@ -4549,7 +4549,7 @@ namespace Phoenix.HabboHotel.Rooms
 											"', y = '",
 											@class.GetY,
 											"', z = '",
-											@class.Double_0,
+											@class.GetZ,
 											"', rot = '",
 											@class.Rot,
 											"', wall_pos = '' WHERE Id = '",
@@ -4585,7 +4585,7 @@ namespace Phoenix.HabboHotel.Rooms
 											"UPDATE items SET room_id = '",
 											this.RoomId,
 											"', base_item = '",
-											@class.uint_2,
+											@class.BaseItem,
 											"', extra_data = @extra_data",
 											@class.Id,
 											", x = '0', y = '0', z = '0', rot = '0', wall_pos = @pos",
@@ -4621,7 +4621,7 @@ namespace Phoenix.HabboHotel.Rooms
 								"', y = '",
 								@class.GetY,
 								"', z = '",
-								@class.Double_0,
+								@class.GetZ,
 								"', rot = '",
 								@class.Rot,
 								"', wall_pos = '' WHERE Id = '",
@@ -4973,7 +4973,7 @@ namespace Phoenix.HabboHotel.Rooms
                 double num = this.Model.SqFloorHeight[int_17, int_18];
                 if (!bool_14)
                 {
-                    if (RoomItem_0.Rot == int_19 && RoomItem_0.GetX == int_17 && RoomItem_0.GetY == int_18 && RoomItem_0.Double_0 != num)
+                    if (RoomItem_0.Rot == int_19 && RoomItem_0.GetX == int_17 && RoomItem_0.GetY == int_18 && RoomItem_0.GetZ != num)
                     {
                         result = false;
                         return result;
@@ -5086,13 +5086,13 @@ namespace Phoenix.HabboHotel.Rooms
                 {
                     if (RoomItem_0.Rot != int_19 && RoomItem_0.GetX == int_17 && RoomItem_0.GetY == int_18)
                     {
-                        num = RoomItem_0.Double_0;
+                        num = RoomItem_0.GetZ;
                     }
                     foreach (RoomItem current2 in list3)
                     {
-                        if (current2.Id != RoomItem_0.Id && current2.Double_1 > num)
+                        if (current2.Id != RoomItem_0.Id && current2.TotalHeight > num)
                         {
-                            num = current2.Double_1;
+                            num = current2.TotalHeight;
                         }
                     }
                 }
@@ -5294,7 +5294,7 @@ namespace Phoenix.HabboHotel.Rooms
             }
             return result;
         }
-        internal void method_80(RoomItem RoomItem_0)
+        internal void UpdateItem(RoomItem RoomItem_0)
         {
             if (!this.mMovedItems.Contains(RoomItem_0.Id) && !this.mAddedItems.ContainsKey(RoomItem_0.Id))
             {
@@ -5397,16 +5397,16 @@ namespace Phoenix.HabboHotel.Rooms
                     {
                         if ((current.GetBaseItem().IsSeat || current.GetBaseItem().InteractionType.ToLower() == "bed") && flag)
                         {
-                            result = current.Double_0;
+                            result = current.GetZ;
                             return result;
                         }
-                        if (current.Double_1 > num)
+                        if (current.TotalHeight > num)
                         {
                             if (current.GetBaseItem().IsSeat || current.GetBaseItem().InteractionType.ToLower() == "bed")
                             {
                                 if (flag)
                                 {
-                                    result = current.Double_0;
+                                    result = current.GetZ;
                                     return result;
                                 }
                                 flag2 = true;
@@ -5416,7 +5416,7 @@ namespace Phoenix.HabboHotel.Rooms
                             {
                                 flag2 = false;
                             }
-                            num = current.Double_1;
+                            num = current.TotalHeight;
                         }
                     }
                 }
@@ -5661,7 +5661,7 @@ namespace Phoenix.HabboHotel.Rooms
                                             goto IL_51B;
                                         }
                                     IL_55D:
-                                        User.Z = Item.Double_0;
+                                        User.Z = Item.GetZ;
                                         User.RotHead = Item.Rot;
                                         User.RotBody = Item.Rot;
                                         if (User.IsBot && User.BotData.RoomUser != null)
@@ -5710,7 +5710,7 @@ namespace Phoenix.HabboHotel.Rooms
                                                 User.byte_1 = 0;
                                             }
                                         }
-                                        User.Z = Item.Double_0;
+                                        User.Z = Item.GetZ;
                                         User.RotHead = Item.Rot;
                                         User.RotBody = Item.Rot;
                                         if (User.IsBot && User.BotData.RoomUser != null)
@@ -5831,7 +5831,7 @@ namespace Phoenix.HabboHotel.Rooms
                         {
                             foreach (RoomItem current in list2)
                             {
-                                if (this.double_0[current.GetX, current.GetY] <= current.Double_0)
+                                if (this.double_0[current.GetX, current.GetY] <= current.GetZ)
                                 {
                                     if (bool_14)
                                     {
@@ -6244,7 +6244,7 @@ namespace Phoenix.HabboHotel.Rooms
                 list[index].ReqUpdate(1);
                 this.byte_0[RoomUser_1.X, RoomUser_1.Y] = 1;
                 this.byte_0[list[index].GetX, list[index].GetY] = 1;
-                RoomUser_1.SetPos(list[index].GetX, list[index].GetY, list[index].Double_0);
+                RoomUser_1.SetPos(list[index].GetX, list[index].GetY, list[index].GetZ);
                 RoomUser_1.UpdateNeeded = true;
             }
         }

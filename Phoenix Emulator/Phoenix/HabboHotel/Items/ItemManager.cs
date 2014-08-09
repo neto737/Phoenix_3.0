@@ -6,7 +6,7 @@ using Phoenix.Storage;
 using Phoenix.HabboHotel.SoundMachine;
 namespace Phoenix.HabboHotel.Items
 {
-	internal sealed class ItemManager
+	internal class ItemManager
 	{
 		private Dictionary<uint, Item> Item;
 		//private Dictionary<int, Soundtrack> Sound;

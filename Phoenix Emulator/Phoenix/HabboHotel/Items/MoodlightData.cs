@@ -6,7 +6,7 @@ using Phoenix.HabboHotel.Items;
 using Phoenix.Storage;
 namespace Phoenix.HabboHotel.Items
 {
-	internal sealed class MoodlightData
+	internal class MoodlightData
 	{
 		public bool Enabled;
 		public int CurrentPreset;

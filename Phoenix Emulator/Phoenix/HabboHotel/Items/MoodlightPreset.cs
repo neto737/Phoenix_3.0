@@ -1,7 +1,7 @@
 using System;
 namespace Phoenix.HabboHotel.Items
 {
-	internal sealed class MoodlightPreset
+	internal class MoodlightPreset
 	{
 		public string ColorCode;
 		public int ColorIntensity;

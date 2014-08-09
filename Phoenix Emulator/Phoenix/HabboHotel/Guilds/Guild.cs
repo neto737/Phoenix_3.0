@@ -14,6 +14,7 @@ namespace Phoenix.HabboHotel.Guilds
 		public string Badge;
 		public uint RoomId;
 		public string Locked;
+
 		public Guild(int Id, DataRow Row, DatabaseClient adapter)
 		{
 			this.Id = Id;
@@ -30,6 +31,7 @@ namespace Phoenix.HabboHotel.Guilds
 				this.AddMember((int)dataRow["userid"]);
 			}
 		}
+
 		public void AddMember(int MemberId)
 		{
 			if (!this.List.Contains(MemberId))
@@ -37,6 +39,7 @@ namespace Phoenix.HabboHotel.Guilds
 				this.List.Add(MemberId);
 			}
 		}
+
 		public void RemoveMember(int MemberId)
 		{
 			if (this.List.Contains(MemberId))

@@ -20,7 +20,7 @@ namespace Phoenix.Communication.Messages.Rooms.Engine
 					if (text == null || !(text == "postit"))
 					{
 						@class.RemoveFurniture(Session, class2.Id, false, true);
-						Session.GetHabbo().GetInventoryComponent().AddItem(class2.Id, class2.uint_2, class2.ExtraData, false);
+						Session.GetHabbo().GetInventoryComponent().AddItem(class2.Id, class2.BaseItem, class2.ExtraData, false);
 						Session.GetHabbo().GetInventoryComponent().UpdateItems(true);
 						if (Session.GetHabbo().CurrentQuestId == 10u)
 						{

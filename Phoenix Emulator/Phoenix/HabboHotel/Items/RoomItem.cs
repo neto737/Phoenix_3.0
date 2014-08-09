@@ -11,17 +11,18 @@ using Phoenix.Util;
 using Phoenix.HabboHotel.SoundMachine;
 namespace Phoenix.HabboHotel.Items
 {
-	internal sealed class RoomItem
+	internal class RoomItem
 	{
-		internal enum Enum5
+		/*internal enum Enum5
 		{
 			const_0,
 			const_1,
 			const_2
-		}
+		}*/
+
 		internal uint Id;
-		internal uint uint_1;
-		internal uint uint_2;
+		internal uint RoomId;
+		internal uint BaseItem;
 		internal string ExtraData;
 		internal bool TimerRunning;
 		internal string string_1;
@@ -31,29 +32,29 @@ namespace Phoenix.HabboHotel.Items
 		internal string Extra4;
 		internal string Extra5;
 		internal int int_0;
-		private Dictionary<int, AffectedTile> dictionary_0;
+		private Dictionary<int, AffectedTile> mAffectedPoints;
 		private int mX;
 		private int mY;
-		private double double_0;
-		internal RoomItem.Enum5 enum5_0;
+		private double mZ;
+		//internal RoomItem.Enum5 enum5_0;
 		internal int Rot;
 		internal string string_7;
-		internal bool bool_1;
-		internal int int_4;
+		internal bool UpdateNeeded;
+		internal int UpdateCounter;
 		internal uint InteractingUser;
 		internal uint InteractingUser2;
 		internal Dictionary<RoomUser, int> dictionary_1;
-		private Item Item;
-		private Room class14_0;
-		private bool bool_2;
-		private bool bool_3;
-		private bool bool_4;
+		private Item mBaseItem;
+		private Room mRoom;
+		private bool mIsWallItem;
+		private bool mIsFloorItem;
+		private bool mIsRoller;
 
-		internal Dictionary<int, AffectedTile> Dictionary_0
+		internal Dictionary<int, AffectedTile> GetAffectedTiles
 		{
 			get
 			{
-				return this.dictionary_0;
+				return mAffectedPoints;
 			}
 		}
 
@@ -61,7 +62,7 @@ namespace Phoenix.HabboHotel.Items
 		{
 			get
 			{
-				return this.mX;
+				return mX;
 			}
 		}
 
@@ -69,15 +70,15 @@ namespace Phoenix.HabboHotel.Items
 		{
 			get
 			{
-				return this.mY;
+				return mY;
 			}
 		}
 
-		internal double Double_0
+		internal double GetZ
 		{
 			get
 			{
-				return this.double_0;
+				return mZ;
 			}
 		}
 
@@ -85,7 +86,7 @@ namespace Phoenix.HabboHotel.Items
 		{
 			get
 			{
-				return this.bool_4;
+				return mIsRoller;
 			}
 		}
 
@@ -93,32 +94,30 @@ namespace Phoenix.HabboHotel.Items
 		{
 			get
 			{
-				return new Coord(this.mX, this.mY);
+				return new Coord(mX, mY);
 			}
 		}
 
-		internal double Double_1
+		internal double TotalHeight
 		{
 			get
 			{
-				double result;
-				if (this.GetBaseItem().Height_Adjustable.Count > 1)
+				if (GetBaseItem().Height_Adjustable.Count > 1)
 				{
-					int index;
-					if (int.TryParse(this.ExtraData, out index))
+					int i;
+					if (int.TryParse(ExtraData, out i))
 					{
-						result = this.double_0 + this.GetBaseItem().Height_Adjustable[index];
+						return mZ + GetBaseItem().Height_Adjustable[i];
 					}
 					else
 					{
-						result = this.double_0 + this.GetBaseItem().Height;
+						return mZ + GetBaseItem().Height;
 					}
 				}
 				else
 				{
-					result = this.double_0 + this.GetBaseItem().Height;
+				    return mZ + GetBaseItem().Height;
 				}
-				return result;
 			}
 		}
 
@@ -126,84 +125,70 @@ namespace Phoenix.HabboHotel.Items
 		{
 			get
 			{
-				return this.bool_2;
+				return this.mIsWallItem;
 			}
 		}
 		internal bool IsFloorItem
 		{
 			get
 			{
-				return this.bool_3;
+				return this.mIsFloorItem;
 			}
 		}
 
 		internal Coord SquareInFront
-		{
-			get
-			{
-				Coord result = new Coord(this.mX, this.mY);
-				if (this.Rot == 0)
-				{
-					result.Y--;
-				}
-				else
-				{
-					if (this.Rot == 2)
-					{
-						result.X++;
-					}
-					else
-					{
-						if (this.Rot == 4)
-						{
-							result.Y++;
-						}
-						else
-						{
-							if (this.Rot == 6)
-							{
-								result.X--;
-							}
-						}
-					}
-				}
-				return result;
-			}
-		}
+        {
+            get
+            {
+                Coord Sq = new Coord(mX, mY);
+
+                if (Rot == 0)
+                {
+                    Sq.Y--;
+                }
+                else if (Rot == 2)
+                {
+                    Sq.X++;
+                }
+                else if (Rot == 4)
+                {
+                    Sq.Y++;
+                }
+                else if (Rot == 6)
+                {
+                    Sq.X--;
+                }
+
+                return Sq;
+            }
+        }
 
 		internal Coord SquareBehind
-		{
-			get
-			{
-				Coord result = new Coord(this.mX, this.mY);
-				if (this.Rot == 0)
-				{
-					result.Y++;
-				}
-				else
-				{
-					if (this.Rot == 2)
-					{
-						result.X--;
-					}
-					else
-					{
-						if (this.Rot == 4)
-						{
-							result.Y--;
-						}
-						else
-						{
-							if (this.Rot == 6)
-							{
-								result.X++;
-							}
-						}
-					}
-				}
-				return result;
-			}
-		}
+        {
+            get
+            {
+                Coord Sq = new Coord(mX, mY);
+
+                if (Rot == 0)
+                {
+                    Sq.Y++;
+                }
+                else if (Rot == 2)
+                {
+                    Sq.X--;
+                }
+                else if (Rot == 4)
+                {
+                    Sq.Y--;
+                }
+                else if (Rot == 6)
+                {
+                    Sq.X++;
+                }
+
+                return Sq;
+            }
+        }
 
 		internal FurniInteractor Interactor
 		{
@@ -280,24 +265,24 @@ namespace Phoenix.HabboHotel.Items
 			}
 		}
 
-		public RoomItem(uint uint_5, uint uint_6, uint uint_7, string string_8, int int_5, int int_6, double double_1, int int_7, string string_9, Room class14_1)
+		public RoomItem(uint uint_5, uint uint_6, uint BaseItem, string string_8, int int_5, int int_6, double double_1, int int_7, string string_9, Room class14_1)
 		{
 			this.Id = uint_5;
-			this.uint_1 = uint_6;
-			this.uint_2 = uint_7;
+			this.RoomId = uint_6;
+			this.BaseItem = BaseItem;
 			this.ExtraData = string_8;
 			this.mX = int_5;
 			this.mY = int_6;
-			this.double_0 = double_1;
+			this.mZ = double_1;
 			this.Rot = int_7;
 			this.string_7 = string_9;
-			this.bool_1 = false;
-			this.int_4 = 0;
+			this.UpdateNeeded = false;
+			this.UpdateCounter = 0;
 			this.InteractingUser = 0u;
 			this.InteractingUser2 = 0u;
 			this.TimerRunning = false;
 			this.string_1 = "none";
-			this.enum5_0 = RoomItem.Enum5.const_0;
+			//this.enum5_0 = RoomItem.Enum5.const_0;
 			this.Extra1 = "";
 			this.Extra2 = "";
 			this.Extra3 = "";
@@ -305,11 +290,11 @@ namespace Phoenix.HabboHotel.Items
 			this.Extra5 = "";
 			this.int_0 = 0;
 			this.dictionary_1 = new Dictionary<RoomUser, int>();
-			this.Item = PhoenixEnvironment.GetGame().GetItemManager().GetItem(uint_7);
-			this.class14_0 = class14_1;
+			this.mBaseItem = PhoenixEnvironment.GetGame().GetItemManager().GetItem(BaseItem);
+			this.mRoom = class14_1;
 			if (this.GetBaseItem() == null)
 			{
-                Logging.LogException("Unknown baseID: " + uint_7);
+                Logging.LogException("Unknown baseID: " + BaseItem);
 			}
 			string text = this.GetBaseItem().InteractionType.ToLower();
 			if (text != null)
@@ -346,7 +331,7 @@ namespace Phoenix.HabboHotel.Items
 					}
 					else
 					{
-						this.bool_4 = true;
+						this.mIsRoller = true;
 						class14_1.Boolean_1 = true;
 					}
 				}
@@ -365,17 +350,19 @@ namespace Phoenix.HabboHotel.Items
                         break;
                 }
             }
-			this.bool_2 = (this.GetBaseItem().Type == 'i');
-			this.bool_3 = (this.GetBaseItem().Type == 's');
-			this.dictionary_0 = this.GetRoom().GetAffectedTiles(this.GetBaseItem().Length, this.GetBaseItem().Width, this.mX, this.mY, int_7);
+			this.mIsWallItem = (this.GetBaseItem().Type == 'i');
+			this.mIsFloorItem = (this.GetBaseItem().Type == 's');
+			this.mAffectedPoints = this.GetRoom().GetAffectedTiles(this.GetBaseItem().Length, this.GetBaseItem().Width, this.mX, this.mY, int_7);
 		}
+
 		internal void method_0(int int_5, int int_6, double double_1)
 		{
 			this.mX = int_5;
 			this.mY = int_6;
-			this.double_0 = double_1;
-			this.dictionary_0 = this.GetRoom().GetAffectedTiles(this.GetBaseItem().Length, this.GetBaseItem().Width, this.mX, this.mY, this.Rot);
+			this.mZ = double_1;
+			this.mAffectedPoints = this.GetRoom().GetAffectedTiles(this.GetBaseItem().Length, this.GetBaseItem().Width, this.mX, this.mY, this.Rot);
 		}
+
 		internal Coord method_1(int int_5)
 		{
 			Coord result = new Coord(this.mX, this.mY);
@@ -406,18 +393,18 @@ namespace Phoenix.HabboHotel.Items
 			}
 			return result;
 		}
-		internal void method_2()
+		internal void ProcessUpdates()
 		{
-			this.int_4--;
-			if (this.int_4 <= 0)
+			this.UpdateCounter--;
+			if (this.UpdateCounter <= 0)
 			{
-				this.bool_1 = false;
-				this.int_4 = 0;
+				this.UpdateNeeded = false;
+				this.UpdateCounter = 0;
 				if (this.TimerRunning && this.int_0 > 0)
 				{
 					this.int_0 += 500;
 					this.GetRoom().int_13 += 500;
-					this.bool_1 = true;
+					this.UpdateNeeded = true;
                     if (this.int_0 > SongManager.GetSong(Convert.ToInt32(this.ExtraData)).Length)
 					{
 						ServerMessage Message = new ServerMessage(327);
@@ -500,7 +487,7 @@ namespace Phoenix.HabboHotel.Items
 										{
 											uint num2 = TeleHandler.GetLinkedTele(this.Id);
 											uint num3 = TeleHandler.GetTeleRoomId(num2);
-											if (num3 == this.uint_1)
+											if (num3 == this.RoomId)
 											{
 												RoomItem class2 = this.GetRoom().GetItem(num2);
 												if (class2 == null)
@@ -509,7 +496,7 @@ namespace Phoenix.HabboHotel.Items
 												}
 												else
 												{
-													roomUserByHabbo.SetPos(class2.GetX, class2.GetY, class2.Double_0);
+													roomUserByHabbo.SetPos(class2.GetX, class2.GetY, class2.GetZ);
 													roomUserByHabbo.SetRot(class2.Rot);
 													class2.ExtraData = "2";
 													class2.UpdateState(false, true);
@@ -792,71 +779,75 @@ namespace Phoenix.HabboHotel.Items
 				}
 			}
 		}
-		internal void ReqUpdate(int int_5)
+
+		internal void ReqUpdate(int Cycles)
 		{
-			this.int_4 = int_5;
-			this.bool_1 = true;
+			this.UpdateCounter = Cycles;
+			this.UpdateNeeded = true;
 		}
+
 		internal void UpdateState()
 		{
 			this.UpdateState(true, true);
 		}
-		internal void UpdateState(bool bool_5, bool bool_6)
+
+		internal void UpdateState(bool inDb, bool inRoom)
 		{
-			if (bool_5)
+			if (inDb)
 			{
-				this.GetRoom().method_80(this);
+				this.GetRoom().UpdateItem(this);
 			}
-			if (bool_6)
+			if (inRoom)
 			{
 				ServerMessage Message = new ServerMessage();
 				if (this.IsFloorItem)
 				{
-					Message.Init(88u);
+					Message.Init(88);
 					Message.AppendStringWithBreak(this.Id.ToString());
 					Message.AppendStringWithBreak(this.ExtraData);
 				}
 				else
 				{
-					Message.Init(85u);
+					Message.Init(85);
 					this.Serialize(Message);
 				}
 				this.GetRoom().SendMessage(Message, null);
 			}
 		}
-		internal void Serialize(ServerMessage Message5_0)
+
+		internal void Serialize(ServerMessage Message)
 		{
 			if (this.IsFloorItem)
 			{
-				Message5_0.AppendUInt(this.Id);
-				Message5_0.AppendInt32(this.GetBaseItem().SpriteId);
-				Message5_0.AppendInt32(this.mX);
-				Message5_0.AppendInt32(this.mY);
-				Message5_0.AppendInt32(this.Rot);
-				Message5_0.AppendStringWithBreak(this.double_0.ToString().Replace(',', '.'));
+				Message.AppendUInt(this.Id);
+				Message.AppendInt32(this.GetBaseItem().SpriteId);
+				Message.AppendInt32(this.mX);
+				Message.AppendInt32(this.mY);
+				Message.AppendInt32(this.Rot);
+				Message.AppendStringWithBreak(this.mZ.ToString().Replace(',', '.'));
 				if (this.GetBaseItem().Name == "song_disk" && this.ExtraData.Length > 0)
 				{
-					Message5_0.AppendInt32(Convert.ToInt32(this.ExtraData));
-					Message5_0.AppendStringWithBreak("");
+					Message.AppendInt32(Convert.ToInt32(this.ExtraData));
+					Message.AppendStringWithBreak("");
 				}
 				else
 				{
-					Message5_0.AppendInt32(0);
-					Message5_0.AppendStringWithBreak(this.ExtraData);
+					Message.AppendInt32(0);
+					Message.AppendStringWithBreak(this.ExtraData);
 				}
-				Message5_0.AppendInt32(-1);
-				Message5_0.AppendBoolean(!(this.GetBaseItem().InteractionType.ToLower() == "default"));
+				Message.AppendInt32(-1);
+				Message.AppendBoolean(!(this.GetBaseItem().InteractionType.ToLower() == "default"));
 			}
 			else
 			{
 				if (this.IsWallItem)
 				{
-					Message5_0.AppendStringWithBreak(string.Concat(this.Id));
-					Message5_0.AppendInt32(this.GetBaseItem().SpriteId);
-					Message5_0.AppendStringWithBreak(this.string_7);
+					Message.AppendStringWithBreak(string.Concat(this.Id));
+					Message.AppendInt32(this.GetBaseItem().SpriteId);
+					Message.AppendStringWithBreak(this.string_7);
 					if (this.GetBaseItem().Name.StartsWith("poster_"))
 					{
-						Message5_0.AppendString(this.GetBaseItem().Name.Split(new char[]
+						Message.AppendString(this.GetBaseItem().Name.Split(new char[]
 						{
 							'_'
 						})[1]);
@@ -864,35 +855,38 @@ namespace Phoenix.HabboHotel.Items
 					string text = this.GetBaseItem().InteractionType.ToLower();
 					if (text != null && text == "postit")
 					{
-						Message5_0.AppendStringWithBreak(this.ExtraData.Split(new char[]
+						Message.AppendStringWithBreak(this.ExtraData.Split(new char[]
 						{
 							' '
 						})[0]);
 					}
 					else
 					{
-						Message5_0.AppendStringWithBreak(this.ExtraData);
+						Message.AppendStringWithBreak(this.ExtraData);
 					}
-					Message5_0.AppendBoolean(!(this.GetBaseItem().InteractionType == "default"));
+					Message.AppendBoolean(!(this.GetBaseItem().InteractionType == "default"));
 				}
 			}
 		}
+
 		internal Item GetBaseItem()
 		{
-			if (this.Item == null)
+			if (mBaseItem == null)
 			{
-				this.Item = PhoenixEnvironment.GetGame().GetItemManager().GetItem(this.uint_2);
+				mBaseItem = PhoenixEnvironment.GetGame().GetItemManager().GetItem(BaseItem);
 			}
-			return this.Item;
+			return mBaseItem;
 		}
+
 		internal Room GetRoom()
 		{
-			if (this.class14_0 == null)
+			if (mRoom == null)
 			{
-				this.class14_0 = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(this.uint_1);
+				mRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(RoomId);
 			}
-			return this.class14_0;
+			return mRoom;
 		}
+
 		internal void method_9()
 		{
 			if (!(this.Extra3 == ""))
@@ -938,6 +932,7 @@ namespace Phoenix.HabboHotel.Items
 				}
 			}
 		}
+
 		internal void method_10()
 		{
 			if (!(this.Extra2 == ""))

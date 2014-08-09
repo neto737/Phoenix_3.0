@@ -182,7 +182,7 @@ namespace Phoenix.Communication.Messages.Wired
 								",",
 								class3.GetY,
 								",",
-								class3.Double_0,
+								class3.GetZ,
 								",",
 								class3.Rot,
 								",",

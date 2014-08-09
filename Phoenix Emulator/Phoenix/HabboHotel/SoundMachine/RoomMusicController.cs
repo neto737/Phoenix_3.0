@@ -183,7 +183,7 @@ namespace Phoenix.HabboHotel.SoundMachine
             {
                 this.mRoomOutputItem.ExtraData = "1";
                 this.mRoomOutputItem.TimerRunning = true;
-                this.mRoomOutputItem.bool_1 = true;
+                this.mRoomOutputItem.UpdateNeeded = true;
                 this.mRoomOutputItem.UpdateState(true, true);
             }
         }

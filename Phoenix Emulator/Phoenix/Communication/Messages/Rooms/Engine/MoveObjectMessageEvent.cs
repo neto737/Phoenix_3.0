@@ -31,7 +31,7 @@ namespace Phoenix.Communication.Messages.Rooms.Engine
 						}
 						else
 						{
-							if (Session.GetHabbo().CurrentQuestId == 9u && class2.Double_0 >= 0.1)
+							if (Session.GetHabbo().CurrentQuestId == 9u && class2.GetZ >= 0.1)
 							{
 								PhoenixEnvironment.GetGame().GetQuestManager().ProgressUserQuest(9u, Session);
 							}

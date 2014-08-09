@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 namespace Phoenix.HabboHotel.Items
 {
-	internal sealed class Item
+	internal class Item
 	{
 		private uint Id;
 		internal int SpriteId;

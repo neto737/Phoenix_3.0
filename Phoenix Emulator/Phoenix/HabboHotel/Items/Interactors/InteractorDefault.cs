@@ -75,7 +75,7 @@ namespace Phoenix.HabboHotel.Items.Interactors
 						Message.AppendInt32(0);
 						Item.int_0 = 1;
 						Item.TimerRunning = true;
-						Item.bool_1 = true;
+						Item.UpdateNeeded = true;
 					}
 					else
 					{
@@ -90,12 +90,12 @@ namespace Phoenix.HabboHotel.Items.Interactors
 					}
 					Item.GetRoom().SendMessage(Message, null);
 				}
-				double double_ = Item.Double_1;
+				double double_ = Item.TotalHeight;
 				Item.ExtraData = num2.ToString();
 				Item.UpdateState();
-				if (double_ != Item.Double_1)
+				if (double_ != Item.TotalHeight)
 				{
-					Dictionary<int, AffectedTile> dictionary = Item.Dictionary_0;
+					Dictionary<int, AffectedTile> dictionary = Item.GetAffectedTiles;
 					if (dictionary == null)
 					{
 						dictionary = new Dictionary<int, AffectedTile>();
