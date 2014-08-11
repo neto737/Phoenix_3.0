@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 using Phoenix.Core;
-using Phoenix.HabboHotel.Users.UserDataManagement;
 using Phoenix.HabboHotel.GameClients;
 using Phoenix.HabboHotel.Pets;
 using Phoenix.HabboHotel.Items;
@@ -26,7 +25,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 		{
 			get
 			{
-				return this.InventoryItems.Count;
+				return InventoryItems.Count;
 			}
 		}
 
@@ -34,7 +33,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 		{
 			get
 			{
-				return this.InventoryPets.Count;
+				return InventoryPets.Count;
 			}
 		}
 
@@ -129,62 +128,62 @@ namespace Phoenix.HabboHotel.Users.Inventory
 
 		public void ClearPets()
 		{
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				@class.ExecuteQuery("DELETE FROM user_pets WHERE user_id = " + this.UserId + " AND room_id = 0;");
+				adapter.ExecuteQuery("DELETE FROM user_pets WHERE user_id = " + UserId + " AND room_id = 0;");
 			}
-			foreach (Pet class2 in this.InventoryPets.Values)
+			foreach (Pet Pet in InventoryPets.Values)
 			{
-				ServerMessage Message = new ServerMessage(604u);
-				Message.AppendUInt(class2.PetId);
+				ServerMessage Message = new ServerMessage(604);
+				Message.AppendUInt(Pet.PetId);
 				this.GetClient().SendMessage(Message);
 			}
 			this.InventoryPets.Clear();
 		}
+
 		public void method_3(bool bool_0)
 		{
 			if (bool_0)
 			{
 				this.method_8();
 			}
-			this.GetClient().SendMessage(this.method_15());
+			this.GetClient().SendMessage(this.SerializePetInventory());
 		}
-		public Pet method_4(uint uint_1)
+
+		public Pet GetPet(uint Id)
 		{
-			return this.InventoryPets[uint_1] as Pet;
+			return InventoryPets[Id] as Pet;
 		}
-		public bool method_5(uint uint_1)
+
+		public bool RemovePet(uint PetId)
 		{
-			ServerMessage Message = new ServerMessage(604u);
-			Message.AppendUInt(uint_1);
-			this.GetClient().SendMessage(Message);
-			this.InventoryPets.Remove(uint_1);
+			ServerMessage Message = new ServerMessage(604);
+			Message.AppendUInt(PetId);
+			GetClient().SendMessage(Message);
+			InventoryPets.Remove(PetId);
 			return true;
 		}
-		public void method_6(uint uint_1, uint uint_2)
+
+		public void MovePetToRoom(uint PetId, uint RoomId)
 		{
-			this.method_5(uint_1);
+			RemovePet(PetId);
 		}
-		public void method_7(Pet class15_0)
-		{
-			try
-			{
-				if (class15_0 != null)
-				{
-					class15_0.PlacedInRoom = false;
-					if (!this.InventoryPets.ContainsKey(class15_0.PetId))
-					{
-						this.InventoryPets.Add(class15_0.PetId, class15_0);
-					}
-					ServerMessage Message5_ = new ServerMessage(603u);
-					class15_0.SerializeInventory(Message5_);
-					this.GetClient().SendMessage(Message5_);
-				}
-			}
-			catch
-			{
-			}
-		}
+
+        public void AddPet(Pet Pet)
+        {
+            if (Pet != null)
+            {
+                Pet.PlacedInRoom = false;
+                if (!this.InventoryPets.ContainsKey(Pet.PetId))
+                {
+                    this.InventoryPets.Add(Pet.PetId, Pet);
+                }
+                ServerMessage AddMessage = new ServerMessage(603);
+                Pet.SerializeInventory(AddMessage);
+                GetClient().SendMessage(AddMessage);
+            }
+        }
+
 		public void method_8()
 		{
 			using (TimedLock.Lock(this.InventoryItems))
@@ -224,34 +223,34 @@ namespace Phoenix.HabboHotel.Users.Inventory
 				}
 			}
 		}
-		public void UpdateItems(bool bool_0)
+
+		public void UpdateItems(bool FromDatabase)
 		{
-			if (bool_0)
+			if (FromDatabase)
 			{
 				this.method_8();
 				this.method_18();
 			}
 			if (this.GetClient() != null)
 			{
-				this.GetClient().SendMessage(new ServerMessage(101u));
+				this.GetClient().SendMessage(new ServerMessage(101));
 			}
 		}
-		public UserItem GetItem(uint uint_1)
+
+		public UserItem GetItem(uint Id)
 		{
-			List<UserItem>.Enumerator enumerator = this.InventoryItems.GetEnumerator();
-			UserItem result;
+			List<UserItem>.Enumerator enumerator = InventoryItems.GetEnumerator();
 			while (enumerator.MoveNext())
 			{
 				UserItem current = enumerator.Current;
-				if (current.Id == uint_1)
+				if (current.Id == Id)
 				{
-					result = current;
-					return result;
+					return current;
 				}
 			}
-			result = null;
-			return result;
+			return null;
 		}
+
 		public void AddItem(uint uint_1, uint uint_2, string string_0, bool bool_0)
 		{
 			UserItem item = new UserItem(uint_1, uint_2, string_0);
@@ -287,9 +286,9 @@ namespace Phoenix.HabboHotel.Users.Inventory
                         this.discs.Add(item.Id, item);
                     }
                 }
-				using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					@class.ExecuteQuery(string.Concat(new object[]
+					adapter.ExecuteQuery(string.Concat(new object[]
 					{
 						"UPDATE items SET room_id = 0, user_id = '",
 						this.UserId,
@@ -300,80 +299,86 @@ namespace Phoenix.HabboHotel.Users.Inventory
 				}
 			}
 		}
-		public void RemoveItem(uint uint_1, uint uint_2, bool bool_0)
+
+		public void RemoveItem(uint Id, uint uint_2, bool PlacedInroom)
 		{
-			ServerMessage Message = new ServerMessage(99u);
-			Message.AppendUInt(uint_1);
+			ServerMessage Message = new ServerMessage(99);
+			Message.AppendUInt(Id);
 			this.GetClient().SendMessage(Message);
-			if (this.hashtable_1.ContainsKey(uint_1))
+			if (this.hashtable_1.ContainsKey(Id))
 			{
-				this.hashtable_1.Remove(uint_1);
+				this.hashtable_1.Remove(Id);
 			}
-			if (!this.list_1.Contains(uint_1))
+			if (!this.list_1.Contains(Id))
 			{
-				this.InventoryItems.Remove(this.GetItem(uint_1));
-				this.list_1.Add(uint_1);
-                this.discs.Remove(uint_1);
-				if (bool_0)
+				this.InventoryItems.Remove(this.GetItem(Id));
+				this.list_1.Add(Id);
+                this.discs.Remove(Id);
+				if (PlacedInroom)
 				{
-					using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+					using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 					{
-						@class.ExecuteQuery(string.Concat(new object[]
+						adapter.ExecuteQuery(string.Concat(new object[]
 						{
 							"UPDATE items SET user_id = '",
 							uint_2,
 							"' WHERE Id = '",
-							uint_1,
+							Id,
 							"' LIMIT 1"
 						}));
 						return;
 					}
 				}
-				if (uint_2 == 0u && !bool_0)
+				if (uint_2 == 0 && !PlacedInroom)
 				{
-					using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+					using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 					{
-						@class.ExecuteQuery("DELETE FROM items WHERE Id = '" + uint_1 + "' LIMIT 1");
+						adapter.ExecuteQuery("DELETE FROM items WHERE Id = '" + Id + "' LIMIT 1");
 					}
 				}
 			}
 		}
-		public ServerMessage method_13()
+        public ServerMessage SerializeFloorItemInventory()
+        {
+            ServerMessage Message = new ServerMessage(140);
+            Message.AppendStringWithBreak("S");
+            Message.AppendInt32(1);
+            Message.AppendInt32(1);
+            Message.AppendInt32(this.ItemCount);
+            List<UserItem>.Enumerator enumerator = InventoryItems.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                enumerator.Current.Serialize(Message, true);
+            }
+            return Message;
+        }
+		
+
+		public ServerMessage SerializeWallItemInventory()
 		{
-			ServerMessage Message = new ServerMessage(140u);
-			Message.AppendStringWithBreak("S");
-			Message.AppendInt32(1);
-			Message.AppendInt32(1);
-			Message.AppendInt32(this.ItemCount);
-			List<UserItem>.Enumerator enumerator = this.InventoryItems.GetEnumerator();
-			while (enumerator.MoveNext())
-			{
-				enumerator.Current.Serialize(Message, true);
-			}
-			return Message;
-		}
-		public ServerMessage method_14()
-		{
-			ServerMessage Message = new ServerMessage(140u);
+			ServerMessage Message = new ServerMessage(140);
 			Message.AppendStringWithBreak("I");
 			Message.AppendString("II");
 			Message.AppendInt32(0);
 			return Message;
 		}
-		public ServerMessage method_15()
+
+		public ServerMessage SerializePetInventory()
 		{
-			ServerMessage Message = new ServerMessage(600u);
-			Message.AppendInt32(this.InventoryPets.Count);
-			foreach (Pet @class in this.InventoryPets.Values)
+			ServerMessage Message = new ServerMessage(600);
+			Message.AppendInt32(InventoryPets.Count);
+			foreach (Pet Pet in InventoryPets.Values)
 			{
-				@class.SerializeInventory(Message);
+				Pet.SerializeInventory(Message);
 			}
 			return Message;
 		}
+
 		private GameClient GetClient()
 		{
 			return PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(this.UserId);
 		}
+
 		public void method_17(List<RoomItem> list_2)
 		{
 			foreach (RoomItem current in list_2)
@@ -383,93 +388,93 @@ namespace Phoenix.HabboHotel.Users.Inventory
 		}
 		internal void method_18()
 		{
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				this.method_19(@class, false);
+				this.method_19(adapter, false);
 			}
 		}
-		internal void method_19(DatabaseClient class6_0, bool bool_0)
+		internal void method_19(DatabaseClient queries, bool bool_0)
 		{
 			try
 			{
 				if (this.list_1.Count > 0 || this.hashtable_1.Count > 0 || this.InventoryPets.Count > 0)
 				{
 					StringBuilder stringBuilder = new StringBuilder();
-					foreach (Pet @class in this.InventoryPets.Values)
+					foreach (Pet pet in this.InventoryPets.Values)
 					{
-						if (@class.DBState == DatabaseUpdateState.NeedsInsert)
+						if (pet.DBState == DatabaseUpdateState.NeedsInsert)
 						{
-							class6_0.AddParamWithValue("petname" + @class.PetId, @class.Name);
-							class6_0.AddParamWithValue("petcolor" + @class.PetId, @class.Color);
-							class6_0.AddParamWithValue("petrace" + @class.PetId, @class.Race);
+							queries.AddParamWithValue("petname" + pet.PetId, pet.Name);
+							queries.AddParamWithValue("petcolor" + pet.PetId, pet.Color);
+							queries.AddParamWithValue("petrace" + pet.PetId, pet.Race);
 							stringBuilder.Append(string.Concat(new object[]
 							{
 								"INSERT INTO `user_pets` VALUES ('",
-								@class.PetId,
+								pet.PetId,
 								"', '",
-								@class.OwnerId,
+								pet.OwnerId,
 								"', '",
-								@class.RoomId,
+								pet.RoomId,
 								"', @petname",
-								@class.PetId,
+								pet.PetId,
 								", @petrace",
-								@class.PetId,
+								pet.PetId,
 								", @petcolor",
-								@class.PetId,
+								pet.PetId,
 								", '",
-								@class.Type,
+								pet.Type,
 								"', '",
-								@class.Expirience,
+								pet.Expirience,
 								"', '",
-								@class.Energy,
+								pet.Energy,
 								"', '",
-								@class.Nutrition,
+								pet.Nutrition,
 								"', '",
-								@class.Respect,
+								pet.Respect,
 								"', '",
-								@class.CreationStamp,
+								pet.CreationStamp,
 								"', '",
-								@class.X,
+								pet.X,
 								"', '",
-								@class.Y,
+								pet.Y,
 								"', '",
-								@class.Z,
+								pet.Z,
 								"');"
 							}));
 						}
 						else
 						{
-							if (@class.DBState == DatabaseUpdateState.NeedsUpdate)
+							if (pet.DBState == DatabaseUpdateState.NeedsUpdate)
 							{
 								stringBuilder.Append(string.Concat(new object[]
 								{
 									"UPDATE user_pets SET room_id = '",
-									@class.RoomId,
+									pet.RoomId,
 									"', expirience = '",
-									@class.Expirience,
+									pet.Expirience,
 									"', energy = '",
-									@class.Energy,
+									pet.Energy,
 									"', nutrition = '",
-									@class.Nutrition,
+									pet.Nutrition,
 									"', respect = '",
-									@class.Respect,
+									pet.Respect,
 									"', x = '",
-									@class.X,
+									pet.X,
 									"', y = '",
-									@class.Y,
+									pet.Y,
 									"', z = '",
-									@class.Z,
+									pet.Z,
 									"' WHERE Id = '",
-									@class.PetId,
+									pet.PetId,
 									"' LIMIT 1; "
 								}));
 							}
 						}
-						@class.DBState = DatabaseUpdateState.Updated;
+						pet.DBState = DatabaseUpdateState.Updated;
 					}
 					if (stringBuilder.Length > 0)
 					{
-						class6_0.ExecuteQuery(stringBuilder.ToString());
+						queries.ExecuteQuery(stringBuilder.ToString());
 					}
 				}
 				if (bool_0)

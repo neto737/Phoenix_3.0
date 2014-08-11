@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
-using Phoenix.HabboHotel.Users.UserDataManagement;
 using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 using Phoenix.HabboHotel.Rooms;
@@ -31,14 +30,15 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			this.UserId = UserId;
 			this.CurrentEffect = -1;
 			this.Effects.Clear();
+
 			DataTable getUserEffects = UserData.GetUserEffects;
-			StringBuilder builder = new StringBuilder();
+			StringBuilder QueryBuilder = new StringBuilder();
 			foreach (DataRow dataRow in getUserEffects.Rows)
 			{
 				AvatarEffect item = new AvatarEffect((int)dataRow["effect_id"], (int)dataRow["total_duration"], PhoenixEnvironment.EnumToBool(dataRow["is_activated"].ToString()), (double)dataRow["activated_stamp"]);
 				if (item.HasExpired)
 				{
-					builder.Append(string.Concat(new object[]
+					QueryBuilder.Append(string.Concat(new object[]
 					{
 						"DELETE FROM user_effects WHERE user_id = '",
 						UserId,
@@ -52,56 +52,56 @@ namespace Phoenix.HabboHotel.Users.Inventory
 					this.Effects.Add(item);
 				}
 			}
-			if (builder.Length > 0)
+			if (QueryBuilder.Length > 0)
 			{
 				using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					class2.ExecuteQuery(builder.ToString());
+					class2.ExecuteQuery(QueryBuilder.ToString());
 				}
 			}
 		}
 
-		public void AddEffect(int int_1, int int_2)
+		public void AddEffect(int EffectId, int Duration)
 		{
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				@class.ExecuteQuery(string.Concat(new object[]
+				adapter.ExecuteQuery(string.Concat(new object[]
 				{
 					"INSERT INTO user_effects (user_id,effect_id,total_duration,is_activated,activated_stamp) VALUES ('",
 					this.UserId,
 					"','",
-					int_1,
+					EffectId,
 					"','",
-					int_2,
+					Duration,
 					"','0','0')"
 				}));
 			}
-			this.Effects.Add(new AvatarEffect(int_1, int_2, false, 0.0));
+			this.Effects.Add(new AvatarEffect(EffectId, Duration, false, 0.0));
 			ServerMessage Message = new ServerMessage(461u);
-			Message.AppendInt32(int_1);
-			Message.AppendInt32(int_2);
+			Message.AppendInt32(EffectId);
+			Message.AppendInt32(Duration);
 			this.GetClient().SendMessage(Message);
 		}
 
-		public void method_1(int int_1)
+		public void StopEffect(int EffectId)
 		{
-			AvatarEffect @class = this.GetEffect(int_1, true);
-			if (@class != null && @class.HasExpired)
+			AvatarEffect Effect = this.GetEffect(EffectId, true);
+			if (Effect != null && Effect.HasExpired)
 			{
-				using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					class2.ExecuteQuery(string.Concat(new object[]
+					adapter.ExecuteQuery(string.Concat(new object[]
 					{
 						"DELETE FROM user_effects WHERE user_id = '",
 						this.UserId,
 						"' AND effect_id = '",
-						int_1,
+						EffectId,
 						"' AND is_activated = '1' LIMIT 1"
 					}));
 				}
-				this.Effects.Remove(@class);
-				ServerMessage Message = new ServerMessage(463u);
-				Message.AppendInt32(int_1);
+				this.Effects.Remove(Effect);
+				ServerMessage Message = new ServerMessage(463);
+				Message.AppendInt32(EffectId);
 				this.GetClient().SendMessage(Message);
 				if (this.CurrentEffect >= 0)
 				{
@@ -190,56 +190,47 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			}
 		}
 
-		public AvatarEffect GetEffect(int int_1, bool bool_0)
-		{
-			using (TimedLock.Lock(this.Effects))
-			{
-				foreach (AvatarEffect current in this.Effects)
-				{
-					if ((!bool_0 || current.Activated) && current.EffectId == int_1)
-					{
-						return current;
-					}
-				}
-			}
-			return null;
-		}
+        public AvatarEffect GetEffect(int EffectId, bool IfEnabledOnly)
+        {
+            foreach (AvatarEffect Effect in Effects)
+            {
+                if ((!IfEnabledOnly || Effect.Activated) && Effect.EffectId == EffectId)
+                {
+                    return Effect;
+                }
+            }
+            return null;
+        }
 
-		public ServerMessage method_6()
-		{
-			ServerMessage Message = new ServerMessage(460);
-			Message.AppendInt32(this.Count);
-			using (TimedLock.Lock(this.Effects))
-			{
-				foreach (AvatarEffect current in this.Effects)
-				{
-					Message.AppendInt32(current.EffectId);
-					Message.AppendInt32(current.TotalDuration);
-					Message.AppendBoolean(!current.Activated);
-					Message.AppendInt32(current.TimeLeft);
-				}
-			}
-			return Message;
-		}
+        public ServerMessage Serialize()
+        {
+            ServerMessage Message = new ServerMessage(460);
+            Message.AppendInt32(Count);
+            foreach (AvatarEffect Effect in Effects)
+            {
+                Message.AppendInt32(Effect.EffectId);
+                Message.AppendInt32(Effect.TotalDuration);
+                Message.AppendBoolean(!Effect.Activated);
+                Message.AppendInt32(Effect.TimeLeft);
+            }
+            return Message;
+        }
 
-		public void method_7()
-		{
-			using (TimedLock.Lock(this.Effects))
-			{
-				List<int> list = new List<int>();
-				foreach (AvatarEffect current in this.Effects)
-				{
-					if (current.HasExpired)
-					{
-						list.Add(current.EffectId);
-					}
-				}
-				foreach (int current2 in list)
-				{
-					this.method_1(current2);
-				}
-			}
-		}
+        public void CheckExpired()
+        {
+            List<int> list = new List<int>();
+            foreach (AvatarEffect current in this.Effects)
+            {
+                if (current.HasExpired)
+                {
+                    list.Add(current.EffectId);
+                }
+            }
+            foreach (int current2 in list)
+            {
+                this.StopEffect(current2);
+            }
+        }
 
 		private GameClient GetClient()
 		{

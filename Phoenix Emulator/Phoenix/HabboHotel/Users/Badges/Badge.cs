@@ -5,6 +5,7 @@ namespace Phoenix.HabboHotel.Users.Badges
 	{
 		public string Code;
 		public int Slot;
+
 		public Badge(string Code, int Slot)
 		{
 			this.Code = Code;

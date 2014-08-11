@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using Phoenix.HabboHotel.Users.UserDataManagement;
 using Phoenix.Storage;
 namespace Phoenix.HabboHotel.Users.Subscriptions
 {

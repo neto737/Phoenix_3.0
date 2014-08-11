@@ -453,7 +453,7 @@ namespace Phoenix.HabboHotel.GameClients
 				GameClient Session = this.Session[i];
 				if (Session != null && (Session.GetHabbo() != null && Session.GetHabbo().GetAvatarEffectsInventoryComponent() != null))
 				{
-					Session.GetHabbo().GetAvatarEffectsInventoryComponent().method_7();
+					Session.GetHabbo().GetAvatarEffectsInventoryComponent().CheckExpired();
 				}
 			}
 		}

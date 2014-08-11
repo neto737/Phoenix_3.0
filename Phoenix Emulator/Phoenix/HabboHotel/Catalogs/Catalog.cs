@@ -694,7 +694,7 @@ namespace Phoenix.HabboHotel.Catalogs
 							{
 								't'
 							})[1]), array[1], array[2]);
-							Session.GetHabbo().GetInventoryComponent().method_7(class15_);
+							Session.GetHabbo().GetInventoryComponent().AddPet(class15_);
 							Session.GetHabbo().GetInventoryComponent().AddItem(num, 320u, "0", bool_0);
 						}
 						IL_4EA:

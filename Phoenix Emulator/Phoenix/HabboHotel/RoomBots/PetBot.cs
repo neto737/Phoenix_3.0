@@ -161,7 +161,7 @@ namespace Phoenix.HabboHotel.RoomBots
 					if (string_.ToLower() == base.GetRoomUser().PetData.OwnerName.ToLower() && string_.ToLower() != base.GetRoom().Owner.ToLower())
 					{
 						base.GetRoom().RemoveBot(base.GetRoomUser().PetData.VirtualId, false);
-						Session.GetHabbo().GetInventoryComponent().method_7(base.GetRoomUser().PetData);
+						Session.GetHabbo().GetInventoryComponent().AddPet(base.GetRoomUser().PetData);
 					}
 				}
 				catch

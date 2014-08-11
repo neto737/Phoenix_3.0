@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using Phoenix.HabboHotel.Users.UserDataManagement;
 using Phoenix.HabboHotel.Users.Subscriptions;
 using Phoenix.HabboHotel.Users.Inventory;
 using Phoenix.HabboHotel.GameClients;

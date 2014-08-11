@@ -3,7 +3,6 @@ using System.Data;
 using System.Text.RegularExpressions;
 using Phoenix.Core;
 using Phoenix.HabboHotel.Misc;
-using Phoenix.HabboHotel.Users.UserDataManagement;
 using Phoenix.HabboHotel.Support;
 using Phoenix.Messages;
 using Phoenix.Util;
@@ -175,7 +174,7 @@ namespace Phoenix.HabboHotel.GameClients
             }
             this.SendMessage(Message2);
 
-            this.SendMessage(this.GetHabbo().GetAvatarEffectsInventoryComponent().method_6());
+            this.SendMessage(this.GetHabbo().GetAvatarEffectsInventoryComponent().Serialize());
 
             ServerMessage Message3 = new ServerMessage(290u);
             Message3.AppendBoolean(true);

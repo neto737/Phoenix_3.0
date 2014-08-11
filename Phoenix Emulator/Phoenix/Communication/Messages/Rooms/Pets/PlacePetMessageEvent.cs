@@ -16,7 +16,7 @@ namespace Phoenix.Communication.Messages.Rooms.Pets
 			if (@class != null && (@class.AllowPet || @class.CheckRights(Session, true)))
 			{
 				uint uint_ = Event.PopWiredUInt();
-				Pet class2 = Session.GetHabbo().GetInventoryComponent().method_4(uint_);
+				Pet class2 = Session.GetHabbo().GetInventoryComponent().GetPet(uint_);
 				if (class2 != null && !class2.PlacedInRoom)
 				{
 					int num = Event.PopWiredInt32();
@@ -36,7 +36,7 @@ namespace Phoenix.Communication.Messages.Rooms.Pets
 							@class.method_4(new RoomBot(class2.PetId, class2.RoomId, AIType.Pet, "freeroam", class2.Name, "", class2.Look, num, num2, 0, 0, 0, 0, 0, 0, ref list, ref list2, 0), class2);
 							if (@class.CheckRights(Session, true))
 							{
-								Session.GetHabbo().GetInventoryComponent().method_6(class2.PetId, @class.RoomId);
+								Session.GetHabbo().GetInventoryComponent().MovePetToRoom(class2.PetId, @class.RoomId);
 							}
 						}
 					}

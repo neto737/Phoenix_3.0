@@ -1,6 +1,5 @@
 using System;
 using System.Data;
-using Phoenix.HabboHotel.Users.UserDataManagement;
 using Phoenix.HabboHotel.GameClients;
 using Phoenix.HabboHotel.Users;
 namespace Phoenix.HabboHotel.Users.Authenticator

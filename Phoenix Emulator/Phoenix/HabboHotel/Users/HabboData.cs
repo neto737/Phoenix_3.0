@@ -2,7 +2,7 @@ using System;
 using System.Data;
 using Phoenix.Util;
 using Phoenix.Storage;
-namespace Phoenix.HabboHotel.Users.UserDataManagement
+namespace Phoenix.HabboHotel.Users
 {
 	internal class HabboData
 	{

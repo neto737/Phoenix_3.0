@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using Phoenix.HabboHotel.Users.UserDataManagement;
 using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 using Phoenix.Storage;

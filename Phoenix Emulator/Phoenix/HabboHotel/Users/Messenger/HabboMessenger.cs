@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using Phoenix.HabboHotel.Misc;
-using Phoenix.HabboHotel.Users.UserDataManagement;
 using Phoenix.HabboHotel.GameClients;
 using Phoenix.Util;
 using Phoenix.Messages;

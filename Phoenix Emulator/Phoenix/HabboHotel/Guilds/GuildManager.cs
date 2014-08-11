@@ -9,17 +9,17 @@ namespace Phoenix.HabboHotel.Guilds
 	{
         public static Dictionary<int, Guild> GuildList = new Dictionary<int, Guild>();
 
-		public static void LoadGroups(DatabaseClient dbClient)
-		{
+        public static void LoadGroups(DatabaseClient dbClient)
+        {
             Logging.Write("Loading groups...");
-			GuildManager.ClearGroups();
-			DataTable dataTable = dbClient.ReadDataTable("SELECT * FROM groups;");
-			foreach (DataRow dataRow in dataTable.Rows)
-			{
+            GuildManager.ClearGroups();
+            DataTable dataTable = dbClient.ReadDataTable("SELECT * FROM groups;");
+            foreach (DataRow dataRow in dataTable.Rows)
+            {
                 GuildManager.GuildList.Add((int)dataRow["Id"], new Guild((int)dataRow["Id"], dataRow, dbClient));
-			}
-			Logging.WriteLine("completed!");
-		
+            }
+            Logging.WriteLine("completed!");
+        }
 
 		public static void ClearGroups()
 		{

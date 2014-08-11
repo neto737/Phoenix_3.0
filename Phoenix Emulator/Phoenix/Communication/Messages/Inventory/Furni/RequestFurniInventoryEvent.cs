@@ -9,7 +9,7 @@ namespace Phoenix.Communication.Messages.Inventory.Furni
 		{
 			if (Session != null && Session.GetHabbo() != null)
 			{
-				Session.SendMessage(Session.GetHabbo().GetInventoryComponent().method_13());
+				Session.SendMessage(Session.GetHabbo().GetInventoryComponent().SerializeFloorItemInventory());
 			}
 		}
 	}
