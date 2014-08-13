@@ -2,52 +2,58 @@ using System;
 using Phoenix.Messages;
 namespace Phoenix.HabboHotel.Users.Messenger
 {
-	internal sealed class MessengerRequest
+	class MessengerRequest
 	{
-		private uint xRequestId;
-		private uint ToUser;
-		private uint FromUser;
-		private string SenderUsername;
-		internal uint RequestId
+        private UInt32 xRequestId;
+        private UInt32 ToUser;
+        private UInt32 FromUser;
+		private string mUsername;
+
+        internal UInt32 RequestId
 		{
 			get
 			{
-				return this.FromUser;
+				return FromUser;
 			}
 		}
-		internal uint To
+
+		internal UInt32 To
 		{
 			get
 			{
-				return this.ToUser;
+				return ToUser;
 			}
 		}
-		internal uint From
+
+        internal UInt32 From
 		{
 			get
 			{
-				return this.FromUser;
+				return FromUser;
 			}
 		}
+
 		internal string senderUsername
 		{
 			get
 			{
-				return this.SenderUsername;
+				return mUsername;
 			}
 		}
-		public MessengerRequest(uint RequestId, uint ToUser, uint FromUser, string SenderUsername)
+
+        public MessengerRequest(UInt32 RequestId, UInt32 ToUser, UInt32 FromUser, string pUsername)
 		{
 			this.xRequestId = RequestId;
 			this.ToUser = ToUser;
 			this.FromUser = FromUser;
-			this.SenderUsername = SenderUsername;
+			this.mUsername = pUsername;
 		}
+
 		public void Serialize(ServerMessage Request)
 		{
-			Request.AppendUInt(this.FromUser);
-			Request.AppendStringWithBreak(this.SenderUsername);
-			Request.AppendStringWithBreak(this.FromUser.ToString());
+			Request.AppendUInt(FromUser);
+			Request.AppendStringWithBreak(mUsername);
+			Request.AppendStringWithBreak(FromUser.ToString());
 		}
 	}
 }

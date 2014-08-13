@@ -9,7 +9,7 @@ namespace Phoenix.Communication.Messages.Messenger
 		{
 			if (Session.GetHabbo().GetMessenger() != null)
 			{
-				Session.SendMessage(Session.GetHabbo().GetMessenger().method_24(Event.PopFixedString()));
+				Session.SendMessage(Session.GetHabbo().GetMessenger().PerformSearch(Event.PopFixedString()));
 			}
 		}
 	}

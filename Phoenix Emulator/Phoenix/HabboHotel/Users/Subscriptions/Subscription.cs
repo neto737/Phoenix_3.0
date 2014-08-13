@@ -1,7 +1,7 @@
 using System;
 namespace Phoenix.HabboHotel.Users.Subscriptions
 {
-	internal sealed class Subscription
+	class Subscription
 	{
 		private string Caption;
 		private int TimeActivated;
@@ -11,7 +11,7 @@ namespace Phoenix.HabboHotel.Users.Subscriptions
 		{
 			get
 			{
-				return this.Caption;
+				return Caption;
 			}
 		}
 
@@ -19,7 +19,7 @@ namespace Phoenix.HabboHotel.Users.Subscriptions
         {
             get
             {
-                return this.TimeExpire;
+                return TimeExpire;
             }
         }
 
@@ -30,9 +30,9 @@ namespace Phoenix.HabboHotel.Users.Subscriptions
             this.TimeExpire = TimeExpire;
         }
 
-        public bool IsValid()
+        public Boolean IsValid()
         {
-            if (this.TimeExpire <= PhoenixEnvironment.GetUnixTimestamp())
+            if (TimeExpire <= PhoenixEnvironment.GetUnixTimestamp())
             {
                 return false;
             }
@@ -41,9 +41,9 @@ namespace Phoenix.HabboHotel.Users.Subscriptions
 
 		public void ExtendSubscription(int Time)
 		{
-			if (this.TimeExpire + Time < 2147483647)
+			if (TimeExpire + Time < 2147483647)
 			{
-				this.TimeExpire += Time;
+				TimeExpire += Time;
 			}
 		}
 	}

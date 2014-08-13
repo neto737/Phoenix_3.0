@@ -6,7 +6,7 @@ using Phoenix.Messages;
 using Phoenix.Storage;
 namespace Phoenix.HabboHotel.Users.Badges
 {
-	internal sealed class BadgeComponent
+	class BadgeComponent
 	{
 		private List<Badge> Badges;
 		private uint UserId;
@@ -24,9 +24,9 @@ namespace Phoenix.HabboHotel.Users.Badges
 			get
 			{
 				int i = 0;
-				foreach (Badge current in Badges)
+				foreach (Badge Badge in Badges)
 				{
-					if (current.Slot > 0)
+					if (Badge.Slot > 0)
 					{
 						i++;
 					}
@@ -96,20 +96,13 @@ namespace Phoenix.HabboHotel.Users.Badges
                 using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
                 {
                     adapter.AddParamWithValue("badge", Badge);
-                    adapter.ExecuteQuery(string.Concat(new object[]
-						{
-							"INSERT INTO user_badges (user_id,badge_id,badge_slot) VALUES ('",
-							UserId,
-							"',@badge,'",
-							Slot,
-							"')"
-						}));
+                    adapter.ExecuteQuery("INSERT INTO user_badges (user_id,badge_id,badge_slot) VALUES ('" + UserId + "',@badge,'" + Slot + "')");
                 }
             }
             Badges.Add(new Badge(Badge, Slot));
         }
 
-		public void method_4(string Badge, int Slot)
+		public void SetBadgeSlot(string Badge, int Slot)
 		{
 			Badge B = GetBadge(Badge);
 			if (B != null)

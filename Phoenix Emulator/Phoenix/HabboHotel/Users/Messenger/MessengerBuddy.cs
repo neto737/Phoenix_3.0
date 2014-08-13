@@ -4,34 +4,39 @@ using Phoenix.Messages;
 using Phoenix.Storage;
 namespace Phoenix.HabboHotel.Users.Messenger
 {
-	internal sealed class MessengerBuddy
-	{
-		private uint UserId;
+	class MessengerBuddy
+    {
+        #region Fields
+        private uint UserId;
 		internal bool UpdateNeeded;
 		private string mUsername;
 		private string mLook;
 		private string mMotto;
 		private string mLastOnline;
+        #endregion
 
-		public uint Id
+        #region Return values
+        public uint Id
 		{
 			get
 			{
-				return this.UserId;
+				return UserId;
 			}
 		}
+
 		internal string Username
 		{
 			get
 			{
-				return this.mUsername;
+				return mUsername;
 			}
 		}
+
 		internal string RealName
 		{
 			get
 			{
-				GameClient clientByHabbo = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(this.UserId);
+				GameClient clientByHabbo = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(UserId);
 				if (clientByHabbo != null)
 				{
 					return clientByHabbo.GetHabbo().RealName;
@@ -40,49 +45,57 @@ namespace Phoenix.HabboHotel.Users.Messenger
 				{
 					using (DatabaseClient dbClient = PhoenixEnvironment.GetDatabase().GetClient())
 					{
-						return dbClient.ReadString("SELECT real_name FROM users WHERE Id = '" + this.UserId + "' LIMIT 1");
+						return dbClient.ReadString("SELECT real_name FROM users WHERE Id = '" + UserId + "' LIMIT 1");
 					}
 				}
 			}
 		}
+
 		internal string Look
 		{
 			get
 			{
-				return this.mLook;
+				return mLook;
 			}
 		}
+
 		internal string Motto
 		{
 			get
 			{
-				return this.mMotto;
+				return mMotto;
 			}
 		}
+
 		internal string LastOnline
 		{
 			get
 			{
-				return this.mLastOnline;
+				return mLastOnline;
 			}
 		}
-		internal bool IsOnline
+
+		internal Boolean IsOnline
 		{
 			get
 			{
-				GameClient clientByHabbo = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(this.UserId);
+				GameClient clientByHabbo = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(UserId);
 				return clientByHabbo != null && clientByHabbo.GetHabbo() != null && clientByHabbo.GetHabbo().GetMessenger() != null && !clientByHabbo.GetHabbo().GetMessenger().AppearOffline && !clientByHabbo.GetHabbo().HideOnline;
 			}
 		}
-		internal bool InRoom
+
+		internal Boolean InRoom
 		{
 			get
 			{
-				GameClient clientByHabbo = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(this.UserId);
+				GameClient clientByHabbo = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(UserId);
 				return clientByHabbo != null && (clientByHabbo.GetHabbo().InRoom && !clientByHabbo.GetHabbo().HideInRom);
 			}
 		}
-		public MessengerBuddy(uint UserId, string pUsername, string pLook, string pMotto, string pLastOnline)
+        #endregion
+
+        #region Constructor
+        public MessengerBuddy(uint UserId, string pUsername, string pLook, string pMotto, string pLastOnline)
 		{
 			this.UserId = UserId;
 			this.mUsername = pUsername;
@@ -91,59 +104,63 @@ namespace Phoenix.HabboHotel.Users.Messenger
 			this.mLastOnline = PhoenixEnvironment.UnixTimeStampToDateTime(Convert.ToDouble(pLastOnline)).ToString();
 			this.UpdateNeeded = false;
 		}
-		public void Serialize(ServerMessage Message, bool Search)
+        #endregion
+
+        #region Methods
+        public void Serialize(ServerMessage reply, bool Search)
 		{
 			if (Search)
 			{
-				Message.AppendUInt(this.UserId);
-				Message.AppendStringWithBreak(this.mUsername);
-				Message.AppendStringWithBreak(this.mMotto);
-				bool isOnline = this.IsOnline;
-				Message.AppendBoolean(isOnline);
+				reply.AppendUInt(UserId);
+				reply.AppendStringWithBreak(mUsername);
+				reply.AppendStringWithBreak(mMotto);
+				bool isOnline = IsOnline;
+				reply.AppendBoolean(isOnline);
 				if (isOnline)
 				{
-					Message.AppendBoolean(this.InRoom);
+					reply.AppendBoolean(InRoom);
 				}
 				else
 				{
-					Message.AppendBoolean(false);
+					reply.AppendBoolean(false);
 				}
-				Message.AppendStringWithBreak("");
-				Message.AppendBoolean(false);
-				Message.AppendStringWithBreak(this.mLook);
-				Message.AppendStringWithBreak(this.mLastOnline);
-				Message.AppendStringWithBreak("");
+				reply.AppendStringWithBreak("");
+				reply.AppendBoolean(false);
+				reply.AppendStringWithBreak(mLook);
+				reply.AppendStringWithBreak(mLastOnline);
+				reply.AppendStringWithBreak("");
 			}
 			else
 			{
-				Message.AppendUInt(this.UserId);
-				Message.AppendStringWithBreak(this.mUsername);
-				Message.AppendBoolean(true);
-				if (this.UserId == 0u)
+				reply.AppendUInt(this.UserId);
+				reply.AppendStringWithBreak(mUsername);
+				reply.AppendBoolean(true);
+				if (UserId == 0)
 				{
-					Message.AppendBoolean(true);
-					Message.AppendBoolean(false);
+					reply.AppendBoolean(true);
+					reply.AppendBoolean(false);
 				}
 				else
 				{
-					bool isOnline = this.IsOnline;
-					Message.AppendBoolean(isOnline);
+					bool isOnline = IsOnline;
+					reply.AppendBoolean(isOnline);
 					if (isOnline)
 					{
-						Message.AppendBoolean(this.InRoom);
+						reply.AppendBoolean(InRoom);
 					}
 					else
 					{
-						Message.AppendBoolean(false);
+						reply.AppendBoolean(false);
 					}
 				}
-				Message.AppendStringWithBreak(this.mLook);
-				Message.AppendBoolean(false);
-				Message.AppendStringWithBreak(this.mMotto);
-				Message.AppendStringWithBreak(this.mLastOnline);
-				Message.AppendStringWithBreak("");
-				Message.AppendStringWithBreak("");
+				reply.AppendStringWithBreak(mLook);
+				reply.AppendBoolean(false);
+				reply.AppendStringWithBreak(mMotto);
+				reply.AppendStringWithBreak(mLastOnline);
+				reply.AppendStringWithBreak("");
+				reply.AppendStringWithBreak("");
 			}
-		}
-	}
+        }
+        #endregion
+    }
 }

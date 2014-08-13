@@ -1,12 +1,12 @@
 using System;
 namespace Phoenix.HabboHotel.Users.Badges
 {
-	internal sealed class Badge
+	class Badge
 	{
-		public string Code;
-		public int Slot;
+		internal string Code;
+        internal int Slot;
 
-		public Badge(string Code, int Slot)
+        internal Badge(string Code, int Slot)
 		{
 			this.Code = Code;
 			this.Slot = Slot;

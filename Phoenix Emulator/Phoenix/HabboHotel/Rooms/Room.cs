@@ -2241,7 +2241,7 @@ namespace Phoenix.HabboHotel.Rooms
                 }
             }
         }
-        internal List<RoomItem> method_24(GameClient Session)
+        internal List<RoomItem> RemoveAllFurniture(GameClient Session)
         {
             List<RoomItem> list = new List<RoomItem>();
             foreach (RoomItem @class in this.Hashtable_0.Values)

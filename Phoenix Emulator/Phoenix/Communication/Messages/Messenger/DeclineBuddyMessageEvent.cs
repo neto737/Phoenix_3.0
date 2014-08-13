@@ -14,13 +14,13 @@ namespace Phoenix.Communication.Messages.Messenger
 				if (num == 0 && num2 == 1)
 				{
 					uint uint_ = Event.PopWiredUInt();
-					Session.GetHabbo().GetMessenger().method_11(uint_);
+					Session.GetHabbo().GetMessenger().HandleRequest(uint_);
 				}
 				else
 				{
 					if (num == 1)
 					{
-						Session.GetHabbo().GetMessenger().method_10();
+						Session.GetHabbo().GetMessenger().HandleAllRequests();
 					}
 				}
 			}

@@ -158,8 +158,8 @@ namespace Phoenix.HabboHotel.Misc
                                 TargetRoom = Session.GetHabbo().CurrentRoom;
                                 if (TargetRoom != null && TargetRoom.CheckRights(Session, true))
                                 {
-                                    List<RoomItem> list = TargetRoom.method_24(Session);
-                                    Session.GetHabbo().GetInventoryComponent().method_17(list);
+                                    List<RoomItem> list = TargetRoom.RemoveAllFurniture(Session);
+                                    Session.GetHabbo().GetInventoryComponent().AddItemArray(list);
                                     Session.GetHabbo().GetInventoryComponent().UpdateItems(true);
                                     PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input + " " + Session.GetHabbo().CurrentRoomId);
                                     return true;
@@ -2087,6 +2087,19 @@ namespace Phoenix.HabboHotel.Misc
                             Session.GetHabbo().Sendselfwhisper("You are too far away from " + Params[1] + ", try getting closer");
                             return true;
 
+                        #endregion
+                        #region CMD Pickall
+                        case 33: //CMD Pickall
+                            TargetRoom = Session.GetHabbo().CurrentRoom;
+
+                            if (TargetRoom != null && TargetRoom.CheckRights(Session, true))
+                            {
+                                List<RoomItem> RemovedItems = TargetRoom.RemoveAllFurniture(Session);
+                                Session.GetHabbo().GetInventoryComponent().AddItemArray(RemovedItems);
+                                Session.GetHabbo().GetInventoryComponent().UpdateItems(true);
+                                PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            }
+                            return true;
                         #endregion
                         #endregion
 

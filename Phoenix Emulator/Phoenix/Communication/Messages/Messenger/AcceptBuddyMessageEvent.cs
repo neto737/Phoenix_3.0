@@ -25,7 +25,7 @@ namespace Phoenix.Communication.Messages.Messenger
 						{
 							Session.GetHabbo().GetMessenger().method_12(@class.From);
 						}
-						Session.GetHabbo().GetMessenger().method_11(uint_);
+						Session.GetHabbo().GetMessenger().HandleRequest(uint_);
 					}
 				}
 			}

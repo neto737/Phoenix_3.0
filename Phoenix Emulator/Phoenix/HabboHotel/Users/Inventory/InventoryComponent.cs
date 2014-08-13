@@ -379,7 +379,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			return PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(this.UserId);
 		}
 
-		public void method_17(List<RoomItem> list_2)
+		public void AddItemArray(List<RoomItem> list_2)
 		{
 			foreach (RoomItem current in list_2)
 			{

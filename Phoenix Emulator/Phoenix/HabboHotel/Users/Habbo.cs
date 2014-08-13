@@ -595,7 +595,7 @@ namespace Phoenix.HabboHotel.Users
 				if (@class != null)
 				{
 					@class.SendMessage(this.Messenger.method_21());
-					@class.SendMessage(this.Messenger.method_23());
+					@class.SendMessage(this.Messenger.SerializeRequests());
 					this.Messenger.method_5(true);
 				}
 			}

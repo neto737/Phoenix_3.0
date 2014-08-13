@@ -2,9 +2,10 @@ using System;
 using System.Data;
 using Phoenix.HabboHotel.GameClients;
 using Phoenix.HabboHotel.Users;
+
 namespace Phoenix.HabboHotel.Users.Authenticator
 {
-	internal class Authenticator
+	class Authenticator
 	{
 		internal static Habbo TryLoginHabbo(string AuthTicket, GameClient Session, HabboData pData, HabboData UserData)
 		{
