@@ -1,7 +1,7 @@
 using System;
 namespace Phoenix.HabboHotel.Support
 {
-	internal sealed class HelpTopic
+	class HelpTopic
 	{
 		private uint Id;
 		public string Caption;
@@ -20,7 +20,7 @@ namespace Phoenix.HabboHotel.Support
         {
             get
             {
-                return this.Id;
+                return Id;
             }
         }
 	}

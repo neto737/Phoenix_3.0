@@ -3,7 +3,7 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Inventory.AvatarFX
 {
-	internal sealed class AvatarEffectActivatedEvent : MessageEvent
+	internal class AvatarEffectActivatedEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{

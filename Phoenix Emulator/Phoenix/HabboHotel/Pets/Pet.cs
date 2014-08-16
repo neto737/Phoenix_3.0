@@ -44,6 +44,7 @@ namespace Phoenix.HabboHotel.Pets
 					return PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(RoomId);
 			}
 		}
+
 		public bool IsInRoom
 		{
 			get
@@ -51,6 +52,7 @@ namespace Phoenix.HabboHotel.Pets
 				return (RoomId > 0);
 			}
 		}
+
 		public int Level
 		{
 			get
@@ -65,6 +67,7 @@ namespace Phoenix.HabboHotel.Pets
 				return this.MaxLevel;
 			}
 		}
+
 		public int MaxLevel
 		{
 			get
@@ -72,6 +75,7 @@ namespace Phoenix.HabboHotel.Pets
 				return 20;
 			}
 		}
+
 		public int ExpirienceGoal
 		{
 			get
@@ -86,6 +90,7 @@ namespace Phoenix.HabboHotel.Pets
 				}
 			}
 		}
+
 		public int MaxEnergy
 		{
 			get
@@ -93,6 +98,7 @@ namespace Phoenix.HabboHotel.Pets
 				return 100;
 			}
 		}
+
 		public int MaxNutrition
 		{
 			get
@@ -100,6 +106,7 @@ namespace Phoenix.HabboHotel.Pets
 				return 150;
 			}
 		}
+
 		public int Age
 		{
 			get
@@ -107,6 +114,7 @@ namespace Phoenix.HabboHotel.Pets
 				return (int)Math.Floor((PhoenixEnvironment.GetUnixTimestamp() - this.CreationStamp) / 86400.0);
 			}
 		}
+
 		public string Look
 		{
 			get
@@ -114,6 +122,7 @@ namespace Phoenix.HabboHotel.Pets
                 return Type + " " + Race + " " + Color.ToLower();
 			}
 		}
+
 		public string UNDEFINED
 		{
 			get
@@ -121,6 +130,7 @@ namespace Phoenix.HabboHotel.Pets
 				return OldEncoding.encodeVL64((int)this.Type) + OldEncoding.encodeVL64(Convert.ToInt32(this.Race)) + this.Color;
 			}
 		}
+
 		public string OwnerName
 		{
 			get
@@ -128,6 +138,7 @@ namespace Phoenix.HabboHotel.Pets
 				return PhoenixEnvironment.GetGame().GetClientManager().GetNameById(OwnerId);
 			}
 		}
+
 		public Pet(uint PetId, uint OwnerId, uint RoomId, string Name, uint Type, string Race, string Color, int Expirience, int Energy, int Nutrition, int Respect, double CreationStamp, int X, int Y, double Z)
 		{
 			this.PetId = PetId;
@@ -148,6 +159,7 @@ namespace Phoenix.HabboHotel.Pets
 			this.PlacedInRoom = false;
 			this.DBState = DatabaseUpdateState.Updated;
 		}
+
 		public void OnRespect()
 		{
 			this.Respect++;
@@ -172,6 +184,7 @@ namespace Phoenix.HabboHotel.Pets
 			Message.AppendStringWithBreak("281");
 			this.Room.SendMessage(Message, null);
 		}
+
 		public void AddExpirience(int Amount, int int_9)
 		{
 			this.PetEnergy(int_9);
@@ -201,6 +214,7 @@ namespace Phoenix.HabboHotel.Pets
 				}
 			}
 		}
+
 		public void PetEnergy(int Add)
 		{
 			this.Energy -= Add;
@@ -220,12 +234,14 @@ namespace Phoenix.HabboHotel.Pets
 				this.DBState = DatabaseUpdateState.NeedsUpdate;
 			}
 		}
+
 		public void SerializeInventory(ServerMessage Message)
 		{
 			Message.AppendUInt(PetId);
 			Message.AppendStringWithBreak(Name);
 			Message.AppendStringWithBreak(UNDEFINED);
 		}
+
 		public ServerMessage SerializeInfo()
 		{
 			ServerMessage Nfo = new ServerMessage(601u);

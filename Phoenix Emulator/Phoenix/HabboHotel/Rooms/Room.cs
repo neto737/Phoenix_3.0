@@ -103,7 +103,7 @@ namespace Phoenix.HabboHotel.Rooms
         private bool mGotRollers;
         private int int_14;
         private int int_15;
-        private RoomData class27_0;
+        private RoomData mRoomData;
         private RoomMusicController musicController;
         private int int_16;
         private bool bool_12;
@@ -208,21 +208,22 @@ namespace Phoenix.HabboHotel.Rooms
                 return this.mWallItems.Clone() as Hashtable;
             }
         }
-        public bool Boolean_2
+        public bool CanTradeInRoom
         {
             get
             {
-                if (this.IsPublic)
+                if (IsPublic)
                 {
                     return false;
                 }
                 else
                 {
-                    FlatCat @class = PhoenixEnvironment.GetGame().GetNavigator().GetFlatCat(this.Category);
+                    FlatCat @class = PhoenixEnvironment.GetGame().GetNavigator().GetFlatCat(Category);
                     return (@class != null && @class.CanTrade);
                 }
             }
         }
+
         public bool IsPublic
         {
             get
@@ -230,6 +231,7 @@ namespace Phoenix.HabboHotel.Rooms
                 return this.Type == "public";
             }
         }
+
         public int Int32_2
         {
             get
@@ -246,14 +248,16 @@ namespace Phoenix.HabboHotel.Rooms
                 return num;
             }
         }
-        internal RoomData Class27_0
+
+        internal RoomData RoomData
         {
             get
             {
-                this.class27_0.Fill(this);
-                return this.class27_0;
+                mRoomData.Fill(this);
+                return mRoomData;
             }
         }
+
         public byte[,] SqFloorHeight
         {
             get
@@ -261,6 +265,7 @@ namespace Phoenix.HabboHotel.Rooms
                 return this.byte_0;
             }
         }
+
         internal bool Boolean_4
         {
             get
@@ -347,7 +352,7 @@ namespace Phoenix.HabboHotel.Rooms
             this.bool_6 = false;
             this.bool_7 = false;
             this.bool_5 = true;
-            this.class27_0 = class27_1;
+            this.mRoomData = class27_1;
             this.bool_8 = bool_17;
             this.list_17 = new List<Guild>();
             this.list_4 = new List<uint>();
@@ -3052,7 +3057,7 @@ namespace Phoenix.HabboHotel.Rooms
                             this.CrashRoom();
                         }
                     }
-                    this.class27_0.UsersNow = num3;
+                    this.mRoomData.UsersNow = num3;
                 }
                 catch (Exception ex)
                 {
@@ -3648,9 +3653,9 @@ namespace Phoenix.HabboHotel.Rooms
                                 ServerMessage Message3 = new ServerMessage(29u);
                                 Message3.AppendRawInt32(@class.VirtualId);
                                 this.SendMessage(Message3, null);
-                                if (this.method_74(Session.GetHabbo().Id))
+                                if (this.HasActiveTrade(Session.GetHabbo().Id))
                                 {
-                                    this.method_78(Session.GetHabbo().Id);
+                                    this.TryStopTrade(Session.GetHabbo().Id);
                                 }
                                 num = 5;
                                 if (Session.GetHabbo().Username.ToLower() == this.Owner.ToLower() && this.HasOngoingEvent)
@@ -4749,7 +4754,7 @@ namespace Phoenix.HabboHotel.Rooms
 							"UPDATE user_pets SET room_id = 0 WHERE room_id = ",
 							this.Id,
 							" AND NOT user_id = ",
-							PhoenixEnvironment.GetGame().GetClientManager().method_27(this.Owner)
+							PhoenixEnvironment.GetGame().GetClientManager().GetIdByName(this.Owner)
 						}));
                     }
                     this.timer_0.Dispose();
@@ -4885,73 +4890,72 @@ namespace Phoenix.HabboHotel.Rooms
             }
             return num;
         }
-        public bool method_73(RoomUser RoomUser_1)
+
+        public bool HasActiveTrade(RoomUser User)
         {
-            return !RoomUser_1.IsBot && this.method_74(RoomUser_1.GetClient().GetHabbo().Id);
+            return !User.IsBot && HasActiveTrade(User.GetClient().GetHabbo().Id);
         }
-        public bool method_74(uint uint_2)
+
+        public bool HasActiveTrade(uint UserId)
         {
-            bool result;
-            using (TimedLock.Lock(this.ActiveTrades))
+            using (TimedLock.Lock(ActiveTrades))
             {
-                foreach (Trade current in this.ActiveTrades)
+                foreach (Trade Trade in ActiveTrades)
                 {
-                    if (current.ContainsUser(uint_2))
+                    if (Trade.ContainsUser(UserId))
                     {
-                        result = true;
-                        return result;
+                        return true;
                     }
                 }
             }
-            result = false;
-            return result;
+            return false;
         }
+
         public Trade method_75(RoomUser RoomUser_1)
         {
-            Trade result;
             if (RoomUser_1.IsBot)
             {
-                result = null;
+                return null;
             }
             else
             {
-                result = this.method_76(RoomUser_1.GetClient().GetHabbo().Id);
+                return GetUserTrade(RoomUser_1.GetClient().GetHabbo().Id);
             }
-            return result;
         }
-        public Trade method_76(uint uint_2)
+
+        public Trade GetUserTrade(uint UserId)
         {
-            Trade result;
-            using (TimedLock.Lock(this.ActiveTrades))
+            using (TimedLock.Lock(ActiveTrades))
             {
-                foreach (Trade current in this.ActiveTrades)
+                foreach (Trade Trade in ActiveTrades)
                 {
-                    if (current.ContainsUser(uint_2))
+                    if (Trade.ContainsUser(UserId))
                     {
-                        result = current;
-                        return result;
+                        return Trade;
                     }
                 }
             }
-            result = null;
-            return result;
+            return null;
         }
-        public void method_77(RoomUser RoomUser_1, RoomUser RoomUser_2)
+
+        public void TryStartTrade(RoomUser UserOne, RoomUser UserTwo)
         {
-            if (RoomUser_1 != null && RoomUser_2 != null && (!RoomUser_1.IsBot || RoomUser_1.BotData.Boolean_1) && (!RoomUser_2.IsBot || RoomUser_2.BotData.Boolean_1) && !RoomUser_1.IsTrading && !RoomUser_2.IsTrading && !this.method_73(RoomUser_1) && !this.method_73(RoomUser_2))
+            if (UserOne != null && UserTwo != null && (!UserOne.IsBot || UserOne.BotData.Boolean_1) && (!UserTwo.IsBot || UserTwo.BotData.Boolean_1) && !UserOne.IsTrading && !UserTwo.IsTrading && !HasActiveTrade(UserOne) && !HasActiveTrade(UserTwo))
             {
-                this.ActiveTrades.Add(new Trade(RoomUser_1.GetClient().GetHabbo().Id, RoomUser_2.GetClient().GetHabbo().Id, this.RoomId));
+                ActiveTrades.Add(new Trade(UserOne.GetClient().GetHabbo().Id, UserTwo.GetClient().GetHabbo().Id, RoomId));
             }
         }
-        public void method_78(uint uint_2)
+
+        public void TryStopTrade(uint UserId)
         {
-            Trade @class = this.method_76(uint_2);
-            if (@class != null)
+            Trade Trade = GetUserTrade(UserId);
+            if (Trade != null)
             {
-                @class.CloseTrade(uint_2);
-                this.ActiveTrades.Remove(@class);
+                Trade.CloseTrade(UserId);
+                ActiveTrades.Remove(Trade);
             }
         }
+
         public bool method_79(GameClient Session, RoomItem RoomItem_0, int int_17, int int_18, int int_19, bool bool_13, bool bool_14, bool bool_15)
         {
             Dictionary<int, AffectedTile> dictionary = this.GetAffectedTiles(RoomItem_0.GetBaseItem().Length, RoomItem_0.GetBaseItem().Width, int_17, int_18, int_19);

@@ -3,17 +3,17 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Messenger
 {
-	internal sealed class RequestBuddyMessageEvent : MessageEvent
+	internal class RequestBuddyMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
 			if (Session.GetHabbo().GetMessenger() != null)
 			{
-				if (Session.GetHabbo().CurrentQuestId == 4u)
+				if (Session.GetHabbo().CurrentQuestId == 4)
 				{
-					PhoenixEnvironment.GetGame().GetQuestManager().ProgressUserQuest(4u, Session);
+					PhoenixEnvironment.GetGame().GetQuestManager().ProgressUserQuest(4, Session);
 				}
-				Session.GetHabbo().GetMessenger().method_16(Event.PopFixedString());
+				Session.GetHabbo().GetMessenger().RequestBuddy(Event.PopFixedString());
 			}
 		}
 	}

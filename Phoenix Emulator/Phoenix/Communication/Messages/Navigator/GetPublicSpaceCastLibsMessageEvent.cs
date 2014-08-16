@@ -4,29 +4,29 @@ using Phoenix.HabboHotel.Rooms;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Navigator
 {
-	internal sealed class GetPublicSpaceCastLibsMessageEvent : MessageEvent
+	internal class GetPublicSpaceCastLibsMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			uint num = Event.PopWiredUInt();
+			uint Id = Event.PopWiredUInt();
 			Event.PopFixedString();
 			Event.PopWiredInt32();
-            RoomData @class = PhoenixEnvironment.GetGame().GetRoomManager().GenerateRoomData(num);
-			if (@class != null)
+            RoomData Data = PhoenixEnvironment.GetGame().GetRoomManager().GenerateRoomData(Id);
+			if (Data != null)
 			{
-				if (@class.Type == "private")
+				if (Data.Type == "private")
 				{
-					ServerMessage Message = new ServerMessage(286u);
-					Message.AppendBoolean(@class.IsPublicRoom);
-					Message.AppendUInt(num);
+					ServerMessage Message = new ServerMessage(286);
+					Message.AppendBoolean(Data.IsPublicRoom);
+					Message.AppendUInt(Id);
 					Session.SendMessage(Message);
 				}
 				else
 				{
-					ServerMessage Message2 = new ServerMessage(453u);
-					Message2.AppendUInt(@class.Id);
-					Message2.AppendStringWithBreak(@class.CCTs);
-					Message2.AppendUInt(@class.Id);
+					ServerMessage Message2 = new ServerMessage(453);
+					Message2.AppendUInt(Data.Id);
+					Message2.AppendStringWithBreak(Data.CCTs);
+					Message2.AppendUInt(Data.Id);
 					Session.SendMessage(Message2);
 				}
 			}

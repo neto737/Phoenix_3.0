@@ -3,7 +3,7 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Inventory.Badges
 {
-	internal sealed class GetBadgePointLimitsEvent : MessageEvent
+	internal class GetBadgePointLimitsEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{

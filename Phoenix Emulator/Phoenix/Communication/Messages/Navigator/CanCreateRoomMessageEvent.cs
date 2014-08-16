@@ -4,11 +4,11 @@ using Phoenix.Util;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Navigator
 {
-	internal sealed class CanCreateRoomMessageEvent : MessageEvent
+	internal class CanCreateRoomMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			ServerMessage Message = new ServerMessage(512u);
+			ServerMessage Message = new ServerMessage(512);
 			if (Session.GetHabbo().list_6.Count > GlobalClass.MaxRoomsPerUser)
 			{
 				Message.AppendBoolean(true);

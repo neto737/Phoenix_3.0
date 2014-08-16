@@ -4,20 +4,20 @@ using Phoenix.Messages;
 using Phoenix.HabboHotel.Rooms;
 namespace Phoenix.Communication.Messages.Messenger
 {
-	internal sealed class FollowFriendMessageEvent : MessageEvent
+	internal class FollowFriendMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			uint uint_ = Event.PopWiredUInt();
-			GameClient @class = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(uint_);
-			if (@class != null && @class.GetHabbo() != null && @class.GetHabbo().InRoom)
+			uint Id = Event.PopWiredUInt();
+			GameClient mSession = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Id);
+			if (mSession != null && mSession.GetHabbo() != null && mSession.GetHabbo().InRoom)
 			{
-				Room class2 = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(@class.GetHabbo().CurrentRoomId);
-				if (class2 != null && class2 != Session.GetHabbo().CurrentRoom)
+				Room Room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(mSession.GetHabbo().CurrentRoomId);
+				if (Room != null && Room != Session.GetHabbo().CurrentRoom)
 				{
-					ServerMessage Message = new ServerMessage(286u);
-					Message.AppendBoolean(class2.IsPublic);
-					Message.AppendUInt(class2.RoomId);
+					ServerMessage Message = new ServerMessage(286);
+					Message.AppendBoolean(Room.IsPublic);
+					Message.AppendUInt(Room.RoomId);
 					Session.SendMessage(Message);
 				}
 			}

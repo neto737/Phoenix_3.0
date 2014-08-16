@@ -3,13 +3,14 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Catalog
 {
-	internal sealed class PurchaseFromCatalogEvent : MessageEvent
-	{
-		public void parse(GameClient Session, ClientMessage Event)
-		{
-			int pageId = Event.PopWiredInt32();
-			uint itemId = Event.PopWiredUInt();
-			string extraData = Event.PopFixedString();
+    internal class PurchaseFromCatalogEvent : MessageEvent
+    {
+        public void parse(GameClient Session, ClientMessage Event)
+        {
+            int pageId = Event.PopWiredInt32();
+            uint itemId = Event.PopWiredUInt();
+            string extraData = Event.PopFixedString();
+
             if (Session.GetHabbo().BuyCount <= 1)
             {
                 PhoenixEnvironment.GetGame().GetCatalog().HandlePurchase(Session, pageId, itemId, extraData, false, "", "", true);
@@ -25,6 +26,6 @@ namespace Phoenix.Communication.Messages.Catalog
                 }
                 Session.GetHabbo().BuyCount = 1;
             }
-		}
-	}
+        }
+    }
 }

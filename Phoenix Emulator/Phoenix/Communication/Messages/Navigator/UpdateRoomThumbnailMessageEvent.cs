@@ -7,68 +7,61 @@ using Phoenix.Messages;
 using Phoenix.Storage;
 namespace Phoenix.Communication.Messages.Navigator
 {
-	internal sealed class UpdateRoomThumbnailMessageEvent : MessageEvent
+	internal class UpdateRoomThumbnailMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			Room @class = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-			if (@class != null && @class.CheckRights(Session, true))
+			Room Room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+			if (Room != null && Room.CheckRights(Session, true))
 			{
 				Event.PopWiredInt32();
-				Dictionary<int, int> dictionary = new Dictionary<int, int>();
-				int num = Event.PopWiredInt32();
-				int num2 = Event.PopWiredInt32();
+				Dictionary<int, int> Items = new Dictionary<int, int>();
+				int BackgroundImage = Event.PopWiredInt32();
+				int ForegroundImage = Event.PopWiredInt32();
 				int num3 = Event.PopWiredInt32();
+
 				for (int i = 0; i < num3; i++)
 				{
 					int num4 = Event.PopWiredInt32();
 					int num5 = Event.PopWiredInt32();
-					if (num4 < 0 || num4 > 10 || (num5 < 1 || num5 > 27) || dictionary.ContainsKey(num4))
+					if (num4 < 0 || num4 > 10 || (num5 < 1 || num5 > 27) || Items.ContainsKey(num4))
 					{
 						return;
 					}
-					dictionary.Add(num4, num5);
+					Items.Add(num4, num5);
 				}
-				if (num >= 1 && num <= 24 && (num2 >= 0 && num2 <= 11))
+				if (BackgroundImage >= 1 && BackgroundImage <= 24 && (ForegroundImage >= 0 && ForegroundImage <= 11))
 				{
 					StringBuilder stringBuilder = new StringBuilder();
 					int num6 = 0;
-					foreach (KeyValuePair<int, int> current in dictionary)
+					foreach (KeyValuePair<int, int> Item in Items)
 					{
 						if (num6 > 0)
 						{
 							stringBuilder.Append("|");
 						}
-						stringBuilder.Append(current.Key + "," + current.Value);
+						stringBuilder.Append(Item.Key + "," + Item.Value);
 						num6++;
 					}
-					using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
+					using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 					{
-						class2.ExecuteQuery(string.Concat(new object[]
-						{
-							"UPDATE rooms SET icon_bg = '",
-							num,
-							"', icon_fg = '",
-							num2,
-							"', icon_items = '",
-							stringBuilder.ToString(),
-							"' WHERE Id = '",
-							@class.RoomId,
-							"' LIMIT 1"
-						}));
+						adapter.ExecuteQuery("UPDATE rooms SET icon_bg = '" + BackgroundImage + "', icon_fg = '" + ForegroundImage + "', icon_items = '" + stringBuilder.ToString() + "' WHERE Id = '" + Room.RoomId + "' LIMIT 1");
 					}
-					@class.myIcon = new RoomIcon(num, num2, dictionary);
-					ServerMessage Message = new ServerMessage(457u);
-					Message.AppendUInt(@class.RoomId);
+					Room.myIcon = new RoomIcon(BackgroundImage, ForegroundImage, Items);
+
+					ServerMessage Message = new ServerMessage(457);
+					Message.AppendUInt(Room.RoomId);
 					Message.AppendBoolean(true);
 					Session.SendMessage(Message);
-					ServerMessage Message2 = new ServerMessage(456u);
-					Message2.AppendUInt(@class.RoomId);
+
+					ServerMessage Message2 = new ServerMessage(456);
+					Message2.AppendUInt(Room.RoomId);
 					Session.SendMessage(Message2);
-					RoomData class27_ = @class.Class27_0;
-					ServerMessage Message3 = new ServerMessage(454u);
+					RoomData Data = Room.RoomData;
+
+					ServerMessage Message3 = new ServerMessage(454);
 					Message3.AppendBoolean(false);
-					class27_.Serialize(Message3, false, false);
+					Data.Serialize(Message3, false, false);
 					Session.SendMessage(Message3);
 				}
 			}

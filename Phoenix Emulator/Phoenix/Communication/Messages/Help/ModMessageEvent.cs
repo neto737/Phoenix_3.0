@@ -3,23 +3,23 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Help
 {
-	internal sealed class ModMessageMessageEvent : MessageEvent
+	internal class ModMessageMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
 			if (Session.GetHabbo().HasRole("acc_supporttool"))
 			{
-				uint num = Event.PopWiredUInt();
-				string text = Event.PopFixedString();
-				string string_ = string.Concat(new object[]
+				uint User = Event.PopWiredUInt();
+				string Msg = Event.PopFixedString();
+				string Alert = string.Concat(new object[]
 				{
 					"User: ",
-					num,
+					User,
 					", Message: ",
-					text
+					Msg
 				});
-				PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, "ModTool - Alert User", string_);
-				PhoenixEnvironment.GetGame().GetModerationTool().method_16(Session, num, text, false);
+				PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, "ModTool - Alert User", Alert);
+				PhoenixEnvironment.GetGame().GetModerationTool().AlertUser(Session, User, Msg, false);
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 using System;
 namespace Phoenix.HabboHotel.Rooms
 {
-	public sealed class AffectedTile
+	class AffectedTile
 	{
 		private int mX;
 		private int mY;
@@ -11,7 +11,7 @@ namespace Phoenix.HabboHotel.Rooms
 		{
 			get
 			{
-				return this.mX;
+				return mX;
 			}
 		}
 
@@ -19,7 +19,7 @@ namespace Phoenix.HabboHotel.Rooms
 		{
 			get
             {
-				return this.mY;
+				return mY;
 			}
 		}
 
@@ -27,7 +27,7 @@ namespace Phoenix.HabboHotel.Rooms
 		{
 			get
 			{
-            	return this.mI;
+            	return mI;
 			}
 		}
 

@@ -3,31 +3,31 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Help
 {
-	internal sealed class ModerateRoomMessageEvent : MessageEvent
+	internal class ModerateRoomMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
 			if (Session.GetHabbo().HasRole("acc_supporttool"))
 			{
-				uint uint_ = Event.PopWiredUInt();
-				bool flag = Event.PopWiredBoolean();
-				bool flag2 = Event.PopWiredBoolean();
-				bool flag3 = Event.PopWiredBoolean();
-				string text = "";
-				if (flag)
+				uint RoomId = Event.PopWiredUInt();
+				bool LockRoom = Event.PopWiredBoolean();
+				bool InappropriateRoom = Event.PopWiredBoolean();
+				bool KickUsers = Event.PopWiredBoolean();
+				string Act = "";
+				if (LockRoom)
 				{
-					text += "Apply Doorbell";
+					Act += "Apply Doorbell";
 				}
-				if (flag2)
+				if (InappropriateRoom)
 				{
-					text += " Change Name";
+					Act += " Change Name";
 				}
-				if (flag3)
+				if (KickUsers)
 				{
-					text += " Kick Users";
+					Act += " Kick Users";
 				}
-				PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, "ModTool - Room Action", text);
-				PhoenixEnvironment.GetGame().GetModerationTool().method_12(Session, uint_, flag3, flag, flag2);
+				PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, "ModTool - Room Action", Act);
+				PhoenixEnvironment.GetGame().GetModerationTool().PerformRoomAction(Session, RoomId, KickUsers, LockRoom, InappropriateRoom);
 			}
 		}
 	}

@@ -4,7 +4,7 @@ using Phoenix.Messages;
 using Phoenix.HabboHotel.Support;
 namespace Phoenix.Communication.Messages.Help
 {
-	internal sealed class GetFaqCategoryMessageEvent : MessageEvent
+	internal class GetFaqCategoryMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{

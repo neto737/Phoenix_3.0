@@ -1,10 +1,8 @@
 using System;
 namespace Phoenix.HabboHotel.Support
 {
-	public sealed class ModerationBanException : Exception
+	class ModerationBanException : Exception
 	{
-		public ModerationBanException(string Reason) : base(Reason)
-		{
-		}
+        public ModerationBanException(string Reason) : base(Reason) { }
 	}
 }

@@ -11,13 +11,13 @@ namespace Phoenix.Communication.Messages.Help
 		{
 			if (Session.GetHabbo().HasRole("acc_supporttool"))
 			{
-				SupportTicket @class = PhoenixEnvironment.GetGame().GetModerationTool().method_5(Event.PopWiredUInt());
+				SupportTicket @class = PhoenixEnvironment.GetGame().GetModerationTool().GetTicket(Event.PopWiredUInt());
 				if (@class != null)
 				{
                     RoomData class2 = PhoenixEnvironment.GetGame().GetRoomManager().GenerateNullableRoomData(@class.RoomId);
 					if (class2 != null)
 					{
-                        Session.SendMessage(PhoenixEnvironment.GetGame().GetModerationTool().method_21(@class, class2, @class.Timestamp));
+                        Session.SendMessage(PhoenixEnvironment.GetGame().GetModerationTool().SerializeTicketChatlog(@class, class2, @class.Timestamp));
 					}
 				}
 			}

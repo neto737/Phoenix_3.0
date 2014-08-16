@@ -5,21 +5,22 @@ using Phoenix.Util;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Navigator
 {
-	internal sealed class CreateFlatMessageEvent : MessageEvent
+	internal class CreateFlatMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
 			if (Session.GetHabbo().list_6.Count <= GlobalClass.MaxRoomsPerUser)
 			{
-				string string_ = PhoenixEnvironment.FilterInjectionChars(Event.PopFixedString());
-				string string_2 = Event.PopFixedString();
+				string Name = PhoenixEnvironment.FilterInjectionChars(Event.PopFixedString());
+				string Model = Event.PopFixedString();
+
 				Event.PopFixedString();
-                RoomData @class = PhoenixEnvironment.GetGame().GetRoomManager().method_20(Session, string_, string_2);
-				if (@class != null)
+                RoomData Data = PhoenixEnvironment.GetGame().GetRoomManager().CreateRoom(Session, Name, Model);
+				if (Data != null)
 				{
-					ServerMessage Message = new ServerMessage(59u);
-					Message.AppendUInt(@class.Id);
-					Message.AppendStringWithBreak(@class.Name);
+					ServerMessage Message = new ServerMessage(59);
+					Message.AppendUInt(Data.Id);
+					Message.AppendStringWithBreak(Data.Name);
 					Session.SendMessage(Message);
 				}
 			}

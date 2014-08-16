@@ -3,11 +3,11 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Catalog
 {
-    internal sealed class GetGiftWrappingConfigurationEvent : MessageEvent
+    internal class GetGiftWrappingConfigurationEvent : MessageEvent
     {
         public void parse(GameClient Session, ClientMessage Event)
         {
-            ServerMessage Message = new ServerMessage(620u);
+            ServerMessage Message = new ServerMessage(620);
             for (int i = 187; i < 191; i++)
             {
                 Message.AppendInt32(i);

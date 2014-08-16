@@ -3,7 +3,7 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 namespace Phoenix.HabboHotel.Quests
 {
-	internal sealed class Quest
+	class Quest
 	{
 		private readonly uint Id;
 		public string Type;
@@ -29,17 +29,17 @@ namespace Phoenix.HabboHotel.Quests
 
         public void Serialize(ServerMessage Message, GameClient Session, bool Single)
         {
-            Message.AppendStringWithBreak(this.Type);
-            if (Session.GetHabbo().CompletedQuests.Contains(this.Id))
+            Message.AppendStringWithBreak(Type);
+            if (Session.GetHabbo().CompletedQuests.Contains(Id))
             {
-                Message.AppendInt32(this.Level);
+                Message.AppendInt32(Level);
             }
             else
             {
-                Message.AppendInt32(this.Level - 1);
+                Message.AppendInt32(Level - 1);
             }
-            Message.AppendInt32(PhoenixEnvironment.GetGame().GetQuestManager().GetHighestLevelForType(this.Type));
-            if (PhoenixEnvironment.GetGame().GetQuestManager().GetHighestLevelForType(this.Type) == this.Level && Session.GetHabbo().CompletedQuests.Contains(this.Id) && !Single)
+            Message.AppendInt32(PhoenixEnvironment.GetGame().GetQuestManager().GetHighestLevelForType(Type));
+            if (PhoenixEnvironment.GetGame().GetQuestManager().GetHighestLevelForType(Type) == Level && Session.GetHabbo().CompletedQuests.Contains(Id) && !Single)
             {
                 Message.AppendInt32(0);
                 Message.AppendInt32(0);
@@ -55,14 +55,14 @@ namespace Phoenix.HabboHotel.Quests
             else
             {
                 Message.AppendBoolean(false);
-                Message.AppendUInt(this.Id);
-                Message.AppendBoolean(Session.GetHabbo().CurrentQuestId == this.Id);
-                Message.AppendStringWithBreak(this.Action.StartsWith("FIND") ? "FIND_STUFF" : this.Action);
+                Message.AppendUInt(Id);
+                Message.AppendBoolean(Session.GetHabbo().CurrentQuestId == Id);
+                Message.AppendStringWithBreak(Action.StartsWith("FIND") ? "FIND_STUFF" : Action);
                 Message.AppendStringWithBreak("_2");
-                Message.AppendInt32(this.PixelReward);
-                Message.AppendStringWithBreak(this.Action.Replace("_", ""));
+                Message.AppendInt32(PixelReward);
+                Message.AppendStringWithBreak(Action.Replace("_", ""));
                 Message.AppendInt32(Session.GetHabbo().CurrentQuestProgress);
-                Message.AppendInt32(this.NeedForLevel);
+                Message.AppendInt32(NeedForLevel);
                 Message.AppendInt32(0);
             }
         }

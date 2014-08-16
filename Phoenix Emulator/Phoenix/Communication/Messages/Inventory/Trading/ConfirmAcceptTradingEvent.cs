@@ -4,17 +4,17 @@ using Phoenix.Messages;
 using Phoenix.HabboHotel.Rooms;
 namespace Phoenix.Communication.Messages.Inventory.Trading
 {
-	internal sealed class ConfirmAcceptTradingEvent : MessageEvent
+	internal class ConfirmAcceptTradingEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			Room @class = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
-			if (@class != null && @class.Boolean_2)
+			Room Room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
+			if (Room != null && Room.CanTradeInRoom)
 			{
-				Trade class2 = @class.method_76(Session.GetHabbo().Id);
-				if (class2 != null)
+				Trade Trade = Room.GetUserTrade(Session.GetHabbo().Id);
+				if (Trade != null)
 				{
-					class2.CompleteTrade(Session.GetHabbo().Id);
+					Trade.CompleteTrade(Session.GetHabbo().Id);
 				}
 			}
 		}

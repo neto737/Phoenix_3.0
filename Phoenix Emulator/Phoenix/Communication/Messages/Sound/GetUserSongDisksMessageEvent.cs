@@ -13,7 +13,7 @@ namespace Phoenix.Communication.Messages.Sound
             List<UserItem> songs = new List<UserItem>();
             foreach (UserItem current in Session.GetHabbo().GetInventoryComponent().InventoryItems)
             {
-                if (current != null && !(current.GetBaseItem().Name != "song_disk") && !Session.GetHabbo().GetInventoryComponent().list_1.Contains(current.Id))
+                if (current != null && !(current.GetBaseItem().Name != "song_disk") && !Session.GetHabbo().GetInventoryComponent().mRemovedItems.Contains(current.Id))
                 {
                     songs.Add(current);
                 }

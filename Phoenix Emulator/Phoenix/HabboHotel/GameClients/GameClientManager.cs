@@ -295,9 +295,7 @@ namespace Phoenix.HabboHotel.GameClients
 							Session.GetConnection().SendData(byte_2);
 						}
 					}
-					catch
-					{
-					}
+                    catch { }
 				}
 			}
 		}
@@ -351,101 +349,97 @@ namespace Phoenix.HabboHotel.GameClients
 				}
 			}
 		}
-		internal void GiveCredits(int int_0)
-		{
-			for (int i = 0; i < this.Session.Length; i++)
-			{
-				GameClient Session = this.Session[i];
-				if (Session != null && Session.GetHabbo() != null)
-				{
-					try
-					{
-						Session.GetHabbo().Credits += int_0;
-						Session.GetHabbo().UpdateCreditsBalance(true);
-						Session.SendNotif("You just received " + int_0 + " credits from staff!");
-					}
-					catch
-					{
-					}
-				}
-			}
-		}
-		internal void GivePixels(int int_0, bool bool_0)
-		{
-			for (int i = 0; i < this.Session.Length; i++)
-			{
-				GameClient Session = this.Session[i];
-				if (Session != null && Session.GetHabbo() != null)
-				{
-					try
-					{
-						Session.GetHabbo().ActivityPoints += int_0;
-						Session.GetHabbo().UpdateActivityPointsBalance(bool_0);
-						Session.SendNotif("You just received " + int_0 + " pixels from staff!");
-					}
-					catch
-					{
-					}
-				}
-			}
-		}
-		internal void GivePoints(int int_0, bool bool_0)
-		{
-			for (int i = 0; i < this.Session.Length; i++)
-			{
-				GameClient Session = this.Session[i];
-				if (Session != null && Session.GetHabbo() != null)
-				{
-					try
-					{
-						Session.GetHabbo().shells += int_0;
-						Session.GetHabbo().UpdateShellsBalance(false, bool_0);
-						Session.SendNotif("You just received " + int_0 + " points from staff!");
-					}
-					catch
-					{
-					}
-				}
-			}
-		}
-		internal void GiveMassBadge(string string_0)
-		{
-			for (int i = 0; i < this.Session.Length; i++)
-			{
-				GameClient Session = this.Session[i];
-				if (Session != null && Session.GetHabbo() != null)
-				{
-					try
-					{
-						Session.GetHabbo().GetBadgeComponent().GiveBadge(Session, string_0, true);
-						Session.SendNotif("You just received a badge from hotel staff!");
-					}
-					catch
-					{
-					}
-				}
-			}
-		}
-		public void method_22(ServerMessage Message5_0, string string_0)
-		{
-			for (int i = 0; i < this.Session.Length; i++)
-			{
-				GameClient Session = this.Session[i];
-				if (Session != null)
-				{
-					try
-					{
-						if (string_0.Length <= 0 || (Session.GetHabbo() != null && Session.GetHabbo().HasRole(string_0)))
-						{
-							Session.SendMessage(Message5_0);
-						}
-					}
-					catch
-					{
-					}
-				}
-			}
-		}
+
+        internal void GiveCredits(int Amount)
+        {
+            for (int i = 0; i < this.Session.Length; i++)
+            {
+                GameClient Session = this.Session[i];
+                if (Session != null && Session.GetHabbo() != null)
+                {
+                    try
+                    {
+                        Session.GetHabbo().Credits += Amount;
+                        Session.GetHabbo().UpdateCreditsBalance(true);
+                        Session.SendNotif("You just received " + Amount + " credits from staff!");
+                    }
+                    catch { }
+                }
+            }
+        }
+
+        internal void GivePixels(int int_0, bool bool_0)
+        {
+            for (int i = 0; i < this.Session.Length; i++)
+            {
+                GameClient Session = this.Session[i];
+                if (Session != null && Session.GetHabbo() != null)
+                {
+                    try
+                    {
+                        Session.GetHabbo().ActivityPoints += int_0;
+                        Session.GetHabbo().UpdateActivityPointsBalance(bool_0);
+                        Session.SendNotif("You just received " + int_0 + " pixels from staff!");
+                    }
+                    catch { }
+                }
+            }
+        }
+
+        internal void GivePoints(int int_0, bool bool_0)
+        {
+            for (int i = 0; i < this.Session.Length; i++)
+            {
+                GameClient Session = this.Session[i];
+                if (Session != null && Session.GetHabbo() != null)
+                {
+                    try
+                    {
+                        Session.GetHabbo().shells += int_0;
+                        Session.GetHabbo().UpdateShellsBalance(false, bool_0);
+                        Session.SendNotif("You just received " + int_0 + " points from staff!");
+                    }
+                    catch { }
+                }
+            }
+        }
+
+        internal void GiveMassBadge(string string_0)
+        {
+            for (int i = 0; i < this.Session.Length; i++)
+            {
+                GameClient Session = this.Session[i];
+                if (Session != null && Session.GetHabbo() != null)
+                {
+                    try
+                    {
+                        Session.GetHabbo().GetBadgeComponent().GiveBadge(Session, string_0, true);
+                        Session.SendNotif("You just received a badge from hotel staff!");
+                    }
+                    catch { }
+                }
+            }
+        }
+
+        public void QueueBroadcaseMessage(ServerMessage Message, string FuseRequirement)
+        {
+            for (int i = 0; i < this.Session.Length; i++)
+            {
+                GameClient Session = this.Session[i];
+                if (Session != null)
+                {
+                    try
+                    {
+                        if (FuseRequirement.Length <= 0 || (Session.GetHabbo() != null && Session.GetHabbo().HasRole(FuseRequirement)))
+                        {
+                            Session.SendMessage(Message);
+                        }
+                    }
+                    catch { }
+                }
+            }
+        }
+
 		public void CheckEffects()
 		{
 			for (int i = 0; i < this.Session.Length; i++)
@@ -457,10 +451,11 @@ namespace Phoenix.HabboHotel.GameClients
 				}
 			}
 		}
+
 		internal void CloseAll()
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			bool flag = false;
+			StringBuilder QueryBuilder = new StringBuilder();
+			bool RunUpdate = false;
 			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
 				for (int i = 0; i < this.Session.Length; i++)
@@ -470,24 +465,22 @@ namespace Phoenix.HabboHotel.GameClients
 					{
 						try
 						{
-							Session.GetHabbo().GetInventoryComponent().method_19(adapter, true);
-							stringBuilder.Append(Session.GetHabbo().String_0);
-							flag = true;
+							Session.GetHabbo().GetInventoryComponent().RunDBUpdate(adapter, true);
+							QueryBuilder.Append(Session.GetHabbo().GetQueryString);
+							RunUpdate = true;
 						}
-						catch
-						{
-						}
+                        catch { }
 					}
 				}
-				if (flag)
+				if (RunUpdate)
 				{
 					try
 					{
-						adapter.ExecuteQuery(stringBuilder.ToString());
+						adapter.ExecuteQuery(QueryBuilder.ToString());
 					}
 					catch (Exception ex)
 					{
-						Logging.smethod_8(ex.ToString());
+						Logging.HandleException(ex.ToString());
 					}
 				}
 			}
@@ -504,19 +497,18 @@ namespace Phoenix.HabboHotel.GameClients
 						{
 							Session.GetConnection().Dispose();
 						}
-						catch
-						{
-						}
+                        catch { }
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				Logging.smethod_8(ex.ToString());
+				Logging.HandleException(ex.ToString());
 			}
 			Array.Clear(this.Session, 0, this.Session.Length);
 			Console.WriteLine("Connections closed!");
 		}
+
 		public void LogClonesOut(uint uint_0)
 		{
 			for (int i = 0; i < this.Session.Length; i++)
@@ -528,58 +520,57 @@ namespace Phoenix.HabboHotel.GameClients
 				}
 			}
 		}
-		public string GetNameById(uint uint_0)
+
+		public string GetNameById(uint Id)
 		{
-			GameClient Session = this.GetClientByHabbo(uint_0);
-			string result;
-			if (Session != null)
+			GameClient Cl = this.GetClientByHabbo(Id);
+			if (Cl != null)
 			{
-				result = Session.GetHabbo().Username;
+				return Cl.GetHabbo().Username;
 			}
 			else
 			{
-				DataRow dataRow = null;
-				using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
+				DataRow Row = null;
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					dataRow = class2.ReadDataRow("SELECT username FROM users WHERE Id = '" + uint_0 + "' LIMIT 1");
+					Row = adapter.ReadDataRow("SELECT username FROM users WHERE Id = '" + Id + "' LIMIT 1");
 				}
-				if (dataRow == null)
+				if (Row == null)
 				{
-					result = "Unknown User";
+					return "Unknown User";
 				}
 				else
 				{
-					result = (string)dataRow[0];
+					return (string)Row[0];
 				}
 			}
-			return result;
 		}
-		public uint method_27(string string_0)
+
+		public uint GetIdByName(string Name)
 		{
-			GameClient Session = this.GetClientByHabbo(string_0);
-			uint result;
+			GameClient Session = this.GetClientByHabbo(Name);
 			if (Session != null)
 			{
-				result = Session.GetHabbo().Id;
+				return Session.GetHabbo().Id;
 			}
 			else
 			{
 				DataRow dataRow = null;
 				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					dataRow = adapter.ReadDataRow("SELECT Id FROM users WHERE username = '" + string_0 + "' LIMIT 1");
+					dataRow = adapter.ReadDataRow("SELECT Id FROM users WHERE username = '" + Name + "' LIMIT 1");
 				}
 				if (dataRow == null)
 				{
-					result = 0u;
+					return 0;
 				}
 				else
 				{
-					result = (uint)dataRow[0];
+					return (uint)dataRow[0];
 				}
 			}
-			return result;
 		}
+
 		public void CheckForAllBanConflicts()
 		{
 			Dictionary<GameClient, ModerationBanException> dictionary = new Dictionary<GameClient, ModerationBanException>();
@@ -630,7 +621,7 @@ namespace Phoenix.HabboHotel.GameClients
 			List<ServerMessage> list = new List<ServerMessage>();
 			int num = 0;
 			ServerMessage Message = new ServerMessage();
-			Message.Init(161u);
+			Message.Init(161);
 			Message.AppendStringWithBreak("Users online:\r");
 			for (int i = 0; i < this.Session.Length; i++)
 			{
@@ -657,6 +648,7 @@ namespace Phoenix.HabboHotel.GameClients
 			list.Add(Message);
 			return list;
 		}
+
 		internal void RecordCmdLogs(GameClient Session, string Command, string ExtraData)
 		{
             if (GlobalClass.RecordCmdlogs)
@@ -664,16 +656,7 @@ namespace Phoenix.HabboHotel.GameClients
 				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
 					adapter.AddParamWithValue("extra_data", ExtraData);
-					adapter.ExecuteQuery(string.Concat(new object[]
-					{
-						"INSERT INTO cmdlogs (user_id,user_name,command,extra_data,timestamp) VALUES ('",
-						Session.GetHabbo().Id,
-						"','",
-						Session.GetHabbo().Username,
-						"','",
-						Command,
-						"', @extra_data, UNIX_TIMESTAMP())"
-					}));
+					adapter.ExecuteQuery("INSERT INTO cmdlogs (user_id,user_name,command,extra_data,timestamp) VALUES ('" + Session.GetHabbo().Id + "','" + Session.GetHabbo().Username + "','" + Command + "', @extra_data, UNIX_TIMESTAMP())");
 				}
 			}
 		}

@@ -3,7 +3,7 @@ using Phoenix.Core;
 using Phoenix.Messages;
 namespace Phoenix.HabboHotel.Items
 {
-	internal sealed class UserItem
+	internal class UserItem
 	{
 		internal uint Id;
 		internal uint BaseItem;

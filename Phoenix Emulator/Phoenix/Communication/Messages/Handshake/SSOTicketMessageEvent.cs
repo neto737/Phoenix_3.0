@@ -5,7 +5,7 @@ using Phoenix.Messages;
 using Phoenix.Storage;
 namespace Phoenix.Communication.Messages.Handshake
 {
-	internal sealed class SSOTicketMessageEvent : MessageEvent
+	internal class SSOTicketMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
@@ -14,15 +14,15 @@ namespace Phoenix.Communication.Messages.Handshake
 				Session.Login(Event.PopFixedString());
 				if (Session.GetHabbo() != null && Session.GetHabbo().MutedUsers != null && Session.GetHabbo().MutedUsers.Count > 0)
 				{
-					using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+					using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 					{
 						try
 						{
-							ServerMessage Message = new ServerMessage(420u);
+							ServerMessage Message = new ServerMessage(420);
 							Message.AppendInt32(Session.GetHabbo().MutedUsers.Count);
-							foreach (uint current in Session.GetHabbo().MutedUsers)
+							foreach (uint Id in Session.GetHabbo().MutedUsers)
 							{
-								string string_ = @class.ReadString("SELECT username FROM users WHERE Id = " + current + " LIMIT 1;");
+								string string_ = adapter.ReadString("SELECT username FROM users WHERE Id = " + Id + " LIMIT 1;");
 								Message.AppendStringWithBreak(string_);
 							}
 							Session.SendMessage(Message);

@@ -12,7 +12,7 @@ namespace Phoenix.Communication.Messages.Help
 				int int_ = Event.PopWiredInt32();
 				Event.PopWiredInt32();
 				uint uint_ = Event.PopWiredUInt();
-				PhoenixEnvironment.GetGame().GetModerationTool().method_8(Session, uint_, int_);
+				PhoenixEnvironment.GetGame().GetModerationTool().CloseTicket(Session, uint_, int_);
 			}
 		}
 	}

@@ -147,7 +147,7 @@ namespace Phoenix.Core
 			Logging.IsRunning = true;
 		}
 
-		internal static void smethod_8(string logText)
+		internal static void HandleException(string logText)
 		{
 			throw new NotImplementedException();
 		}

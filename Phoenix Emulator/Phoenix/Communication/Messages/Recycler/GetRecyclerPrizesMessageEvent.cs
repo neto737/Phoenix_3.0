@@ -5,7 +5,7 @@ using Phoenix.Messages;
 using Phoenix.HabboHotel.Catalogs;
 namespace Phoenix.Communication.Messages.Recycler
 {
-	internal sealed class GetRecyclerPrizesMessageEvent : MessageEvent
+	internal class GetRecyclerPrizesMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{

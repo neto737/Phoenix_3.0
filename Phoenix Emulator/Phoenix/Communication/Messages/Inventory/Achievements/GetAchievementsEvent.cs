@@ -4,7 +4,7 @@ using Phoenix.HabboHotel.Achievements;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Inventory.Achievements
 {
-	internal sealed class GetAchievementsEvent : MessageEvent
+	internal class GetAchievementsEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Request)
 		{

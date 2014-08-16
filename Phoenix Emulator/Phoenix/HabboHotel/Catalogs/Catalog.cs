@@ -92,7 +92,8 @@ namespace Phoenix.HabboHotel.Catalogs
 			}
 			Logging.WriteLine("completed!");
 		}
-		public CatalogItem method_2(uint uint_1)
+
+		public CatalogItem FindItem(uint uint_1)
 		{
 			foreach (CatalogPage current in this.Pages.Values)
 			{

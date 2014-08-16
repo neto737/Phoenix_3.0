@@ -13,7 +13,7 @@ namespace Phoenix.HabboHotel.Users.Messenger
 	internal sealed class HabboMessenger
 	{
 		private uint UserId;
-        private Hashtable mBuddies = new Hashtable();
+        private Hashtable friends = new Hashtable();
         private Hashtable mRequests = new Hashtable();
 		internal bool AppearOffline;
 
@@ -21,6 +21,7 @@ namespace Phoenix.HabboHotel.Users.Messenger
 		{
 			this.UserId = UserId;
 		}
+
 		internal void LoadBuddies(HabboData UserData)
 		{
 			//this.mBuddies = new Hashtable();
@@ -29,13 +30,13 @@ namespace Phoenix.HabboHotel.Users.Messenger
 			{
 				foreach (DataRow dataRow in getFriendList.Rows)
 				{
-					this.mBuddies.Add((uint)dataRow["Id"], new MessengerBuddy((uint)dataRow["Id"], dataRow["username"] as string, dataRow["look"] as string, dataRow["motto"] as string, dataRow["last_online"] as string));
+					this.friends.Add((uint)dataRow["Id"], new MessengerBuddy((uint)dataRow["Id"], dataRow["username"] as string, dataRow["look"] as string, dataRow["motto"] as string, dataRow["last_online"] as string));
 				}
 				try
 				{
 					if (this.GetClient().GetHabbo().HasRole("receive_sa"))
 					{
-						this.mBuddies.Add(0, new MessengerBuddy(0, "Staff Chat", this.GetClient().GetHabbo().Look, "Staff Chat Room", "0"));
+						this.friends.Add(0, new MessengerBuddy(0, "Staff Chat", this.GetClient().GetHabbo().Look, "Staff Chat Room", "0"));
 					}
 				}
 				catch
@@ -43,10 +44,11 @@ namespace Phoenix.HabboHotel.Users.Messenger
 				}
 			}
 		}
-		internal void method_1(HabboData class12_0)
+
+		internal void method_1(HabboData UserData)
 		{
 			//this.mRequests = new Hashtable();
-			DataTable dataTable_ = class12_0.GetUserRequests;
+			DataTable dataTable_ = UserData.GetUserRequests;
 			if (dataTable_ != null)
 			{
 				foreach (DataRow dataRow in dataTable_.Rows)
@@ -55,21 +57,25 @@ namespace Phoenix.HabboHotel.Users.Messenger
 				}
 			}
 		}
+
 		internal void ClearBuddies()
 		{
-			this.mBuddies.Clear();
+			this.friends.Clear();
 		}
+
 		public void ClearRequests()
 		{
 			this.mRequests.Clear();
 		}
+
 		internal MessengerRequest GetRequest(uint RequestId)
 		{
 			return this.mRequests[RequestId] as MessengerRequest;
 		}
+
 		internal void method_5(bool bool_1)
 		{
-			Hashtable hashtable = this.mBuddies.Clone() as Hashtable;
+			Hashtable hashtable = this.friends.Clone() as Hashtable;
 			foreach (MessengerBuddy @class in hashtable.Values)
 			{
 				try
@@ -91,32 +97,31 @@ namespace Phoenix.HabboHotel.Users.Messenger
 			hashtable.Clear();
 			hashtable = null;
 		}
+
 		internal bool method_6(uint uint_1)
 		{
-			Hashtable hashtable = this.mBuddies.Clone() as Hashtable;
-			bool result;
+			Hashtable hashtable = this.friends.Clone() as Hashtable;
 			foreach (MessengerBuddy @class in hashtable.Values)
 			{
 				if (@class.Id == uint_1)
 				{
 					@class.UpdateNeeded = true;
-					result = true;
-					return result;
+					return true;
 				}
 			}
-			result = false;
-			return result;
+			return false;
 		}
+
 		internal void UpdateFriend()
 		{
 			GetClient().SendMessage(SerializeUpdates());
 		}
+
 		internal bool method_8(uint uint_1, uint uint_2)
 		{
-			bool result;
 			if (uint_1 == uint_2)
 			{
-				result = true;
+				return true;
 			}
 			else
 			{
@@ -131,8 +136,7 @@ namespace Phoenix.HabboHotel.Users.Messenger
 						"' LIMIT 1"
 					})) != null)
 					{
-						result = true;
-						return result;
+						return true;
 					}
 					if (@class.ReadDataRow(string.Concat(new object[]
 					{
@@ -143,17 +147,15 @@ namespace Phoenix.HabboHotel.Users.Messenger
 						"' LIMIT 1"
 					})) != null)
 					{
-						result = true;
-						return result;
+						return true;
 					}
 				}
-				result = false;
 			}
-			return result;
+            return false;
 		}
+
 		internal bool method_9(uint uint_1, uint uint_2)
 		{
-			bool result;
 			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
 			{
 				if (@class.ReadDataRow(string.Concat(new object[]
@@ -165,8 +167,7 @@ namespace Phoenix.HabboHotel.Users.Messenger
 					"' LIMIT 1"
 				})) != null)
 				{
-					result = true;
-					return result;
+					return true;
 				}
 				if (@class.ReadDataRow(string.Concat(new object[]
 				{
@@ -177,19 +178,18 @@ namespace Phoenix.HabboHotel.Users.Messenger
 					"' LIMIT 1"
 				})) != null)
 				{
-					result = true;
-					return result;
+					return true;
 				}
 			}
-			result = false;
-			return result;
+			return false;
 		}
 
 		internal void HandleAllRequests()
 		{
 			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				adapter.ExecuteQuery("DELETE FROM messenger_requests WHERE to_id = '" + UserId + "'");
+                adapter.AddParamWithValue("userid", UserId);
+                adapter.ExecuteQuery("DELETE FROM messenger_requests WHERE to_id = @userid");
 			}
 			this.ClearRequests();
 		}
@@ -208,141 +208,148 @@ namespace Phoenix.HabboHotel.Users.Messenger
 			}
 		}
 
-		internal void method_12(uint uint_1)
+		internal void method_12(uint ToId)
 		{
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				@class.AddParamWithValue("toid", uint_1);
-				@class.AddParamWithValue("userid", this.UserId);
-				@class.ExecuteQuery("INSERT INTO messenger_friendships (user_one_id,user_two_id) VALUES (@userid,@toid)");
-				@class.ExecuteQuery("INSERT INTO messenger_friendships (user_one_id,user_two_id) VALUES (@toid,@userid)");
+				adapter.AddParamWithValue("toid", ToId);
+				adapter.AddParamWithValue("userid", UserId);
+				adapter.ExecuteQuery("INSERT INTO messenger_friendships (user_one_id,user_two_id) VALUES (@userid,@toid)");
+				adapter.ExecuteQuery("INSERT INTO messenger_friendships (user_one_id,user_two_id) VALUES (@toid,@userid)");
 			}
-			this.method_14(uint_1);
-			GameClient class2 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(uint_1);
-			if (class2 != null && class2.GetHabbo().GetMessenger() != null)
+			this.method_14(ToId);
+			GameClient ToUser = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(ToId);
+			if (ToUser != null && ToUser.GetHabbo().GetMessenger() != null)
 			{
-				class2.GetHabbo().GetMessenger().method_14(this.UserId);
+				ToUser.GetHabbo().GetMessenger().method_14(this.UserId);
 			}
 		}
-		internal void method_13(uint uint_1)
+
+		internal void method_13(uint ToId)
 		{
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				@class.AddParamWithValue("toid", uint_1);
-				@class.AddParamWithValue("userid", this.UserId);
-				@class.ExecuteQuery("DELETE FROM messenger_friendships WHERE user_one_id = @toid AND user_two_id = @userid LIMIT 1");
-				@class.ExecuteQuery("DELETE FROM messenger_friendships WHERE user_one_id = @userid AND user_two_id = @toid LIMIT 1");
+				adapter.AddParamWithValue("toid", ToId);
+				adapter.AddParamWithValue("userid", this.UserId);
+				adapter.ExecuteQuery("DELETE FROM messenger_friendships WHERE user_one_id = @toid AND user_two_id = @userid LIMIT 1");
+				adapter.ExecuteQuery("DELETE FROM messenger_friendships WHERE user_one_id = @userid AND user_two_id = @toid LIMIT 1");
 			}
-			this.method_15(uint_1);
-			GameClient class2 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(uint_1);
+			this.OnDestroyFriendship(ToId);
+			GameClient class2 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(ToId);
 			if (class2 != null && class2.GetHabbo().GetMessenger() != null)
 			{
-				class2.GetHabbo().GetMessenger().method_15(this.UserId);
+				class2.GetHabbo().GetMessenger().OnDestroyFriendship(this.UserId);
 			}
 		}
+
 		internal void method_14(uint uint_1)
 		{
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				DataRow dataRow = @class.ReadDataRow("SELECT username,motto,look,last_online FROM users WHERE Id = '" + uint_1 + "' LIMIT 1");
+				DataRow dataRow = adapter.ReadDataRow("SELECT username,motto,look,last_online FROM users WHERE Id = '" + uint_1 + "' LIMIT 1");
 				MessengerBuddy class2 = new MessengerBuddy(uint_1, dataRow["username"] as string, dataRow["look"] as string, dataRow["motto"] as string, dataRow["last_online"] as string);
 				class2.UpdateNeeded = true;
-				if (!this.mBuddies.Contains(class2.Id))
+				if (!this.friends.Contains(class2.Id))
 				{
-					this.mBuddies.Add(class2.Id, class2);
+					this.friends.Add(class2.Id, class2);
 				}
 				this.UpdateFriend();
 			}
 		}
-		internal void method_15(uint uint_1)
+
+		internal void OnDestroyFriendship(uint Friend)
 		{
-			this.mBuddies.Remove(uint_1);
-			ServerMessage Message = new ServerMessage(13u);
+			friends.Remove(Friend);
+
+			ServerMessage Message = new ServerMessage(13);
 			Message.AppendInt32(0);
 			Message.AppendInt32(1);
 			Message.AppendInt32(-1);
-			Message.AppendUInt(uint_1);
-			this.GetClient().SendMessage(Message);
+			Message.AppendUInt(Friend);
+			GetClient().SendMessage(Message);
 		}
-		internal void method_16(string string_0)
+
+		internal void RequestBuddy(string UserQuery)
 		{
 			DataRow dataRow = null;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				@class.AddParamWithValue("query", string_0.ToLower());
-				dataRow = @class.ReadDataRow("SELECT Id,block_newfriends FROM users WHERE username = @query LIMIT 1");
+				adapter.AddParamWithValue("query", UserQuery.ToLower());
+				dataRow = adapter.ReadDataRow("SELECT Id,block_newfriends FROM users WHERE username = @query LIMIT 1");
 			}
 			if (dataRow != null)
 			{
 				if (PhoenixEnvironment.EnumToBool(dataRow["block_newfriends"].ToString()) && !this.GetClient().GetHabbo().HasRole("ignore_friendsettings"))
 				{
-					ServerMessage Message = new ServerMessage(260u);
+					ServerMessage Message = new ServerMessage(260);
 					Message.AppendInt32(39);
 					Message.AppendInt32(3);
 					this.GetClient().SendMessage(Message);
 				}
 				else
 				{
-					uint num = (uint)dataRow["Id"];
-					if (!this.method_8(this.UserId, num))
+					uint ToId = (uint)dataRow["Id"];
+					if (!this.method_8(this.UserId, ToId))
 					{
-						using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+						using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 						{
-							@class.AddParamWithValue("toid", num);
-							@class.AddParamWithValue("userid", this.UserId);
-							@class.ExecuteQuery("INSERT INTO messenger_requests (to_id,from_id) VALUES (@toid,@userid)");
+							adapter.AddParamWithValue("toid", ToId);
+							adapter.AddParamWithValue("userid", UserId);
+							adapter.ExecuteQuery("INSERT INTO messenger_requests (to_id,from_id) VALUES (@toid,@userid)");
 						}
-						GameClient class2 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(num);
-						if (class2 != null && class2.GetHabbo() != null)
+						GameClient ToUser = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(ToId);
+						if (ToUser != null && ToUser.GetHabbo() != null)
 						{
-							uint num2 = 0u;
-							using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+							uint num2 = 0;
+							using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 							{
-								@class.AddParamWithValue("toid", num);
-								@class.AddParamWithValue("userid", this.UserId);
-								num2 = @class.ReadUInt32("SELECT Id FROM messenger_requests WHERE to_id = @toid AND from_id = @userid ORDER BY Id DESC LIMIT 1");
+								adapter.AddParamWithValue("toid", ToId);
+								adapter.AddParamWithValue("userid", UserId);
+								num2 = adapter.ReadUInt32("SELECT Id FROM messenger_requests WHERE to_id = @toid AND from_id = @userid ORDER BY Id DESC LIMIT 1");
 							}
-							MessengerRequest class3 = new MessengerRequest(num2, num, this.UserId, PhoenixEnvironment.GetGame().GetClientManager().GetNameById(this.UserId));
-							class2.GetHabbo().GetMessenger().method_17(num2, num, this.UserId);
-							ServerMessage Message5_ = new ServerMessage(132u);
-							class3.Serialize(Message5_);
-							class2.SendMessage(Message5_);
+							MessengerRequest Request = new MessengerRequest(num2, ToId, UserId, PhoenixEnvironment.GetGame().GetClientManager().GetNameById(this.UserId));
+							ToUser.GetHabbo().GetMessenger().OnNewRequest(num2, ToId, UserId);
+							ServerMessage Message = new ServerMessage(132);
+							Request.Serialize(Message);
+							ToUser.SendMessage(Message);
 						}
 					}
 				}
 			}
 		}
-		internal void method_17(uint uint_1, uint uint_2, uint uint_3)
+
+		internal void OnNewRequest(uint uint_1, uint uint_2, uint uint_3)
 		{
 			if (!this.mRequests.ContainsKey(uint_3))
 			{
 				this.mRequests.Add(uint_3, new MessengerRequest(uint_1, uint_2, uint_3, PhoenixEnvironment.GetGame().GetClientManager().GetNameById(uint_3)));
 			}
 		}
+
 		internal void method_18(uint uint_1, string string_0)
 		{
 			if (!this.method_9(uint_1, this.UserId))
 			{
-				this.method_20(6, uint_1);
+				this.DeliverInstantMessageError(6, uint_1);
 			}
 			else
 			{
 				GameClient @class = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(uint_1);
 				if (@class == null || @class.GetHabbo().GetMessenger() == null)
 				{
-					this.method_20(5, uint_1);
+					this.DeliverInstantMessageError(5, uint_1);
 				}
 				else
 				{
 					if (this.GetClient().GetHabbo().Muted)
 					{
-						this.method_20(4, uint_1);
+						this.DeliverInstantMessageError(4, uint_1);
 					}
 					else
 					{
 						if (@class.GetHabbo().Muted)
 						{
-							this.method_20(3, uint_1);
+							this.DeliverInstantMessageError(3, uint_1);
 						}
 						if (this.GetClient().GetHabbo().MaxFloodTime() > 0)
 						{
@@ -353,7 +360,7 @@ namespace Phoenix.HabboHotel.Users.Messenger
 							}
 							if (timeSpan.Seconds < 4 && this.GetClient().GetHabbo().FloodCount > 5)
 							{
-								this.method_20(4, uint_1);
+								this.DeliverInstantMessageError(4, uint_1);
 								return;
 							}
 							this.GetClient().GetHabbo().FloodTime = DateTime.Now;
@@ -381,47 +388,62 @@ namespace Phoenix.HabboHotel.Users.Messenger
 								}));
 							}
 						}
-						@class.GetHabbo().GetMessenger().method_19(string_0, this.UserId);
+						@class.GetHabbo().GetMessenger().DeliverInstantMessage(string_0, this.UserId);
 					}
 				}
 			}
 		}
-		internal void method_19(string string_0, uint uint_1)
+
+		internal void DeliverInstantMessage(string message, uint convoID)
 		{
-			ServerMessage Message = new ServerMessage(134u);
-			Message.AppendUInt(uint_1);
-			Message.AppendString(string_0);
-			this.GetClient().SendMessage(Message);
+			ServerMessage InstantMessage = new ServerMessage(134);
+			InstantMessage.AppendUInt(convoID);
+			InstantMessage.AppendString(message);
+			GetClient().SendMessage(InstantMessage);
 		}
-		internal void method_20(int int_0, uint uint_1)
+
+		internal void DeliverInstantMessageError(int ErrorId, UInt32 ConversationId)
 		{
-			ServerMessage Message = new ServerMessage(261u);
-			Message.AppendInt32(int_0);
-			Message.AppendUInt(uint_1);
-			this.GetClient().SendMessage(Message);
+/*
+3                =     Your friend is muted and cannot reply.
+4                =     Your message was not sent because you are muted.
+5                =     Your friend is not online.
+6                =     Receiver is not your friend anymore.
+7                =     Your friend is busy.
+8                =     Your friend is wanking
+*/
+
+			ServerMessage reply = new ServerMessage(261);
+			reply.AppendInt32(ErrorId);
+			reply.AppendUInt(ConversationId);
+			GetClient().SendMessage(reply);
 		}
-		internal ServerMessage method_21()
+
+		internal ServerMessage SerializeFriends()
 		{
-			ServerMessage Message = new ServerMessage(12u);
-			Message.AppendInt32(6000);
-			Message.AppendInt32(200);
-			Message.AppendInt32(6000);
-			Message.AppendInt32(900);
-			Message.AppendBoolean(false);
-			Message.AppendInt32(this.mBuddies.Count);
-			Hashtable hashtable = this.mBuddies.Clone() as Hashtable;
-			foreach (MessengerBuddy @class in hashtable.Values)
+			ServerMessage reply = new ServerMessage(12);
+			reply.AppendInt32(6000);
+			reply.AppendInt32(200);
+			reply.AppendInt32(6000);
+			reply.AppendInt32(900);
+			reply.AppendBoolean(false);
+			reply.AppendInt32(friends.Count);
+
+			Hashtable hashtable = friends.Clone() as Hashtable;
+
+			foreach (MessengerBuddy friend in hashtable.Values)
 			{
-				@class.Serialize(Message, false);
+				friend.Serialize(reply, false);
 			}
-			return Message;
+
+			return reply;
 		}
 
 		internal ServerMessage SerializeUpdates()
 		{
 			List<MessengerBuddy> list = new List<MessengerBuddy>();
 			int num = 0;
-			Hashtable hashtable = this.mBuddies.Clone() as Hashtable;
+			Hashtable hashtable = this.friends.Clone() as Hashtable;
 			foreach (MessengerBuddy @class in hashtable.Values)
 			{
 				if (@class.UpdateNeeded)
@@ -501,13 +523,15 @@ namespace Phoenix.HabboHotel.Users.Messenger
 			}
 			return Message;
 		}
+
 		private GameClient GetClient()
 		{
 			return PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(UserId);
 		}
+
 		internal Hashtable method_26()
 		{
-			return this.mBuddies.Clone() as Hashtable;
+			return friends.Clone() as Hashtable;
 		}
 	}
 }

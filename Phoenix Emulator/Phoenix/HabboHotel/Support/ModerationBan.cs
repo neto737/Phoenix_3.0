@@ -1,7 +1,7 @@
 using System;
 namespace Phoenix.HabboHotel.Support
 {
-	internal sealed class ModerationBan
+	class ModerationBan
 	{
 		public ModerationBanType Type;
 		public string Variable;
@@ -20,7 +20,7 @@ namespace Phoenix.HabboHotel.Support
         {
             get
             {
-                return PhoenixEnvironment.GetUnixTimestamp() >= this.Expire;
+                return PhoenixEnvironment.GetUnixTimestamp() >= Expire;
             }
         }
 	}

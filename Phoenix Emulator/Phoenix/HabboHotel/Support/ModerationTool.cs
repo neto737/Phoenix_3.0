@@ -11,27 +11,30 @@ using Phoenix.Storage;
 using Phoenix.Util;
 namespace Phoenix.HabboHotel.Support
 {
-	internal sealed class ModerationTool
-	{
-		public List<SupportTicket> Tickets;
+	class ModerationTool
+    {
+        #region General
+        public List<SupportTicket> Tickets;
 		public List<string> UserMessagePresets;
 		public List<string> RoomMessagePresets;
+
 		public ModerationTool()
 		{
 			this.Tickets = new List<SupportTicket>();
 			this.UserMessagePresets = new List<string>();
 			this.RoomMessagePresets = new List<string>();
 		}
+
 		public ServerMessage SerializeTool()
 		{
-			ServerMessage Message = new ServerMessage(531u);
+			ServerMessage Message = new ServerMessage(531);
 			Message.AppendInt32(-1);
 			Message.AppendInt32(this.UserMessagePresets.Count);
 			using (TimedLock.Lock(this.UserMessagePresets))
 			{
-				foreach (string current in this.UserMessagePresets)
+				foreach (string Preset in this.UserMessagePresets)
 				{
-					Message.AppendStringWithBreak(current);
+					Message.AppendStringWithBreak(Preset);
 				}
 			}
 			Message.AppendUInt(6);
@@ -161,12 +164,13 @@ namespace Phoenix.HabboHotel.Support
 			Message.AppendStringWithBreak("");
 			return Message;
 		}
-		public void LoadMessagePresets(DatabaseClient class6_0)
+
+        public void LoadMessagePresets(DatabaseClient adapter)
 		{
 			Logging.Write("Loading Pre-set Help Messages..");
 			this.UserMessagePresets.Clear();
 			this.RoomMessagePresets.Clear();
-			DataTable dataTable = class6_0.ReadDataTable("SELECT type,message FROM moderation_presets WHERE enabled = '1'");
+			DataTable dataTable = adapter.ReadDataTable("SELECT type,message FROM moderation_presets WHERE enabled = '1'");
 			if (dataTable != null)
 			{
 				foreach (DataRow dataRow in dataTable.Rows)
@@ -191,7 +195,10 @@ namespace Phoenix.HabboHotel.Support
 				Logging.WriteLine("completed!");
 			}
 		}
-		public void LoadPendingTickets(DatabaseClient class6_0)
+        #endregion
+
+        #region Support Tickets
+        public void LoadPendingTickets(DatabaseClient class6_0)
 		{
 			Logging.Write("Loading Current Help Tickets..");
 			DataTable dataTable = class6_0.ReadDataTable("SELECT Id,score,type,status,sender_id,reported_id,moderator_id,message,room_id,room_name,timestamp FROM moderation_tickets WHERE status = 'open' OR status = 'picked'");
@@ -209,36 +216,27 @@ namespace Phoenix.HabboHotel.Support
 				Logging.WriteLine("completed!");
 			}
 		}
-		public void method_3(GameClient Session, int int_0, uint uint_0, string string_0)
+
+        public void SendNewTicket(GameClient Session, int Category, uint ReportedUser, string Message)
 		{
-			if (Session.GetHabbo().CurrentRoomId > 0u)
+			if (Session.GetHabbo().CurrentRoomId > 0)
 			{
-				RoomData @class = PhoenixEnvironment.GetGame().GetRoomManager().GenerateNullableRoomData(Session.GetHabbo().CurrentRoomId);
-				uint uint_ = 0u;
-				using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
+				RoomData Data = PhoenixEnvironment.GetGame().GetRoomManager().GenerateNullableRoomData(Session.GetHabbo().CurrentRoomId);
+				uint TicketId = 0;
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					class2.AddParamWithValue("message", string_0);
-					class2.AddParamWithValue("name", @class.Name);
-					class2.ExecuteQuery(string.Concat(new object[]
-					{
-						"INSERT INTO moderation_tickets (score,type,status,sender_id,reported_id,moderator_id,message,room_id,room_name,timestamp) VALUES (1,'",
-						int_0,
-						"','open','",
-						Session.GetHabbo().Id,
-						"','",
-						uint_0,
-						"','0',@message,'",
-						@class.Id,
-						"',@name,UNIX_TIMESTAMP())"
-					}));
-					class2.ExecuteQuery("UPDATE user_info SET cfhs = cfhs + 1 WHERE user_id = '" + Session.GetHabbo().Id + "' LIMIT 1");
-					uint_ = (uint)class2.ReadDataRow("SELECT Id FROM moderation_tickets WHERE sender_id = '" + Session.GetHabbo().Id + "' ORDER BY Id DESC LIMIT 1")[0];
+					adapter.AddParamWithValue("message", Message);
+					adapter.AddParamWithValue("name", Data.Name);
+					adapter.ExecuteQuery("INSERT INTO moderation_tickets (score,type,status,sender_id,reported_id,moderator_id,message,room_id,room_name,timestamp) VALUES (1,'" + Category + "','open','" + Session.GetHabbo().Id + "','" + ReportedUser + "','0',@message,'" + Data.Id + "',@name,UNIX_TIMESTAMP())");
+					adapter.ExecuteQuery("UPDATE user_info SET cfhs = cfhs + 1 WHERE user_id = '" + Session.GetHabbo().Id + "' LIMIT 1");
+					TicketId = (uint)adapter.ReadDataRow("SELECT Id FROM moderation_tickets WHERE sender_id = '" + Session.GetHabbo().Id + "' ORDER BY Id DESC LIMIT 1")[0];
 				}
-				SupportTicket class3 = new SupportTicket(uint_, 1, int_0, Session.GetHabbo().Id, uint_0, string_0, @class.Id, @class.Name, PhoenixEnvironment.GetUnixTimestamp(), 0u);
-				this.Tickets.Add(class3);
-				this.method_11(class3);
+				SupportTicket Ticket = new SupportTicket(TicketId, 1, Category, Session.GetHabbo().Id, ReportedUser, Message, Data.Id, Data.Name, PhoenixEnvironment.GetUnixTimestamp(), 0u);
+				this.Tickets.Add(Ticket);
+				this.SendTicketToModerators(Ticket);
 			}
 		}
+
 		public void SendOpenTickets(GameClient Session)
 		{
             foreach (SupportTicket ticket in this.Tickets.ToArray())
@@ -249,173 +247,175 @@ namespace Phoenix.HabboHotel.Support
                 }
             }
 		}
-		public SupportTicket method_5(uint uint_0)
+
+		public SupportTicket GetTicket(uint TicketId)
 		{
-			SupportTicket result;
 			using (TimedLock.Lock(this.Tickets))
 			{
 				foreach (SupportTicket current in this.Tickets)
 				{
-					if (current.TicketId == uint_0)
+					if (current.TicketId == TicketId)
 					{
-						result = current;
-						return result;
+						return current;
 					}
 				}
 			}
-			result = null;
-			return result;
+			return null;
 		}
-		public void method_6(GameClient Session, uint uint_0)
+
+		public void PickTicket(GameClient Session, uint TicketId)
 		{
-			SupportTicket @class = this.method_5(uint_0);
-			if (@class != null && @class.Status == TicketStatus.OPEN)
+			SupportTicket Ticket = this.GetTicket(TicketId);
+			if (Ticket != null && Ticket.Status == TicketStatus.OPEN)
 			{
-				@class.Pick(Session.GetHabbo().Id, true);
-				this.method_11(@class);
+				Ticket.Pick(Session.GetHabbo().Id, true);
+				this.SendTicketToModerators(Ticket);
 			}
 		}
-		public void method_7(GameClient Session, uint uint_0)
+
+		public void ReleaseTicket(GameClient Session, uint TicketId)
 		{
-			SupportTicket @class = this.method_5(uint_0);
-			if (@class != null && @class.Status == TicketStatus.PICKED && @class.ModeratorId == Session.GetHabbo().Id)
+			SupportTicket Ticket = this.GetTicket(TicketId);
+			if (Ticket != null && Ticket.Status == TicketStatus.PICKED && Ticket.ModeratorId == Session.GetHabbo().Id)
 			{
-				@class.Release(true);
-				this.method_11(@class);
+				Ticket.Release(true);
+				this.SendTicketToModerators(Ticket);
 			}
 		}
-		public void method_8(GameClient Session, uint uint_0, int int_0)
+
+		public void CloseTicket(GameClient Session, uint TicketId, int Result)
 		{
-			SupportTicket @class = this.method_5(uint_0);
-			if (@class != null && @class.Status == TicketStatus.PICKED && @class.ModeratorId == Session.GetHabbo().Id)
+			SupportTicket Ticket = this.GetTicket(TicketId);
+			if (Ticket != null && Ticket.Status == TicketStatus.PICKED && Ticket.ModeratorId == Session.GetHabbo().Id)
 			{
-				GameClient class2 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(@class.SenderId);
-				int int_;
-				TicketStatus enum6_;
-				switch (int_0)
+				GameClient Client = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Ticket.SenderId);
+				int ResultCode;
+				TicketStatus NewStatus;
+
+				switch (Result)
 				{
 				case 1:
-					int_ = 1;
-					enum6_ = TicketStatus.INVALID;
-					goto IL_AC;
+					ResultCode = 1;
+					NewStatus = TicketStatus.INVALID;
+                    break;
+
 				case 2:
-					int_ = 2;
-					enum6_ = TicketStatus.ABUSIVE;
-					using (DatabaseClient class3 = PhoenixEnvironment.GetDatabase().GetClient())
+					ResultCode = 2;
+					NewStatus = TicketStatus.ABUSIVE;
+					using (DatabaseClient dbClient = PhoenixEnvironment.GetDatabase().GetClient())
 					{
-						class3.ExecuteQuery("UPDATE user_info SET cfhs_abusive = cfhs_abusive + 1 WHERE user_id = '" + @class.SenderId + "' LIMIT 1");
-						goto IL_AC;
+						dbClient.ExecuteQuery("UPDATE user_info SET cfhs_abusive = cfhs_abusive + 1 WHERE user_id = '" + Ticket.SenderId + "' LIMIT 1");
 					}
+                    break;
+
+                case 3:
+                default:
+                    ResultCode = 0;
+				    NewStatus = TicketStatus.RESOLVED;
+                    break;
 				}
-				int_ = 0;
-				enum6_ = TicketStatus.RESOLVED;
-				IL_AC:
-				if (class2 != null)
+
+				if (Client != null)
 				{
-					ServerMessage Message = new ServerMessage(540u);
-					Message.AppendInt32(int_);
-					class2.SendMessage(Message);
+					ServerMessage Message = new ServerMessage(540);
+					Message.AppendInt32(ResultCode);
+					Client.SendMessage(Message);
 				}
-				@class.Close(enum6_, true);
-				this.method_11(@class);
+
+				Ticket.Close(NewStatus, true);
+				this.SendTicketToModerators(Ticket);
 			}
 		}
-		public bool method_9(uint uint_0)
-		{
-			bool result;
-			using (TimedLock.Lock(this.Tickets))
-			{
-				foreach (SupportTicket current in this.Tickets)
-				{
-					if (current.SenderId == uint_0 && current.Status == TicketStatus.OPEN)
-					{
-						result = true;
-						return result;
-					}
-				}
-			}
-			result = false;
-			return result;
-		}
-		public void method_10(uint uint_0)
+
+		public bool UsersHasPendingTicket(uint Id)
 		{
 			using (TimedLock.Lock(this.Tickets))
 			{
 				foreach (SupportTicket current in this.Tickets)
 				{
-					if (current.SenderId == uint_0)
+					if (current.SenderId == Id && current.Status == TicketStatus.OPEN)
 					{
-						current.Delete(true);
-						this.method_11(current);
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		public void DeletePendingTicketForUser(uint Id)
+		{
+			using (TimedLock.Lock(this.Tickets))
+			{
+				foreach (SupportTicket Ticket in this.Tickets)
+				{
+					if (Ticket.SenderId == Id)
+					{
+						Ticket.Delete(true);
+						this.SendTicketToModerators(Ticket);
 						break;
 					}
 				}
 			}
 		}
-		public void method_11(SupportTicket class111_0)
+
+		public void SendTicketToModerators(SupportTicket Ticket)
 		{
-			PhoenixEnvironment.GetGame().GetClientManager().method_22(class111_0.Serialize(), "acc_supporttool");
+			PhoenixEnvironment.GetGame().GetClientManager().QueueBroadcaseMessage(Ticket.Serialize(), "acc_supporttool");
 		}
-		public void method_12(GameClient Session, uint uint_0, bool bool_0, bool bool_1, bool bool_2)
+
+		public void PerformRoomAction(GameClient Session, uint RoomId, bool KickUsers, bool LockRoom, bool InappropriateRoom)
 		{
-			Room @class = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(uint_0);
-			if (@class != null)
+			Room Room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(RoomId);
+			if (Room != null)
 			{
-				if (bool_1)
+				if (LockRoom)
 				{
-					@class.State = 1;
-					using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
+					Room.State = 1;
+					using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 					{
-						class2.ExecuteQuery("UPDATE rooms SET state = 'locked' WHERE Id = '" + @class.RoomId + "' LIMIT 1");
+						adapter.ExecuteQuery("UPDATE rooms SET state = 'locked' WHERE Id = '" + Room.RoomId + "' LIMIT 1");
 					}
 				}
-				if (bool_2)
+				if (InappropriateRoom)
 				{
-					@class.Name = TextManager.GetText("mod_inappropriate_roomname");
-					@class.Description = TextManager.GetText("mod_inappropriate_roomdesc");
-					@class.Tags.Clear();
-					using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
+					Room.Name = TextManager.GetText("mod_inappropriate_roomname");
+					Room.Description = TextManager.GetText("mod_inappropriate_roomdesc");
+					Room.Tags.Clear();
+
+					using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 					{
-						class2.ExecuteQuery(string.Concat(new object[]
-						{
-							"UPDATE rooms SET caption = '",
-							@class.Name,
-							"', description = '",
-							@class.Description,
-							"', tags = '' WHERE Id = '",
-							@class.RoomId,
-							"' LIMIT 1"
-						}));
+						adapter.ExecuteQuery("UPDATE rooms SET caption = '" + Room.Name + "', description = '" + Room.Description + "', tags = '' WHERE Id = '" + Room.RoomId + "' LIMIT 1");
 					}
 				}
-				if (bool_0)
+				if (KickUsers)
 				{
-					List<RoomUser> list = new List<RoomUser>();
-					for (int i = 0; i < @class.UserList.Length; i++)
+					List<RoomUser> Kick = new List<RoomUser>();
+					for (int i = 0; i < Room.UserList.Length; i++)
 					{
-						RoomUser class3 = @class.UserList[i];
-						if (class3 != null && (class3 != null && !class3.IsBot && class3.GetClient().GetHabbo().Rank < Session.GetHabbo().Rank))
+						RoomUser User = Room.UserList[i];
+						if (User != null && (User != null && !User.IsBot && User.GetClient().GetHabbo().Rank < Session.GetHabbo().Rank))
 						{
-							list.Add(class3);
+							Kick.Add(User);
 						}
 					}
-					for (int i = 0; i < list.Count; i++)
+					for (int i = 0; i < Kick.Count; i++)
 					{
-						@class.RemoveUserFromRoom(list[i].GetClient(), true, false);
+						Room.RemoveUserFromRoom(Kick[i].GetClient(), true, false);
 					}
 				}
 			}
 		}
+
 		public void method_13(uint uint_0, bool bool_0, string string_0)
 		{
-			Room @class = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(uint_0);
-			if (@class != null && string_0.Length > 1)
+			Room Room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(uint_0);
+			if (Room != null && string_0.Length > 1)
 			{
 				StringBuilder stringBuilder = new StringBuilder();
 				int num = 0;
-				for (int i = 0; i < @class.UserList.Length; i++)
+				for (int i = 0; i < Room.UserList.Length; i++)
 				{
-					RoomUser class2 = @class.UserList[i];
+					RoomUser class2 = Room.UserList[i];
 					if (class2 != null && !class2.IsBot)
 					{
 						class2.GetClient().SendNotif(string_0, 0);
@@ -445,55 +445,56 @@ namespace Phoenix.HabboHotel.Support
 				}
 			}
 		}
-		public ServerMessage method_14(RoomData class27_0)
+
+		public ServerMessage SerializeRoomTool(RoomData Data)
 		{
-			Room @class = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(class27_0.Id);
-			uint uint_ = 0u;
-			using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
+			Room Room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Data.Id);
+			uint OwnerId = 0;
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
 				try
 				{
-					class2.AddParamWithValue("owner", class27_0.Owner);
-					uint_ = (uint)class2.ReadDataRow("SELECT Id FROM users WHERE username = @owner LIMIT 1")[0];
+					adapter.AddParamWithValue("owner", Data.Owner);
+					OwnerId = (uint)adapter.ReadDataRow("SELECT Id FROM users WHERE username = @owner LIMIT 1")[0];
 				}
 				catch (Exception)
 				{
 				}
 			}
-			ServerMessage Message = new ServerMessage(538u);
-			Message.AppendUInt(class27_0.Id);
-			Message.AppendInt32(class27_0.UsersNow);
-			if (@class != null)
+			ServerMessage Message = new ServerMessage(538);
+			Message.AppendUInt(Data.Id);
+			Message.AppendInt32(Data.UsersNow);
+			if (Room != null)
 			{
-				Message.AppendBoolean(@class.GetRoomUserByHabbo(class27_0.Owner) != null);
+				Message.AppendBoolean(Room.GetRoomUserByHabbo(Data.Owner) != null);
 			}
 			else
 			{
 				Message.AppendBoolean(false);
 			}
-			Message.AppendUInt(uint_);
-			Message.AppendStringWithBreak(class27_0.Owner);
-			Message.AppendUInt(class27_0.Id);
-			Message.AppendStringWithBreak(class27_0.Name);
-			Message.AppendStringWithBreak(class27_0.Description);
-			Message.AppendInt32(class27_0.TagCount);
-			foreach (string current in class27_0.Tags)
+			Message.AppendUInt(OwnerId);
+			Message.AppendStringWithBreak(Data.Owner);
+			Message.AppendUInt(Data.Id);
+			Message.AppendStringWithBreak(Data.Name);
+			Message.AppendStringWithBreak(Data.Description);
+			Message.AppendInt32(Data.TagCount);
+			foreach (string current in Data.Tags)
 			{
 				Message.AppendStringWithBreak(current);
 			}
-			if (@class != null)
+			if (Room != null)
 			{
-				Message.AppendBoolean(@class.HasOngoingEvent);
-				if (@class.Event == null)
+				Message.AppendBoolean(Room.HasOngoingEvent);
+				if (Room.Event == null)
 				{
 					return Message;
 				}
-				Message.AppendStringWithBreak(@class.Event.Name);
-				Message.AppendStringWithBreak(@class.Event.Description);
-				Message.AppendInt32(@class.Event.Tags.Count);
-				using (TimedLock.Lock(@class.Event.Tags))
+				Message.AppendStringWithBreak(Room.Event.Name);
+				Message.AppendStringWithBreak(Room.Event.Description);
+				Message.AppendInt32(Room.Event.Tags.Count);
+				using (TimedLock.Lock(Room.Event.Tags))
 				{
-					foreach (string current in @class.Event.Tags)
+					foreach (string current in Room.Event.Tags)
 					{
 						Message.AppendStringWithBreak(current);
 					}
@@ -503,94 +504,104 @@ namespace Phoenix.HabboHotel.Support
 			Message.AppendBoolean(false);
 			return Message;
 		}
-		public void method_15(GameClient Session, uint uint_0, string string_0, bool bool_0)
+        #endregion
+
+        #region User Moderation
+        public void KickUser(GameClient ModSession, uint UserId, string Message, bool Soft)
+        {
+            GameClient Client = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(UserId);
+            if (Client == null || Client.GetHabbo().CurrentRoomId < 1 || Client.GetHabbo().Id == ModSession.GetHabbo().Id)
+            {
+                return;
+            }
+            if (Client.GetHabbo().Rank >= ModSession.GetHabbo().Rank)
+            {
+                ModSession.SendNotif(TextManager.GetText("mod_error_permission_kick"));
+            }
+
+            Room Room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Client.GetHabbo().CurrentRoomId);
+
+            if (Room != null)
+            {
+                Room.RemoveUserFromRoom(Client, true, false);
+                if (!Soft)
+                {
+                    Client.SendNotif(Message);
+                    using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                    {
+                        adapter.ExecuteQuery("UPDATE user_info SET cautions = cautions + 1 WHERE user_id = '" + UserId + "' LIMIT 1");
+                    }
+                }
+            }
+        }
+
+		public void AlertUser(GameClient ModSession, uint UserId, string Message, bool Caution)
 		{
-			GameClient @class = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(uint_0);
-			if (@class != null && @class.GetHabbo().CurrentRoomId >= 1u && @class.GetHabbo().Id != Session.GetHabbo().Id)
+			GameClient Client = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(UserId);
+
+			if (Client != null && Client.GetHabbo().Id != ModSession.GetHabbo().Id)
 			{
-				if (@class.GetHabbo().Rank >= Session.GetHabbo().Rank)
+				if (Caution && Client.GetHabbo().Rank >= ModSession.GetHabbo().Rank)
 				{
-					Session.SendNotif(TextManager.GetText("mod_error_permission_kick"));
+					ModSession.SendNotif(TextManager.GetText("mod_error_permission_caution"));
+					Caution = false;
 				}
-				else
+				Client.SendNotif(Message, 0);
+				if (Caution)
 				{
-					Room class2 = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(@class.GetHabbo().CurrentRoomId);
-					if (class2 != null)
+					using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 					{
-						class2.RemoveUserFromRoom(@class, true, false);
-						if (!bool_0)
-						{
-							@class.SendNotif(string_0);
-							using (DatabaseClient class3 = PhoenixEnvironment.GetDatabase().GetClient())
-							{
-								class3.ExecuteQuery("UPDATE user_info SET cautions = cautions + 1 WHERE user_id = '" + uint_0 + "' LIMIT 1");
-							}
-						}
+						adapter.ExecuteQuery("UPDATE user_info SET cautions = cautions + 1 WHERE user_id = '" + UserId + "' LIMIT 1");
 					}
 				}
 			}
 		}
-		public void method_16(GameClient Session, uint uint_0, string string_0, bool bool_0)
+
+		public void BanUser(GameClient ModSession, uint UserId, int Length, string Message)
 		{
-			GameClient @class = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(uint_0);
-			if (@class != null && @class.GetHabbo().Id != Session.GetHabbo().Id)
+			GameClient Client = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(UserId);
+
+			if (Client != null && Client.GetHabbo().Id != ModSession.GetHabbo().Id)
 			{
-				if (bool_0 && @class.GetHabbo().Rank >= Session.GetHabbo().Rank)
+				if (Client.GetHabbo().Rank >= ModSession.GetHabbo().Rank)
 				{
-					Session.SendNotif(TextManager.GetText("mod_error_permission_caution"));
-					bool_0 = false;
-				}
-				@class.SendNotif(string_0, 0);
-				if (bool_0)
-				{
-					using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
-					{
-						class2.ExecuteQuery("UPDATE user_info SET cautions = cautions + 1 WHERE user_id = '" + uint_0 + "' LIMIT 1");
-					}
-				}
-			}
-		}
-		public void method_17(GameClient Session, uint uint_0, int int_0, string string_0)
-		{
-			GameClient @class = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(uint_0);
-			if (@class != null && @class.GetHabbo().Id != Session.GetHabbo().Id)
-			{
-				if (@class.GetHabbo().Rank >= Session.GetHabbo().Rank)
-				{
-					Session.SendNotif(TextManager.GetText("mod_error_permission_ban"));
+					ModSession.SendNotif(TextManager.GetText("mod_error_permission_ban"));
 				}
 				else
 				{
-					double double_ = (double)int_0;
-					PhoenixEnvironment.GetGame().GetBanManager().BanUser(@class, Session.GetHabbo().Username, double_, string_0, false);
+					Double dLength = Length;
+					PhoenixEnvironment.GetGame().GetBanManager().BanUser(Client, ModSession.GetHabbo().Username, dLength, Message, false);
 				}
 			}
 		}
-		public ServerMessage method_18(uint uint_0)
+        #endregion
+
+        #region User Info
+
+        public ServerMessage SerializeUserInfo(uint UserId)
 		{
-			ServerMessage result;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				DataRow dataRow = @class.ReadDataRow("SELECT Id, username, online FROM users WHERE Id = '" + uint_0 + "' LIMIT 1");
-				DataRow dataRow2 = @class.ReadDataRow("SELECT reg_timestamp, login_timestamp, cfhs, cfhs_abusive, cautions, bans FROM user_info WHERE user_id = '" + uint_0 + "' LIMIT 1");
-				if (dataRow == null)
+				DataRow User = adapter.ReadDataRow("SELECT Id, username, online FROM users WHERE Id = '" + UserId + "' LIMIT 1");
+				DataRow Info = adapter.ReadDataRow("SELECT reg_timestamp, login_timestamp, cfhs, cfhs_abusive, cautions, bans FROM user_info WHERE user_id = '" + UserId + "' LIMIT 1");
+				if (User == null)
 				{
 					throw new ArgumentException();
 				}
-				ServerMessage Message = new ServerMessage(533u);
-				Message.AppendUInt((uint)dataRow["Id"]);
-				Message.AppendStringWithBreak((string)dataRow["username"]);
-				if (dataRow2 != null)
+				ServerMessage Message = new ServerMessage(533);
+				Message.AppendUInt((uint)User["Id"]);
+				Message.AppendStringWithBreak((string)User["username"]);
+				if (Info != null)
 				{
-					Message.AppendInt32((int)Math.Ceiling((PhoenixEnvironment.GetUnixTimestamp() - (double)dataRow2["reg_timestamp"]) / 60.0));
-					Message.AppendInt32((int)Math.Ceiling((PhoenixEnvironment.GetUnixTimestamp() - (double)dataRow2["login_timestamp"]) / 60.0));
+					Message.AppendInt32((int)Math.Ceiling((PhoenixEnvironment.GetUnixTimestamp() - (double)Info["reg_timestamp"]) / 60.0));
+					Message.AppendInt32((int)Math.Ceiling((PhoenixEnvironment.GetUnixTimestamp() - (double)Info["login_timestamp"]) / 60.0));
 				}
 				else
 				{
 					Message.AppendInt32(0);
 					Message.AppendInt32(0);
 				}
-				if (dataRow["online"].ToString() == "1")
+				if (User["online"].ToString() == "1")
 				{
 					Message.AppendBoolean(true);
 				}
@@ -598,12 +609,12 @@ namespace Phoenix.HabboHotel.Support
 				{
 					Message.AppendBoolean(false);
 				}
-				if (dataRow2 != null)
+				if (Info != null)
 				{
-					Message.AppendInt32((int)dataRow2["cfhs"]);
-					Message.AppendInt32((int)dataRow2["cfhs_abusive"]);
-					Message.AppendInt32((int)dataRow2["cautions"]);
-					Message.AppendInt32((int)dataRow2["bans"]);
+					Message.AppendInt32((int)Info["cfhs"]);
+					Message.AppendInt32((int)Info["cfhs_abusive"]);
+					Message.AppendInt32((int)Info["cautions"]);
+					Message.AppendInt32((int)Info["bans"]);
 				}
 				else
 				{
@@ -612,19 +623,18 @@ namespace Phoenix.HabboHotel.Support
 					Message.AppendInt32(0);
 					Message.AppendInt32(0);
 				}
-				result = Message;
+				return Message;
 			}
-			return result;
 		}
-		public ServerMessage method_19(uint uint_0)
+
+		public ServerMessage SerializeRoomVisits(uint UserId)
 		{
-			ServerMessage result;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				DataTable dataTable = @class.ReadDataTable("SELECT room_id,hour,minute FROM user_roomvisits WHERE user_id = '" + uint_0 + "' ORDER BY entry_timestamp DESC LIMIT 50");
-				ServerMessage Message = new ServerMessage(537u);
-				Message.AppendUInt(uint_0);
-				Message.AppendStringWithBreak(PhoenixEnvironment.GetGame().GetClientManager().GetNameById(uint_0));
+				DataTable dataTable = adapter.ReadDataTable("SELECT room_id,hour,minute FROM user_roomvisits WHERE user_id = '" + UserId + "' ORDER BY entry_timestamp DESC LIMIT 50");
+				ServerMessage Message = new ServerMessage(537);
+				Message.AppendUInt(UserId);
+				Message.AppendStringWithBreak(PhoenixEnvironment.GetGame().GetClientManager().GetNameById(UserId));
 				if (dataTable != null)
 				{
 					Message.AppendInt32(dataTable.Rows.Count);
@@ -633,15 +643,14 @@ namespace Phoenix.HabboHotel.Support
 					{
 						while (enumerator.MoveNext())
 						{
-							DataRow dataRow = (DataRow)enumerator.Current;
-							RoomData class2 = PhoenixEnvironment.GetGame().GetRoomManager().GenerateNullableRoomData((uint)dataRow["room_id"]);
-							Message.AppendBoolean(class2.IsPublicRoom);
-							Message.AppendUInt(class2.Id);
-							Message.AppendStringWithBreak(class2.Name);
-							Message.AppendInt32((int)dataRow["hour"]);
-							Message.AppendInt32((int)dataRow["minute"]);
+							DataRow Row = (DataRow)enumerator.Current;
+							RoomData RoomData = PhoenixEnvironment.GetGame().GetRoomManager().GenerateNullableRoomData((uint)Row["room_id"]);
+							Message.AppendBoolean(RoomData.IsPublicRoom);
+							Message.AppendUInt(RoomData.Id);
+							Message.AppendStringWithBreak(RoomData.Name);
+							Message.AppendInt32((int)Row["hour"]);
+							Message.AppendInt32((int)Row["minute"]);
 						}
-						goto IL_12A;
 					}
 					finally
 					{
@@ -653,20 +662,21 @@ namespace Phoenix.HabboHotel.Support
 					}
 				}
 				Message.AppendInt32(0);
-				IL_12A:
-				result = Message;
+
+				return Message;
 			}
-			return result;
 		}
-		public ServerMessage method_20(uint uint_0)
+        #endregion
+
+        #region Chatlog
+        public ServerMessage SerializeUserChatlog(uint UserId)
 		{
-			ServerMessage result;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				DataTable dataTable = @class.ReadDataTable("SELECT room_id,entry_timestamp,exit_timestamp FROM user_roomvisits WHERE user_id = '" + uint_0 + "' ORDER BY entry_timestamp DESC LIMIT 5");
+				DataTable dataTable = adapter.ReadDataTable("SELECT room_id,entry_timestamp,exit_timestamp FROM user_roomvisits WHERE user_id = '" + UserId + "' ORDER BY entry_timestamp DESC LIMIT 5");
 				ServerMessage Message = new ServerMessage(536u);
-				Message.AppendUInt(uint_0);
-				Message.AppendStringWithBreak(PhoenixEnvironment.GetGame().GetClientManager().GetNameById(uint_0));
+				Message.AppendUInt(UserId);
+				Message.AppendStringWithBreak(PhoenixEnvironment.GetGame().GetClientManager().GetNameById(UserId));
 				if (dataTable != null)
 				{
 					Message.AppendInt32(dataTable.Rows.Count);
@@ -679,7 +689,7 @@ namespace Phoenix.HabboHotel.Support
 							DataTable dataTable2;
 							if ((double)dataRow["exit_timestamp"] <= 0.0)
 							{
-								dataTable2 = @class.ReadDataTable(string.Concat(new object[]
+								dataTable2 = adapter.ReadDataTable(string.Concat(new object[]
 								{
 									"SELECT user_id,user_name,hour,minute,message FROM chatlogs WHERE room_id = '",
 									(uint)dataRow["room_id"],
@@ -690,7 +700,7 @@ namespace Phoenix.HabboHotel.Support
 							}
 							else
 							{
-								dataTable2 = @class.ReadDataTable(string.Concat(new object[]
+								dataTable2 = adapter.ReadDataTable(string.Concat(new object[]
 								{
 									"SELECT user_id,user_name,hour,minute,message FROM chatlogs WHERE room_id = '",
 									(uint)dataRow["room_id"],
@@ -733,7 +743,6 @@ namespace Phoenix.HabboHotel.Support
 							}
 							Message.AppendInt32(0);
 						}
-						goto IL_2EF;
 					}
 					finally
 					{
@@ -745,31 +754,22 @@ namespace Phoenix.HabboHotel.Support
 					}
 				}
 				Message.AppendInt32(0);
-				IL_2EF:
-				result = Message;
+				return Message;
 			}
-			return result;
 		}
-		public ServerMessage method_21(SupportTicket class111_0, RoomData class27_0, double double_0)
+
+		public ServerMessage SerializeTicketChatlog(SupportTicket Ticket, RoomData RoomData, double Timestamp)
 		{
-			ServerMessage result;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				DataTable dataTable = @class.ReadDataTable(string.Concat(new object[]
-				{
-					"SELECT user_id,user_name,hour,minute,message FROM chatlogs WHERE room_id = '",
-					class27_0.Id,
-					"' AND timestamp >= '",
-					double_0 - 300.0,
-					"' AND timestamp < UNIX_TIMESTAMP() ORDER BY timestamp DESC LIMIT 100"
-				}));
-				ServerMessage Message = new ServerMessage(534u);
-				Message.AppendUInt(class111_0.TicketId);
-				Message.AppendUInt(class111_0.SenderId);
-				Message.AppendUInt(class111_0.ReportedId);
-				Message.AppendBoolean(class27_0.IsPublicRoom);
-				Message.AppendUInt(class27_0.Id);
-				Message.AppendStringWithBreak(class27_0.Name);
+				DataTable dataTable = adapter.ReadDataTable("SELECT user_id,user_name,hour,minute,message FROM chatlogs WHERE room_id = '" + RoomData.Id + "' AND timestamp >= '" + (Timestamp - 300.0) + "' AND timestamp < UNIX_TIMESTAMP() ORDER BY timestamp DESC LIMIT 100");
+				ServerMessage Message = new ServerMessage(534);
+				Message.AppendUInt(Ticket.TicketId);
+				Message.AppendUInt(Ticket.SenderId);
+				Message.AppendUInt(Ticket.ReportedId);
+				Message.AppendBoolean(RoomData.IsPublicRoom);
+				Message.AppendUInt(RoomData.Id);
+				Message.AppendStringWithBreak(RoomData.Name);
 				if (dataTable != null)
 				{
 					Message.AppendInt32(dataTable.Rows.Count);
@@ -785,7 +785,6 @@ namespace Phoenix.HabboHotel.Support
 							Message.AppendStringWithBreak((string)dataRow["user_name"]);
 							Message.AppendStringWithBreak((string)dataRow["message"]);
 						}
-						goto IL_186;
 					}
 					finally
 					{
@@ -797,35 +796,35 @@ namespace Phoenix.HabboHotel.Support
 					}
 				}
 				Message.AppendInt32(0);
-				IL_186:
-				result = Message;
+
+				return Message;
 			}
-			return result;
 		}
-		public ServerMessage method_22(uint uint_0)
+
+		public ServerMessage SerializeRoomChatlog(uint roomID)
 		{
-			Room @class = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(uint_0);
-			if (@class == null)
+			Room currentRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(roomID);
+			if (currentRoom == null)
 			{
 				throw new ArgumentException();
 			}
-			bool bool_ = false;
-			if (@class.Type.ToLower() == "public")
+			bool IsPublic = false;
+			if (currentRoom.Type.ToLower() == "public")
 			{
-				bool_ = true;
+				IsPublic = true;
 			}
-			ServerMessage result;
-			using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
+
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				DataTable dataTable = class2.ReadDataTable("SELECT user_id,user_name,hour,minute,message FROM chatlogs WHERE room_id = '" + @class.RoomId + "' ORDER BY timestamp DESC LIMIT 150");
-				ServerMessage Message = new ServerMessage(535u);
-				Message.AppendBoolean(bool_);
-				Message.AppendUInt(@class.RoomId);
-				Message.AppendStringWithBreak(@class.Name);
-				if (dataTable != null)
+				DataTable Data = adapter.ReadDataTable("SELECT user_id,user_name,hour,minute,message FROM chatlogs WHERE room_id = '" + currentRoom.RoomId + "' ORDER BY timestamp DESC LIMIT 150");
+				ServerMessage Message = new ServerMessage(535);
+				Message.AppendBoolean(IsPublic);
+				Message.AppendUInt(currentRoom.RoomId);
+				Message.AppendStringWithBreak(currentRoom.Name);
+				if (Data != null)
 				{
-					Message.AppendInt32(dataTable.Rows.Count);
-					IEnumerator enumerator = dataTable.Rows.GetEnumerator();
+					Message.AppendInt32(Data.Rows.Count);
+					IEnumerator enumerator = Data.Rows.GetEnumerator();
 					try
 					{
 						while (enumerator.MoveNext())
@@ -837,7 +836,6 @@ namespace Phoenix.HabboHotel.Support
 							Message.AppendStringWithBreak((string)dataRow["user_name"]);
 							Message.AppendStringWithBreak((string)dataRow["message"]);
 						}
-						goto IL_17A;
 					}
 					finally
 					{
@@ -849,10 +847,10 @@ namespace Phoenix.HabboHotel.Support
 					}
 				}
 				Message.AppendInt32(0);
-				IL_17A:
-				result = Message;
+
+				return Message;
 			}
-			return result;
-		}
-	}
+        }
+        #endregion
+    }
 }

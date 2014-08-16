@@ -3,7 +3,7 @@ using Phoenix.Messages;
 using Phoenix.Storage;
 namespace Phoenix.HabboHotel.Support
 {
-	internal sealed class SupportTicket
+	class SupportTicket
 	{
 		private uint Id;
 		public int Score;
@@ -61,6 +61,7 @@ namespace Phoenix.HabboHotel.Support
 			ReportedName = PhoenixEnvironment.GetGame().GetClientManager().GetNameById(mReportedId);
 			ModName = PhoenixEnvironment.GetGame().GetClientManager().GetNameById(mModeratorId);
 		}
+
 		public void Pick(uint ModeratorId, bool UpdateInDb)
 		{
 			Status = TicketStatus.PICKED;
@@ -70,17 +71,11 @@ namespace Phoenix.HabboHotel.Support
 			{
 				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					adapter.ExecuteQuery(string.Concat(new object[]
-					{
-						"UPDATE moderation_tickets SET status = 'picked', moderator_id = '",
-						ModeratorId,
-						"' WHERE Id = '",
-						Id,
-						"' LIMIT 1"
-					}));
+					adapter.ExecuteQuery("UPDATE moderation_tickets SET status = 'picked', moderator_id = '" + ModeratorId + "' WHERE Id = '" + Id + "' LIMIT 1");
 				}
 			}
 		}
+
         public void Close(TicketStatus NewStatus, bool UpdateInDb)
         {
             String dbType = null;
@@ -90,35 +85,25 @@ namespace Phoenix.HabboHotel.Support
                 switch (NewStatus)
                 {
                     case TicketStatus.RESOLVED:
-                        {
-                            dbType = "resolved";
-                            break;
-                        }
+                        dbType = "resolved";
+                        break;
+
                     case TicketStatus.ABUSIVE:
-                        {
-                            dbType = "abusive";
-                            break;
-                        }
+                        dbType = "abusive";
+                        break;
+
                     case TicketStatus.INVALID:
-                        {
-                            dbType = "invalid";
-                            break;
-                        }
+                        dbType = "invalid";
+                        break;
                 }
 
                 using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
                 {
-                    adapter.ExecuteQuery(string.Concat(new object[]
-					{
-						"UPDATE moderation_tickets SET status = '",
-						dbType,
-						"' WHERE Id = '",
-						Id,
-						"' LIMIT 1"
-					}));
+                    adapter.ExecuteQuery("UPDATE moderation_tickets SET status = '" + dbType + "' WHERE Id = '" + Id + "' LIMIT 1");
                 }
             }
         }
+
 		public void Release(bool UpdateInDb)
 		{
 			Status = TicketStatus.OPEN;
@@ -130,6 +115,7 @@ namespace Phoenix.HabboHotel.Support
 				}
 			}
 		}
+
 		public void Delete(bool UpdateInDb)
 		{
 			Status = TicketStatus.DELETED;
@@ -141,6 +127,7 @@ namespace Phoenix.HabboHotel.Support
 				}
 			}
 		}
+
 		public ServerMessage Serialize()
 		{
 			ServerMessage Message = new ServerMessage(530);

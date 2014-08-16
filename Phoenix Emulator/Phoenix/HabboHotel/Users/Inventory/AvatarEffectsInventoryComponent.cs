@@ -8,7 +8,7 @@ using Phoenix.HabboHotel.Rooms;
 using Phoenix.Storage;
 namespace Phoenix.HabboHotel.Users.Inventory
 {
-	internal sealed class AvatarEffectsInventoryComponent
+	class AvatarEffectsInventoryComponent
 	{
 		private List<AvatarEffect> Effects;
 		private uint UserId;
@@ -54,9 +54,9 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			}
 			if (QueryBuilder.Length > 0)
 			{
-				using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					class2.ExecuteQuery(QueryBuilder.ToString());
+					adapter.ExecuteQuery(QueryBuilder.ToString());
 				}
 			}
 		}
@@ -65,19 +65,10 @@ namespace Phoenix.HabboHotel.Users.Inventory
 		{
 			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				adapter.ExecuteQuery(string.Concat(new object[]
-				{
-					"INSERT INTO user_effects (user_id,effect_id,total_duration,is_activated,activated_stamp) VALUES ('",
-					this.UserId,
-					"','",
-					EffectId,
-					"','",
-					Duration,
-					"','0','0')"
-				}));
+				adapter.ExecuteQuery("INSERT INTO user_effects (user_id,effect_id,total_duration,is_activated,activated_stamp) VALUES ('" + UserId + "','" + EffectId + "','" + Duration + "','0','0')");
 			}
 			this.Effects.Add(new AvatarEffect(EffectId, Duration, false, 0.0));
-			ServerMessage Message = new ServerMessage(461u);
+			ServerMessage Message = new ServerMessage(461);
 			Message.AppendInt32(EffectId);
 			Message.AppendInt32(Duration);
 			this.GetClient().SendMessage(Message);
@@ -90,14 +81,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			{
 				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					adapter.ExecuteQuery(string.Concat(new object[]
-					{
-						"DELETE FROM user_effects WHERE user_id = '",
-						this.UserId,
-						"' AND effect_id = '",
-						EffectId,
-						"' AND is_activated = '1' LIMIT 1"
-					}));
+					adapter.ExecuteQuery("DELETE FROM user_effects WHERE user_id = '" + UserId + "' AND effect_id = '" + EffectId + "' AND is_activated = '1' LIMIT 1");
 				}
 				this.Effects.Remove(Effect);
 				ServerMessage Message = new ServerMessage(463);
@@ -142,21 +126,12 @@ namespace Phoenix.HabboHotel.Users.Inventory
 				Room class2 = this.GetUserRoom();
 				if (class2 != null)
 				{
-					RoomUser class3 = class2.GetRoomUserByHabbo(this.GetClient().GetHabbo().Id);
-					if (class3.byte_1 <= 0 && class3.class34_1 == null)
+					RoomUser User = class2.GetRoomUserByHabbo(this.GetClient().GetHabbo().Id);
+					if (User.byte_1 <= 0 && User.class34_1 == null)
 					{
 						using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 						{
-							adapter.ExecuteQuery(string.Concat(new object[]
-							{
-								"UPDATE user_effects SET is_activated = '1', activated_stamp = '",
-								PhoenixEnvironment.GetUnixTimestamp(),
-								"' WHERE user_id = '",
-								this.UserId,
-								"' AND effect_id = '",
-								EffectId,
-								"' LIMIT 1"
-							}));
+							adapter.ExecuteQuery("UPDATE user_effects SET is_activated = '1', activated_stamp = '" + PhoenixEnvironment.GetUnixTimestamp() + "' WHERE user_id = '" + UserId + "' AND effect_id = '" + EffectId + "' LIMIT 1");
 						}
 						Effect.Activate();
 						ServerMessage Message = new ServerMessage(462);
@@ -219,11 +194,11 @@ namespace Phoenix.HabboHotel.Users.Inventory
         public void CheckExpired()
         {
             List<int> list = new List<int>();
-            foreach (AvatarEffect current in this.Effects)
+            foreach (AvatarEffect Effect in Effects)
             {
-                if (current.HasExpired)
+                if (Effect.HasExpired)
                 {
-                    list.Add(current.EffectId);
+                    list.Add(Effect.EffectId);
                 }
             }
             foreach (int current2 in list)

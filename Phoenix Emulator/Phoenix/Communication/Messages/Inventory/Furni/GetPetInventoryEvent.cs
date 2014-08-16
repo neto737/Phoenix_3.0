@@ -3,7 +3,7 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Inventory.Furni
 {
-	internal sealed class GetPetInventoryEvent : MessageEvent
+	internal class GetPetInventoryEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{

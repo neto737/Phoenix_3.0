@@ -3,7 +3,7 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Messenger
 {
-	internal sealed class SendMsgMessageEvent : MessageEvent
+	internal class SendMsgMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
@@ -11,20 +11,20 @@ namespace Phoenix.Communication.Messages.Messenger
 			string text = PhoenixEnvironment.FilterInjectionChars(Event.PopFixedString());
 			if (Session.GetHabbo().GetMessenger() != null)
 			{
-				if (num == 0u && Session.GetHabbo().HasRole("cmd_sa"))
+				if (num == 0 && Session.GetHabbo().HasRole("cmd_sa"))
 				{
-					ServerMessage Message = new ServerMessage(134u);
-					Message.AppendUInt(0u);
+					ServerMessage Message = new ServerMessage(134);
+					Message.AppendUInt(0);
 					Message.AppendString(Session.GetHabbo().Username + ": " + text);
 					PhoenixEnvironment.GetGame().GetClientManager().method_17(Session, Message);
 				}
 				else
 				{
-					if (num == 0u)
+					if (num == 0)
 					{
-						ServerMessage Message2 = new ServerMessage(261u);
+						ServerMessage Message2 = new ServerMessage(261);
 						Message2.AppendInt32(4);
-						Message2.AppendUInt(0u);
+						Message2.AppendUInt(0);
 						Session.SendMessage(Message2);
 					}
 					else

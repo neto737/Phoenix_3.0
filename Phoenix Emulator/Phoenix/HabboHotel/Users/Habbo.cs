@@ -21,7 +21,7 @@ namespace Phoenix.HabboHotel.Users
 		public string RealName;
         public bool isAaron;
 		public bool Visible;
-		public bool bool_2;
+		public bool AcceptTrading;
 		public string SSO;
 		public string LastIp;
 		public uint Rank;
@@ -42,7 +42,7 @@ namespace Phoenix.HabboHotel.Users
 		public bool LoadingChecksPassed;
 		public bool Waitingfordoorbell;
 		public uint CurrentRoomId;
-		public uint uint_4;
+		public uint HomeRoom;
 		public bool IsTeleporting;
 		public uint TeleporterId;
 		public List<uint> FavoriteRooms;
@@ -59,11 +59,11 @@ namespace Phoenix.HabboHotel.Users
 		public List<uint> CompletedQuests;
 		public uint CurrentQuestId;
 		public int CurrentQuestProgress;
-		public int int_6;
-		public int int_7;
-		public int int_8;
-		public int int_9;
-		public uint uint_7;
+		public int LevelBuilder;
+		public int LevelSocial;
+		public int LevelIdentity;
+		public int LevelExplorer;
+		public uint LastQuestId;
 		public int NewbieStatus;
 		public bool SpectatorMode;
 		public bool bool_9;
@@ -121,7 +121,7 @@ namespace Phoenix.HabboHotel.Users
 				return this.HabboData;
 			}
 		}
-		internal string String_0
+		internal string GetQueryString
 		{
 			get
 			{
@@ -177,13 +177,13 @@ namespace Phoenix.HabboHotel.Users
 			this.shells = Points;
 			this.ActivityPoints = Pixels;
 			this.LastActivityPointsUpdate = Activity_Points_LastUpdate;
-			this.bool_2 = AcceptTrading;
+			this.AcceptTrading = AcceptTrading;
 			this.Muted = Muted;
 			this.LoadingRoom = 0u;
 			this.LoadingChecksPassed = false;
 			this.Waitingfordoorbell = false;
-			this.CurrentRoomId = 0u;
-			this.uint_4 = HomeRoom;
+			this.CurrentRoomId = 0;
+			this.HomeRoom = HomeRoom;
 			this.FavoriteRooms = new List<uint>();
 			this.MutedUsers = new List<uint>();
 			this.list_3 = new List<string>();
@@ -311,13 +311,13 @@ namespace Phoenix.HabboHotel.Users
 			this.DailyPetRespectPoints = (int)dataRow["DailyPetRespectPoints"];
 			this.AchievementScore = (int)dataRow["AchievementScore"];
 			this.CompletedQuests = new List<uint>();
-			this.uint_7 = 0u;
+			this.LastQuestId = 0u;
 			this.CurrentQuestId = (uint)dataRow["quest_id"];
 			this.CurrentQuestProgress = (int)dataRow["quest_progress"];
-			this.int_6 = (int)dataRow["lev_builder"];
-			this.int_8 = (int)dataRow["lev_identity"];
-			this.int_7 = (int)dataRow["lev_social"];
-			this.int_9 = (int)dataRow["lev_explore"];
+			this.LevelBuilder = (int)dataRow["lev_builder"];
+			this.LevelIdentity = (int)dataRow["lev_identity"];
+			this.LevelSocial = (int)dataRow["lev_social"];
+			this.LevelExplorer = (int)dataRow["lev_explore"];
 			if (Session != null)
 			{
 				this.SubscriptionManager = new SubscriptionManager(Id, HabboData);
@@ -328,7 +328,7 @@ namespace Phoenix.HabboHotel.Users
 				this.bool_9 = false;
 				foreach (DataRow dataRow3 in HabboData.GetUsersRooms.Rows)
 				{
-					this.list_6.Add(PhoenixEnvironment.GetGame().GetRoomManager().method_17((uint)dataRow3["Id"], dataRow3));
+					this.list_6.Add(PhoenixEnvironment.GetGame().GetRoomManager().FetchRoomData((uint)dataRow3["Id"], dataRow3));
 				}
 			}
 		}
@@ -393,7 +393,7 @@ namespace Phoenix.HabboHotel.Users
 			DataTable dataTable = class6_0.ReadDataTable("SELECT * FROM rooms WHERE owner = @name ORDER BY Id ASC");
 			foreach (DataRow dataRow in dataTable.Rows)
 			{
-				this.list_6.Add(PhoenixEnvironment.GetGame().GetRoomManager().method_17((uint)dataRow["Id"], dataRow));
+				this.list_6.Add(PhoenixEnvironment.GetGame().GetRoomManager().FetchRoomData((uint)dataRow["Id"], dataRow));
 			}
 		}
 		public void LoadData(HabboData class12_1)
@@ -586,24 +586,26 @@ namespace Phoenix.HabboHotel.Users
 		}
 		public void method_12()
 		{
-			if (this.GetMessenger() == null)
+			if (GetMessenger() == null)
 			{
-				this.Messenger = new HabboMessenger(this.Id);
-				this.Messenger.LoadBuddies(this.HabboData);
-				this.Messenger.method_1(this.HabboData);
-				GameClient @class = this.GetClient();
-				if (@class != null)
+				this.Messenger = new HabboMessenger(Id);
+				this.Messenger.LoadBuddies(HabboData);
+				this.Messenger.method_1(HabboData);
+
+				GameClient client = GetClient();
+				if (client != null)
 				{
-					@class.SendMessage(this.Messenger.method_21());
-					@class.SendMessage(this.Messenger.SerializeRequests());
+					client.SendMessage(this.Messenger.SerializeFriends());
+					client.SendMessage(this.Messenger.SerializeRequests());
 					this.Messenger.method_5(true);
 				}
 			}
 		}
+
 		public void UpdateCreditsBalance(bool bool_17)
 		{
-			ServerMessage Message = new ServerMessage(6u);
-			Message.AppendStringWithBreak(this.Credits + ".0");
+			ServerMessage Message = new ServerMessage(6);
+			Message.AppendStringWithBreak(Credits + ".0");
 			this.Session.SendMessage(Message);
 			if (bool_17)
 			{
@@ -620,69 +622,58 @@ namespace Phoenix.HabboHotel.Users
 				}
 			}
 		}
+
 		public void UpdateShellsBalance(bool bool_17, bool bool_18)
 		{
 			if (bool_17)
 			{
-				using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					this.shells = @class.ReadInt32("SELECT vip_points FROM users WHERE Id = '" + this.Id + "' LIMIT 1;");
+					this.shells = adapter.ReadInt32("SELECT vip_points FROM users WHERE Id = '" + Id + "' LIMIT 1;");
 				}
 			}
 			if (bool_18)
 			{
-				using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					@class.ExecuteQuery(string.Concat(new object[]
-					{
-						"UPDATE users SET vip_points = '",
-						this.shells,
-						"' WHERE Id = '",
-						this.Id,
-						"' LIMIT 1;"
-					}));
+					adapter.ExecuteQuery("UPDATE users SET vip_points = '" + shells + "' WHERE Id = '" + Id + "' LIMIT 1;");
 				}
 			}
-			this.UpdateActivityPointsBalance(0);
+			UpdateActivityPointsBalance(0);
 		}
-		public void UpdateActivityPointsBalance(bool bool_17)
-		{
-			this.UpdateActivityPointsBalance(0);
-			if (bool_17)
-			{
-				using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
-				{
-					@class.ExecuteQuery(string.Concat(new object[]
-					{
-						"UPDATE users SET activity_points = '",
-						this.ActivityPoints,
-						"' WHERE Id = '",
-						this.Id,
-						"' LIMIT 1;"
-					}));
-				}
-			}
-		}
+
+        public void UpdateActivityPointsBalance(bool InDatabase)
+        {
+            UpdateActivityPointsBalance(0);
+            if (InDatabase)
+            {
+                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                {
+                    adapter.ExecuteQuery("UPDATE users SET activity_points = '" + ActivityPoints + "' WHERE Id = '" + Id + "' LIMIT 1;");
+                }
+            }
+        }
+
 		public void UpdateActivityPointsBalance(int NotifAmount)
 		{
 			ServerMessage Message = new ServerMessage(438);
-			Message.AppendInt32(this.ActivityPoints);
+			Message.AppendInt32(ActivityPoints);
 			Message.AppendInt32(NotifAmount);
 			Message.AppendInt32(0);
 			ServerMessage Message2 = new ServerMessage(438);
-			Message2.AppendInt32(this.shells);
+			Message2.AppendInt32(shells);
 			Message2.AppendInt32(0);
 			Message2.AppendInt32(1);
 			ServerMessage Message3 = new ServerMessage(438);
-			Message3.AppendInt32(this.shells);
+			Message3.AppendInt32(shells);
 			Message3.AppendInt32(0);
 			Message3.AppendInt32(2);
 			ServerMessage Message4 = new ServerMessage(438);
-			Message4.AppendInt32(this.shells);
+			Message4.AppendInt32(shells);
 			Message4.AppendInt32(0);
 			Message4.AppendInt32(3);
 			ServerMessage Message5 = new ServerMessage(438);
-			Message5.AppendInt32(this.shells);
+			Message5.AppendInt32(shells);
 			Message5.AppendInt32(0);
 			Message5.AppendInt32(4);
 			this.Session.SendMessage(Message);
@@ -691,59 +682,62 @@ namespace Phoenix.HabboHotel.Users
 			this.Session.SendMessage(Message4);
 			this.Session.SendMessage(Message5);
 		}
+
 		public void Mute()
 		{
-			if (!this.Muted)
+			if (!Muted)
 			{
-				this.GetClient().SendNotif("You have been muted by a moderator.");
-				this.Muted = true;
+				GetClient().SendNotif("You have been muted by a moderator.");
+				Muted = true;
                 using (DatabaseClient dbClient = PhoenixEnvironment.GetDatabase().GetClient())
                 {
-                    dbClient.ExecuteQuery(string.Concat(new object[]
-                    {
-                        "UPDATE users SET is_muted = '1' WHERE Id = '", this.Id, "' LIMIT 1;"
-                    }));
+                    dbClient.ExecuteQuery("UPDATE users SET is_muted = '1' WHERE Id = '" + Id + "' LIMIT 1;");
                 }
 			}
 		}
-		public void Unmute()
-		{
-			if (this.Muted)
-			{
-				this.Muted = false;
+
+        public void Unmute()
+        {
+            if (Muted)
+            {
+                Muted = false;
                 using (DatabaseClient dbClient = PhoenixEnvironment.GetDatabase().GetClient())
                 {
-                    dbClient.ExecuteQuery(string.Concat(new object[]
-                    {
-                        "UPDATE users SET is_muted = '0' WHERE Id = '", this.Id, "' LIMIT 1;"
-                    }));
+                    dbClient.ExecuteQuery("UPDATE users SET is_muted = '0' WHERE Id = '" + Id + "' LIMIT 1;");
                 }
-			}
-		}
+            }
+        }
+
 		private GameClient GetClient()
 		{
 			return PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Id);
 		}
+
 		public SubscriptionManager GetSubscriptionManager()
 		{
 			return SubscriptionManager;
 		}
+
 		public HabboMessenger GetMessenger()
 		{
 			return Messenger;
 		}
+
 		public BadgeComponent GetBadgeComponent()
 		{
 			return BadgeComponent;
 		}
+
 		public InventoryComponent GetInventoryComponent()
 		{
 			return InventoryComponent;
 		}
+
 		public AvatarEffectsInventoryComponent GetAvatarEffectsInventoryComponent()
 		{
 			return AvatarEffectsInventoryComponent;
 		}
+
 		public void LoadQuests()
 		{
 			this.CompletedQuests.Clear();
@@ -760,6 +754,7 @@ namespace Phoenix.HabboHotel.Users
 				}
 			}
 		}
+
 		public void method_26(bool bool_17, GameClient class16_1)
 		{
 			ServerMessage Message = new ServerMessage(266u);
@@ -801,12 +796,13 @@ namespace Phoenix.HabboHotel.Users
 				}
 			}
 		}
+
 		public void UpdateVIP()
 		{
 			DataRow dataRow;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				dataRow = @class.ReadDataRow("SELECT vip FROM users WHERE Id = '" + this.Id + "' LIMIT 1;");
+				dataRow = adapter.ReadDataRow("SELECT vip FROM users WHERE Id = '" + this.Id + "' LIMIT 1;");
 			}
 			this.Vip = PhoenixEnvironment.EnumToBool(dataRow["vip"].ToString());
 			ServerMessage Message = new ServerMessage(2u);
@@ -856,12 +852,13 @@ namespace Phoenix.HabboHotel.Users
 			}
 			this.GetClient().SendMessage(Message);
 		}
+
 		public void Sendselfwhisper(string string_7)
 		{
-			Room room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(this.CurrentRoomId);
+			Room room = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(CurrentRoomId);
 			if (room != null)
 			{
-				RoomUser class2 = room.GetRoomUserByHabbo(this.Id);
+				RoomUser class2 = room.GetRoomUserByHabbo(Id);
 				ServerMessage Message = new ServerMessage(25);
 				Message.AppendInt32(class2.VirtualId);
 				Message.AppendStringWithBreak(string_7);

@@ -4,8 +4,9 @@ using System.Text;
 namespace Phoenix.Util
 {
 	internal static class GlobalClass
-	{
-		public static int MaxMarketPlacePrice;
+    {
+        #region Fields
+        public static int MaxMarketPlacePrice;
 		public static int MarketPlaceTax;
 		public static int MaxPetsPerRoom;
 		public static bool AntiDDoSEnabled;
@@ -38,8 +39,10 @@ namespace Phoenix.Util
 		public static int IdleSleep = 300;
 		public static int IdleKick = 1200;
 		public static bool UseIP_Last = false;
+        #endregion
 
-		public static bool cmdRedeemCredits
+        #region Return values
+        public static bool cmdRedeemCredits
 		{
 			get
 			{
@@ -258,6 +261,7 @@ namespace Phoenix.Util
 			{
 				cmdMoonwalk = value;
 			}
-		}
-	}
+        }
+        #endregion
+    }
 }

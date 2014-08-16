@@ -16,7 +16,7 @@ namespace Phoenix.HabboHotel.Rooms
 		private Sandbox Rooms;
 		private List<uint> list_0;
 		private Dictionary<string, RoomModel> Models;
-		private Hashtable hashtable_0;
+		private Hashtable loadedRoomData;
 		private List<TeleUserData> list_1;
 		private Task task_0;
 		private DateTime dateTime_0;
@@ -48,7 +48,7 @@ namespace Phoenix.HabboHotel.Rooms
 			this.Models = new Dictionary<string, RoomModel>();
 			this.list_1 = new List<TeleUserData>();
 			this.list_2 = new List<uint>();
-			this.hashtable_0 = new Hashtable();
+			this.loadedRoomData = new Hashtable();
 			this.task_0 = new Task(new Action(this.method_7));
 			this.task_0.Start();
 		}
@@ -63,7 +63,7 @@ namespace Phoenix.HabboHotel.Rooms
 					DataTable dataTable = @class.ReadDataTable("SELECT * FROM rooms WHERE category = '" + i + "' AND roomtype = 'private' ORDER BY users_now DESC LIMIT 40");
 					foreach (DataRow dataRow in dataTable.Rows)
 					{
-						this.list_3.Add(this.method_17((uint)dataRow["Id"], dataRow));
+						this.list_3.Add(this.FetchRoomData((uint)dataRow["Id"], dataRow));
 					}
 				}
 			}
@@ -311,16 +311,16 @@ namespace Phoenix.HabboHotel.Rooms
 		{
 			RoomData @class = new RoomData();
 			RoomData result;
-			lock (this.hashtable_0)
+			lock (this.loadedRoomData)
 			{
-				if (this.hashtable_0.ContainsKey(uint_0))
+				if (this.loadedRoomData.ContainsKey(uint_0))
 				{
-					result = (this.hashtable_0[uint_0] as RoomData);
+					result = (this.loadedRoomData[uint_0] as RoomData);
 					return result;
 				}
 				if (this.IsRoomLoaded(uint_0))
 				{
-					result = this.GetRoom(uint_0).Class27_0;
+					result = this.GetRoom(uint_0).RoomData;
 					return result;
 				}
 				DataRow dataRow = null;
@@ -335,9 +335,9 @@ namespace Phoenix.HabboHotel.Rooms
 				}
 				@class.method_1(dataRow);
 			}
-			if (!this.hashtable_0.ContainsKey(uint_0))
+			if (!this.loadedRoomData.ContainsKey(uint_0))
 			{
-				this.hashtable_0.Add(uint_0, @class);
+				this.loadedRoomData.Add(uint_0, @class);
 			}
 			result = @class;
 			return result;
@@ -384,101 +384,96 @@ namespace Phoenix.HabboHotel.Rooms
 			result = @class;
 			return result;
 		}
-		internal void UnloadRoom(Room class14_0)
+
+		internal void UnloadRoom(Room Room)
 		{
-			if (class14_0 != null)
+			if (Room != null)
 			{
-				this.Rooms.Remove(class14_0.RoomId);
-				this.method_18(class14_0.RoomId);
-				class14_0.method_62();
+				this.Rooms.Remove(Room.RoomId);
+				this.method_18(Room.RoomId);
+				Room.method_62();
 				if (PhoenixEnvironment.GetConfig().data["emu.messages.roommgr"] == "1")
 				{
-					Logging.WriteLine("[RoomMgr] Unloaded room [ID: " + class14_0.RoomId + "]");
+					Logging.WriteLine("[RoomMgr] Unloaded room [ID: " + Room.RoomId + "]");
 				}
 			}
 		}
-		public RoomData method_17(uint uint_0, DataRow dataRow_0)
+
+		public RoomData FetchRoomData(uint RoomId, DataRow dRow)
 		{
-			RoomData result;
-			if (this.hashtable_0.ContainsKey(uint_0))
+			if (this.loadedRoomData.ContainsKey(RoomId))
 			{
-				result = (this.hashtable_0[uint_0] as RoomData);
+				return (loadedRoomData[RoomId] as RoomData);
 			}
 			else
 			{
-				RoomData @class = new RoomData();
-				if (this.IsRoomLoaded(uint_0))
+				RoomData data = new RoomData();
+				if (this.IsRoomLoaded(RoomId))
 				{
-					@class = this.GetRoom(uint_0).Class27_0;
+					data = GetRoom(RoomId).RoomData;
 				}
 				else
 				{
-					@class.method_1(dataRow_0);
+					data.method_1(dRow);
 				}
-				this.hashtable_0.Add(uint_0, @class);
-				result = @class;
+				this.loadedRoomData.Add(RoomId, data);
+				return data;
 			}
-			return result;
 		}
+
 		public void method_18(uint uint_0)
 		{
-			this.hashtable_0.Remove(uint_0);
+			this.loadedRoomData.Remove(uint_0);
 		}
+
 		public Room GetRoom(uint uint_0)
 		{
-			Room result;
 			if (this.Rooms.ContainsKey(uint_0))
 			{
-				result = (this.Rooms[uint_0] as Room);
+				return (this.Rooms[uint_0] as Room);
 			}
 			else
 			{
-				result = null;
+				return null;
 			}
-			return result;
 		}
-		public RoomData method_20(GameClient Session, string string_0, string string_1)
-		{
-			string_0 = PhoenixEnvironment.FilterInjectionChars(string_0);
-			RoomData result;
-			if (!this.Models.ContainsKey(string_1))
-			{
-				Session.SendNotif("Sorry, this room model has not been added yet. Try again later.");
-				result = null;
-			}
-			else
-			{
-				if (this.Models[string_1].ClubOnly && !Session.GetHabbo().GetSubscriptionManager().HasSubscription("habbo_club") && !Session.GetHabbo().GetSubscriptionManager().HasSubscription("habbo_vip"))
-				{
-					Session.SendNotif("You must be an Phoenix Club member to use that room layout.");
-					result = null;
-				}
-				else
-				{
-					if (string_0.Length < 3)
-					{
-						Session.SendNotif("Room name is too short for room creation!");
-						result = null;
-					}
-					else
-					{
-						uint uint_ = 0u;
-						using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
-						{
-							@class.AddParamWithValue("caption", string_0);
-							@class.AddParamWithValue("model", string_1);
-							@class.AddParamWithValue("username", Session.GetHabbo().Username);
-							@class.ExecuteQuery("INSERT INTO rooms (roomtype,caption,owner,model_name) VALUES ('private',@caption,@username,@model)");
-							Session.GetHabbo().GetHabboData.GetUsersRooms = @class.ReadDataTable("SELECT * FROM rooms WHERE owner = @username ORDER BY Id ASC");
-							uint_ = (uint)@class.ReadDataRow("SELECT Id FROM rooms WHERE owner = @username AND caption = @caption ORDER BY Id DESC")[0];
-							Session.GetHabbo().UpdateRooms(@class);
-						}
-						result = this.GenerateRoomData(uint_);
-					}
-				}
-			}
-			return result;
-		}
+
+        public RoomData CreateRoom(GameClient Session, string Name, string Model)
+        {
+            Name = PhoenixEnvironment.FilterInjectionChars(Name);
+
+            if (!this.Models.ContainsKey(Model))
+            {
+                Session.SendNotif("Sorry, this room model has not been added yet. Try again later.");
+                return null;
+            }
+            else if (Models[Model].ClubOnly && !Session.GetHabbo().GetSubscriptionManager().HasSubscription("habbo_club") && !Session.GetHabbo().GetSubscriptionManager().HasSubscription("habbo_vip"))
+            {
+                Session.SendNotif("You must be an Phoenix Club member to use that room layout.");
+                return null;
+            }
+            else if (Name.Length < 3)
+            {
+                Session.SendNotif("Room name is too short for room creation!");
+                return null;
+            }
+            else
+            {
+                uint RoomId = 0;
+                using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                {
+                    adapter.AddParamWithValue("caption", Name);
+                    adapter.AddParamWithValue("model", Model);
+                    adapter.AddParamWithValue("username", Session.GetHabbo().Username);
+                    adapter.ExecuteQuery("INSERT INTO rooms (roomtype,caption,owner,model_name) VALUES ('private',@caption,@username,@model)");
+                    Session.GetHabbo().GetHabboData.GetUsersRooms = adapter.ReadDataTable("SELECT * FROM rooms WHERE owner = @username ORDER BY Id ASC");
+                    RoomId = (uint)adapter.ReadDataRow("SELECT Id FROM rooms WHERE owner = @username AND caption = @caption ORDER BY Id DESC")[0];
+                    Session.GetHabbo().UpdateRooms(adapter);
+                }
+                return this.GenerateRoomData(RoomId);
+            }
+        }
+
 		internal Dictionary<Room, int> method_21()
 		{
 			Dictionary<Room, int> dictionary = new Dictionary<Room, int>();

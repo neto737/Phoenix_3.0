@@ -1,7 +1,7 @@
 using System;
 namespace Phoenix.HabboHotel.Support
 {
-	internal sealed class HelpCategory
+	class HelpCategory
 	{
 		private uint Id;
 		public string Caption;

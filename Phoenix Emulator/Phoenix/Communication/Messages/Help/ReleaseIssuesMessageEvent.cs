@@ -3,7 +3,7 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Help
 {
-	internal sealed class ReleaseIssuesMessageEvent : MessageEvent
+	internal class ReleaseIssuesMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
@@ -12,8 +12,8 @@ namespace Phoenix.Communication.Messages.Help
 				int num = Event.PopWiredInt32();
 				for (int i = 0; i < num; i++)
 				{
-					uint uint_ = Event.PopWiredUInt();
-					PhoenixEnvironment.GetGame().GetModerationTool().method_7(Session, uint_);
+					uint TicketId = Event.PopWiredUInt();
+					PhoenixEnvironment.GetGame().GetModerationTool().ReleaseTicket(Session, TicketId);
 				}
 			}
 		}

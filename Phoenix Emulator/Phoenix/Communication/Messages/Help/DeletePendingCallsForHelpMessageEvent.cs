@@ -7,9 +7,9 @@ namespace Phoenix.Communication.Messages.Help
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			if (PhoenixEnvironment.GetGame().GetModerationTool().method_9(Session.GetHabbo().Id))
+			if (PhoenixEnvironment.GetGame().GetModerationTool().UsersHasPendingTicket(Session.GetHabbo().Id))
 			{
-				PhoenixEnvironment.GetGame().GetModerationTool().method_10(Session.GetHabbo().Id);
+				PhoenixEnvironment.GetGame().GetModerationTool().DeletePendingTicketForUser(Session.GetHabbo().Id);
 				ServerMessage Message5_ = new ServerMessage(320u);
 				Session.SendMessage(Message5_);
 			}

@@ -3,14 +3,14 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Handshake
 {
-	internal sealed class InitCryptoMessageEvent : MessageEvent
+	internal class InitCryptoMessageEvent : MessageEvent
 	{
-		public void parse(GameClient Session, ClientMessage Event)
+		public void parse(GameClient Session, ClientMessage Request)
 		{
-			MessageEvent @interface;
-			if (PhoenixEnvironment.GetPacketManager().Get(1817u, out @interface))
+			MessageEvent Event;
+			if (PhoenixEnvironment.GetPacketManager().Get(1817, out Event))
 			{
-				@interface.parse(Session, null);
+				Event.parse(Session, null);
 			}
 		}
 	}

@@ -8,7 +8,7 @@ using Phoenix.Util;
 using Phoenix.Storage;
 namespace Phoenix.HabboHotel.Support
 {
-	internal sealed class ModerationBanManager
+	class ModerationBanManager
 	{
         public List<ModerationBan> Bans = new List<ModerationBan>();
 
@@ -79,14 +79,7 @@ namespace Phoenix.HabboHotel.Support
 					adapter.AddParamWithValue("var", username);
 					adapter.AddParamWithValue("reason", Reason);
 					adapter.AddParamWithValue("mod", Moderator);
-					adapter.ExecuteQuery(string.Concat(new object[]
-					{
-						"INSERT INTO bans (bantype,value,reason,expire,added_by,added_date,appeal_state) VALUES (@rawvar,@var,@reason,'",
-						Expire,
-						"',@mod,'",
-						DateTime.Now.ToLongDateString(),
-						"', '1')"
-					}));
+					adapter.ExecuteQuery("INSERT INTO bans (bantype,value,reason,expire,added_by,added_date,appeal_state) VALUES (@rawvar,@var,@reason,'" + Expire + "',@mod,'" + DateTime.Now.ToLongDateString() + "', '1')");
 				}
                 if (IpBan)
                 {
@@ -100,18 +93,18 @@ namespace Phoenix.HabboHotel.Support
                     {
                         foreach (DataRow row in table.Rows)
                         {
-                            using (DatabaseClient client4 = PhoenixEnvironment.GetDatabase().GetClient())
+                            using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
                             {
-                                client4.ExecuteQuery("UPDATE user_info SET bans = bans + 1 WHERE user_id = '" + ((uint)row["id"]) + "' LIMIT 1");
+                                adapter.ExecuteQuery("UPDATE user_info SET bans = bans + 1 WHERE user_id = '" + ((uint)row["id"]) + "' LIMIT 1");
                             }
                         }
                     }
                 }
                 else
                 {
-                    using (DatabaseClient client5 = PhoenixEnvironment.GetDatabase().GetClient())
+                    using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
                     {
-                        client5.ExecuteQuery("UPDATE user_info SET bans = bans + 1 WHERE user_id = '" + Client.GetHabbo().Id + "' LIMIT 1");
+                        adapter.ExecuteQuery("UPDATE user_info SET bans = bans + 1 WHERE user_id = '" + Client.GetHabbo().Id + "' LIMIT 1");
                     }
                 }
                 Client.SendBanMessage("You have been banned: " + Reason);

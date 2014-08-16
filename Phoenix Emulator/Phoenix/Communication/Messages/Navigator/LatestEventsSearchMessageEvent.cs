@@ -3,12 +3,12 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Navigator
 {
-	internal sealed class LatestEventsSearchMessageEvent : MessageEvent
+	internal class LatestEventsSearchMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			int int_ = int.Parse(Event.PopFixedString());
-			Session.SendMessage(PhoenixEnvironment.GetGame().GetNavigator().SerializeEventListing(Session, int_));
+			int Category = int.Parse(Event.PopFixedString());
+			Session.SendMessage(PhoenixEnvironment.GetGame().GetNavigator().SerializeEventListing(Session, Category));
 		}
 	}
 }

@@ -4,20 +4,20 @@ using Phoenix.Messages;
 using Phoenix.Util;
 namespace Phoenix.Communication.Messages.Catalog
 {
-	internal sealed class GetSellablePetBreedsEvent : MessageEvent
+	internal class GetSellablePetBreedsEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			ServerMessage Message = new ServerMessage(827u);
+			ServerMessage Message = new ServerMessage(827);
 			string text = Event.ToString().Split(new char[]
 			{
 				' '
 			})[1];
 			if (text.ToLower().Contains("pet"))
 			{
-				int num = Convert.ToInt32(text.Substring(3));
-				Message.AppendStringWithBreak("a0 pet" + num);
-				switch (num)
+				int PetType = Convert.ToInt32(text.Substring(3));
+				Message.AppendStringWithBreak("a0 pet" + PetType);
+				switch (PetType)
 				{
 				case 0:
 					Message.AppendString(TextManager.GetText("pet_breeds_0"));

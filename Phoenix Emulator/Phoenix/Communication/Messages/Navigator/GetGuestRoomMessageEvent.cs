@@ -4,21 +4,22 @@ using Phoenix.HabboHotel.Rooms;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Navigator
 {
-	internal sealed class GetGuestRoomMessageEvent : MessageEvent
+	internal class GetGuestRoomMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			uint uint_ = Event.PopWiredUInt();
-			bool bool_ = Event.PopWiredBoolean();
-			bool flag = Event.PopWiredBoolean();
-            RoomData @class = PhoenixEnvironment.GetGame().GetRoomManager().GenerateRoomData(uint_);
-			if (@class != null)
+			uint RoomId = Event.PopWiredUInt();
+			bool unk = Event.PopWiredBoolean();
+			bool unk2 = Event.PopWiredBoolean();
+
+            RoomData Data = PhoenixEnvironment.GetGame().GetRoomManager().GenerateRoomData(RoomId);
+			if (Data != null)
 			{
-				ServerMessage Message = new ServerMessage(454u);
-				Message.AppendBoolean(bool_);
-				@class.Serialize(Message, false, flag);
-				Message.AppendBoolean(flag);
-				Message.AppendBoolean(bool_);
+				ServerMessage Message = new ServerMessage(454);
+				Message.AppendBoolean(unk);
+				Data.Serialize(Message, false, unk2);
+				Message.AppendBoolean(unk2);
+				Message.AppendBoolean(unk);
 				Session.SendMessage(Message);
 			}
 		}

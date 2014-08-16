@@ -6,7 +6,7 @@ using Phoenix.Messages;
 using Phoenix.Storage;
 namespace Phoenix.HabboHotel.Support
 {
-	internal sealed class HelpTool
+	class HelpTool
 	{
         public Dictionary<uint, HelpCategory> Categories = new Dictionary<uint, HelpCategory>();
         public Dictionary<uint, HelpTopic> Topics = new Dictionary<uint, HelpTopic>();
@@ -113,6 +113,7 @@ namespace Phoenix.HabboHotel.Support
 			}
 			return Message;
 		}
+        
 		public ServerMessage SerializeIndex()
 		{
 			ServerMessage message = new ServerMessage(519);

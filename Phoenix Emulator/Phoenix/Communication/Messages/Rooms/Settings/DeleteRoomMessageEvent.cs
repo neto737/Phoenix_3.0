@@ -42,7 +42,7 @@ namespace Phoenix.Communication.Messages.Rooms.Settings
 						Session.GetHabbo().UpdateRooms(class4);
 					}
 					Session.GetHabbo().GetInventoryComponent().UpdateItems(true);
-					Session.GetHabbo().GetInventoryComponent().method_3(true);
+					Session.GetHabbo().GetInventoryComponent().UpdatePets(true);
 					Session.SendMessage(PhoenixEnvironment.GetGame().GetNavigator().GetDynamicNavigatorPacket(Session, -3));
 				}
 			}

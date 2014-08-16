@@ -34,7 +34,7 @@ namespace Phoenix.Communication.Messages.Users
 							try
 							{
 								DataRow dataRow_ = class2.ReadDataRow("SELECT * FROM rooms WHERE Id = " + @class.RoomId + " LIMIT 1;");
-								string string_ = PhoenixEnvironment.GetGame().GetRoomManager().method_17(@class.RoomId, dataRow_).Name;
+								string string_ = PhoenixEnvironment.GetGame().GetRoomManager().FetchRoomData(@class.RoomId, dataRow_).Name;
 								Message.AppendStringWithBreak(string_);
 							}
 							catch

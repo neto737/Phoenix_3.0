@@ -11,14 +11,16 @@ using Phoenix.Messages;
 using Phoenix.Storage;
 namespace Phoenix.HabboHotel.Users.Inventory
 {
-	internal sealed class InventoryComponent
+	class InventoryComponent
 	{
         private Hashtable discs;
 		public List<UserItem> InventoryItems;
+
 		private Hashtable InventoryPets;
-		private Hashtable hashtable_1;
-		public List<uint> list_1;
-		private GameClient Session;
+		private Hashtable mAddedItems;
+		public List<uint> mRemovedItems;
+		private GameClient mClient;
+
 		public uint UserId;
 
 		public int ItemCount
@@ -39,13 +41,13 @@ namespace Phoenix.HabboHotel.Users.Inventory
 
         public InventoryComponent(uint mUserId, GameClient Session, HabboData Data)
         {
-            this.Session = Session;
+            this.mClient = Session;
             this.UserId = mUserId;
             this.InventoryItems = new List<UserItem>();
             this.InventoryPets = new Hashtable();
-            this.hashtable_1 = new Hashtable();
+            this.mAddedItems = new Hashtable();
             this.discs = new Hashtable();
-            this.list_1 = new List<uint>();
+            this.mRemovedItems = new List<uint>();
             this.InventoryItems.Clear();
             DataTable Table = Data.GetUserInventory;
             foreach (DataRow Row in Table.Rows)
@@ -87,14 +89,14 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			}
 
             this.discs.Clear();
-			this.hashtable_1.Clear();
-			this.list_1.Clear();
+			this.mAddedItems.Clear();
+			this.mRemovedItems.Clear();
 			this.InventoryItems.Clear();
 			ServerMessage Message = new ServerMessage(101);
 			this.GetClient().SendMessage(Message);
 		}
 
-		public void RedeemCredits(GameClient class16_1)
+		public void RedeemCredits(GameClient Session)
 		{
 			int num = 0;
 			List<UserItem> list = new List<UserItem>();
@@ -107,7 +109,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 						'_'
 					});
 					int num2 = int.Parse(array[1]);
-					if (!this.list_1.Contains(current.Id))
+					if (!this.mRemovedItems.Contains(current.Id))
 					{
 						if (num2 > 0)
 						{
@@ -119,11 +121,11 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			}
 			foreach (UserItem current in list)
 			{
-				this.RemoveItem(current.Id, 0u, false);
+				this.RemoveItem(current.Id, 0, false);
 			}
-			class16_1.GetHabbo().Credits += num;
-			class16_1.GetHabbo().UpdateCreditsBalance(true);
-			class16_1.SendNotif("All coins in your inventory have been converted back into " + num + " credits!");
+			Session.GetHabbo().Credits += num;
+			Session.GetHabbo().UpdateCreditsBalance(true);
+			Session.SendNotif("All coins in your inventory have been converted back into " + num + " credits!");
 		}
 
 		public void ClearPets()
@@ -141,11 +143,11 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			this.InventoryPets.Clear();
 		}
 
-		public void method_3(bool bool_0)
+		public void UpdatePets(bool FromDatabase)
 		{
-			if (bool_0)
+			if (FromDatabase)
 			{
-				this.method_8();
+				this.LoadInventory();
 			}
 			this.GetClient().SendMessage(this.SerializePetInventory());
 		}
@@ -184,17 +186,17 @@ namespace Phoenix.HabboHotel.Users.Inventory
             }
         }
 
-		public void method_8()
+		public void LoadInventory()
 		{
 			using (TimedLock.Lock(this.InventoryItems))
 			{
 				this.InventoryItems.Clear();
-				this.hashtable_1.Clear();
-				this.list_1.Clear();
+				this.mAddedItems.Clear();
+				this.mRemovedItems.Clear();
 				DataTable dataTable;
-				using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					dataTable = @class.ReadDataTable("SELECT Id,base_item,extra_data,user_id FROM items WHERE room_id = 0 AND user_id = " + this.UserId);
+					dataTable = adapter.ReadDataTable("SELECT Id,base_item,extra_data,user_id FROM items WHERE room_id = 0 AND user_id = " + this.UserId);
 				}
 				if (dataTable != null)
 				{
@@ -228,7 +230,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 		{
 			if (FromDatabase)
 			{
-				this.method_8();
+				this.LoadInventory();
 				this.method_18();
 			}
 			if (this.GetClient() != null)
@@ -255,18 +257,18 @@ namespace Phoenix.HabboHotel.Users.Inventory
 		{
 			UserItem item = new UserItem(uint_1, uint_2, string_0);
 			this.InventoryItems.Add(item);
-			if (this.list_1.Contains(uint_1))
+			if (this.mRemovedItems.Contains(uint_1))
 			{
-				this.list_1.Remove(uint_1);
+				this.mRemovedItems.Remove(uint_1);
 			}
-			if (!this.hashtable_1.ContainsKey(uint_1))
+			if (!this.mAddedItems.ContainsKey(uint_1))
 			{
 				if (bool_0)
 				{
-					using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+					using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 					{
-						@class.AddParamWithValue("extra_data", string_0);
-						@class.ExecuteQuery(string.Concat(new object[]
+						adapter.AddParamWithValue("extra_data", string_0);
+						adapter.ExecuteQuery(string.Concat(new object[]
 						{
 							"INSERT INTO items (Id,user_id,base_item,extra_data,wall_pos) VALUES ('",
 							uint_1,
@@ -300,19 +302,19 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			}
 		}
 
-		public void RemoveItem(uint Id, uint uint_2, bool PlacedInroom)
+		public void RemoveItem(uint Id, uint UserId, bool PlacedInroom)
 		{
 			ServerMessage Message = new ServerMessage(99);
 			Message.AppendUInt(Id);
 			this.GetClient().SendMessage(Message);
-			if (this.hashtable_1.ContainsKey(Id))
+			if (this.mAddedItems.ContainsKey(Id))
 			{
-				this.hashtable_1.Remove(Id);
+				this.mAddedItems.Remove(Id);
 			}
-			if (!this.list_1.Contains(Id))
+			if (!this.mRemovedItems.Contains(Id))
 			{
 				this.InventoryItems.Remove(this.GetItem(Id));
-				this.list_1.Add(Id);
+				this.mRemovedItems.Add(Id);
                 this.discs.Remove(Id);
 				if (PlacedInroom)
 				{
@@ -321,7 +323,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 						adapter.ExecuteQuery(string.Concat(new object[]
 						{
 							"UPDATE items SET user_id = '",
-							uint_2,
+							UserId,
 							"' WHERE Id = '",
 							Id,
 							"' LIMIT 1"
@@ -329,7 +331,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 						return;
 					}
 				}
-				if (uint_2 == 0 && !PlacedInroom)
+				if (UserId == 0 && !PlacedInroom)
 				{
 					using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 					{
@@ -338,6 +340,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 				}
 			}
 		}
+
         public ServerMessage SerializeFloorItemInventory()
         {
             ServerMessage Message = new ServerMessage(140);
@@ -379,25 +382,27 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			return PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(this.UserId);
 		}
 
-		public void AddItemArray(List<RoomItem> list_2)
+		public void AddItemArray(List<RoomItem> RoomItemList)
 		{
-			foreach (RoomItem current in list_2)
+			foreach (RoomItem Item in RoomItemList)
 			{
-				this.AddItem(current.Id, current.BaseItem, current.ExtraData, false);
+				this.AddItem(Item.Id, Item.BaseItem, Item.ExtraData, false);
 			}
 		}
+
 		internal void method_18()
 		{
 			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				this.method_19(adapter, false);
+				this.RunDBUpdate(adapter, false);
 			}
 		}
-		internal void method_19(DatabaseClient queries, bool bool_0)
+
+		internal void RunDBUpdate(DatabaseClient queries, bool bool_0)
 		{
 			try
 			{
-				if (this.list_1.Count > 0 || this.hashtable_1.Count > 0 || this.InventoryPets.Count > 0)
+				if (mRemovedItems.Count > 0 || mAddedItems.Count > 0 || InventoryPets.Count > 0)
 				{
 					StringBuilder stringBuilder = new StringBuilder();
 					foreach (Pet pet in this.InventoryPets.Values)
@@ -508,7 +513,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
                     {
                         '_'
                     })[1]);
-                    if (!this.list_1.Contains(userItem.Id))
+                    if (!this.mRemovedItems.Contains(userItem.Id))
                     {
                         if (num2 > 0)
                             num1 += num2;
@@ -517,7 +522,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
                 }    
             }      
             foreach (UserItem userItem in list)
-            this.RemoveItem(userItem.Id, 0U, false);
+            this.RemoveItem(userItem.Id, 0, false);
             Session.GetHabbo().ActivityPoints += num1;
             Session.GetHabbo().UpdateActivityPointsBalance(true);
             Session.SendNotif("All pixels ingots in your inventory were in " + num1 + " Pixel converted!");
@@ -535,7 +540,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
                     {
                         '_'
                     })[1]);
-                    if (!this.list_1.Contains(userItem.Id))
+                    if (!this.mRemovedItems.Contains(userItem.Id))
                     {
                         if (num2 > 0)
                             num1 += num2;
@@ -544,7 +549,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
                 }
             }
             foreach (UserItem userItem in list)
-                this.RemoveItem(userItem.Id, 0U, false);
+                this.RemoveItem(userItem.Id, 0, false);
             Session.GetHabbo().shells += num1;
             Session.GetHabbo().UpdateShellsBalance(false, true);
             Session.SendNotif("All mussel bars in your inventory were in " + num1 + " Mussels converted!");

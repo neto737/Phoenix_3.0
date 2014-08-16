@@ -132,7 +132,7 @@ namespace Phoenix.HabboHotel.Users.Messenger
 			}
 			else
 			{
-				reply.AppendUInt(this.UserId);
+				reply.AppendUInt(UserId);
 				reply.AppendStringWithBreak(mUsername);
 				reply.AppendBoolean(true);
 				if (UserId == 0)

@@ -11,348 +11,314 @@ namespace Phoenix.HabboHotel.Quests
 	internal sealed class QuestManager
 	{
 		public List<Quest> Quests;
+
 		public QuestManager()
 		{
 			this.Quests = new List<Quest>();
 		}
+
 		public void InitQuests()
 		{
             Logging.Write("Loading Quests..");
 			this.Quests.Clear();
-			DataTable dataTable = null;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			DataTable Data = null;
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				dataTable = @class.ReadDataTable("SELECT Id,type,action,needofcount,level_num,pixel_reward FROM quests WHERE enabled = '1' ORDER by level_num");
+				Data = adapter.ReadDataTable("SELECT Id,type,action,needofcount,level_num,pixel_reward FROM quests WHERE enabled = '1' ORDER by level_num");
 			}
-			if (dataTable != null)
+			if (Data != null)
 			{
-				foreach (DataRow dataRow in dataTable.Rows)
+				foreach (DataRow Row in Data.Rows)
 				{
-					Quest class2 = new Quest((uint)dataRow["Id"], (string)dataRow["type"], (string)dataRow["action"], (int)dataRow["needofcount"], (int)dataRow["level_num"], (int)dataRow["pixel_reward"]);
-					if (class2 != null)
+					Quest Quest = new Quest((uint)Row["Id"], (string)Row["type"], (string)Row["action"], (int)Row["needofcount"], (int)Row["level_num"], (int)Row["pixel_reward"]);
+					if (Quest != null)
 					{
-						this.Quests.Add(class2);
+						this.Quests.Add(Quest);
 					}
 				}
 				Logging.WriteLine("completed!");
 			}
 		}
-		public void ProgressUserQuest(uint uint_0, GameClient Session)
+
+		public void ProgressUserQuest(uint Id, GameClient Session)
 		{
 			Session.GetHabbo().CurrentQuestProgress++;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				@class.ExecuteQuery("UPDATE user_stats SET quest_progress = quest_progress + 1 WHERE Id = '" + Session.GetHabbo().Id + "' LIMIT 1");
+				adapter.ExecuteQuery("UPDATE user_stats SET quest_progress = quest_progress + 1 WHERE Id = '" + Session.GetHabbo().Id + "' LIMIT 1");
 			}
-			PhoenixEnvironment.GetGame().GetQuestManager().HandleQuest(uint_0, Session);
+			PhoenixEnvironment.GetGame().GetQuestManager().HandleQuest(Id, Session);
 		}
-		public int GetHighestLevelForType(string string_0)
+
+		public int GetHighestLevelForType(string Type)
 		{
-			int num = 0;
-			foreach (Quest current in this.Quests)
+			int i = 0;
+			foreach (Quest Q in this.Quests)
 			{
-				if (current.Type == string_0)
+				if (Q.Type == Type)
 				{
-					num++;
+					i++;
 				}
 			}
-			return num;
+			return i;
 		}
-		public uint method_3(int int_0, string string_0)
+
+		public uint GetQuestIdBy1More(int LevelType, string Type)
 		{
-			uint result;
-			foreach (Quest current in this.Quests)
+			foreach (Quest Q in Quests)
 			{
-				if (current.Type == string_0 && current.Level == int_0 + 1)
+				if (Q.Type == Type && Q.Level == LevelType + 1)
 				{
-					result = current.QuestId();
-					return result;
+					return Q.QuestId();
 				}
 			}
-			result = 0u;
-			return result;
+			return 0;
 		}
-		public void ActivateNextQuest(GameClient Session)
-		{
-			Quest @class = this.method_6(Session.GetHabbo().uint_7);
-			string text = @class.Type.ToLower();
-			int int_ = 0;
-			string text2 = text;
-			if (text2 != null)
-			{
-				if (!(text2 == "social"))
-				{
-					if (!(text2 == "room_builder"))
-					{
-						if (!(text2 == "identity"))
-						{
-							if (text2 == "explore")
-							{
-								int_ = Session.GetHabbo().int_9;
-							}
-						}
-						else
-						{
-							int_ = Session.GetHabbo().int_8;
-						}
-					}
-					else
-					{
-						int_ = Session.GetHabbo().int_6;
-					}
-				}
-				else
-				{
-					int_ = Session.GetHabbo().int_7;
-				}
-			}
-			if (this.method_3(int_, text) != 0u)
-			{
-				this.HandleQuest(this.method_3(int_, text), Session);
-			}
-		}
+
+        public void ActivateNextQuest(GameClient Session)
+        {
+            Quest Quest = this.GetQuest(Session.GetHabbo().LastQuestId);
+
+            string Type = Quest.Type.ToLower();
+            int Level = 0;
+
+            switch (Type)
+            {
+                case "social":
+                    Level = Session.GetHabbo().LevelSocial;
+                    break;
+                case "room_builder":
+                    Level = Session.GetHabbo().LevelBuilder;
+                    break;
+                case "identity":
+                    Level = Session.GetHabbo().LevelIdentity;
+                    break;
+                case "explore":
+                    Level = Session.GetHabbo().LevelExplorer;
+                    break;
+            }
+
+            if (GetQuestIdBy1More(Level, Type) != 0)
+            {
+                HandleQuest(GetQuestIdBy1More(Level, Type), Session);
+            }
+        }
+
 		public ServerMessage SerializeQuestList(GameClient Session)
 		{
-			ServerMessage Message = new ServerMessage(800u);
+			ServerMessage Message = new ServerMessage(800);
 			Message.AppendInt32(4);
-			this.method_9(Session, Message);
+
+			ParseNeed(Session, Message);
+
 			Message.AppendInt32(1);
 			return Message;
 		}
-		public Quest method_6(uint uint_0)
+
+		public Quest GetQuest(uint Id)
 		{
-			Quest result;
-			foreach (Quest current in this.Quests)
+			foreach (Quest Quest in Quests)
 			{
-				if (current.QuestId() == uint_0)
+				if (Quest.QuestId() == Id)
 				{
-					result = current;
-					return result;
+					return Quest;
 				}
 			}
-			result = null;
-			return result;
+			return null;
 		}
-		public void HandleQuest(uint uint_0, GameClient Session)
+
+		public void HandleQuest(uint Id, GameClient Session)
 		{
 			if (Session != null)
 			{
-				if (Session.GetHabbo().CurrentQuestId != uint_0)
+				if (Session.GetHabbo().CurrentQuestId != Id)
 				{
-					Session.GetHabbo().CurrentQuestId = uint_0;
+					Session.GetHabbo().CurrentQuestId = Id;
 					Session.GetHabbo().CurrentQuestProgress = 0;
-					using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+					using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 					{
-						@class.AddParamWithValue("uid", Session.GetHabbo().Id);
-						@class.AddParamWithValue("qid", uint_0);
-						@class.ExecuteQuery("UPDATE user_stats SET quest_id = @qid, quest_progress = '0' WHERE Id = @uid LIMIT 1");
+						adapter.AddParamWithValue("uid", Session.GetHabbo().Id);
+						adapter.AddParamWithValue("qid", Id);
+						adapter.ExecuteQuery("UPDATE user_stats SET quest_id = @qid, quest_progress = '0' WHERE Id = @uid LIMIT 1");
 					}
 				}
-				if (uint_0 == 0u)
+				if (Id == 0)
 				{
-					Session.SendMessage(this.SerializeQuestList(Session));
-					ServerMessage Message5_ = new ServerMessage(803u);
-					Session.SendMessage(Message5_);
+					Session.SendMessage(SerializeQuestList(Session));
+					ServerMessage Message = new ServerMessage(803);
+					Session.SendMessage(Message);
 				}
 				else
 				{
-					Quest class2 = this.method_6(uint_0);
-					if (class2.NeedForLevel <= Session.GetHabbo().CurrentQuestProgress)
+					Quest Quest = GetQuest(Id);
+					if (Quest.NeedForLevel <= Session.GetHabbo().CurrentQuestProgress)
 					{
-						this.method_8(uint_0, Session);
+						this.CompleteQuest(Id, Session);
 					}
 					else
 					{
-						ServerMessage Message5_ = new ServerMessage(802u);
-						class2.Serialize(Message5_, Session, true);
-						Session.SendMessage(Message5_);
+						ServerMessage Message = new ServerMessage(802);
+						Quest.Serialize(Message, Session, true);
+						Session.SendMessage(Message);
 					}
 				}
 			}
 		}
-		public void method_8(uint uint_0, GameClient Session)
+
+        public void CompleteQuest(uint Id, GameClient Session)
+        {
+            Session.GetHabbo().CurrentQuestId = 0;
+            Session.GetHabbo().LastQuestId = Id;
+
+            using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+            {
+                adapter.AddParamWithValue("userid", Session.GetHabbo().Id);
+                adapter.AddParamWithValue("questid", Id);
+                adapter.ExecuteQuery("UPDATE user_stats SET quest_id = '0',quest_progress = '0', lev_" + GetQuest(Id).Type.Replace("room_", "") + " = lev_" + GetQuest(Id).Type.Replace("room_", "") + " + 1 WHERE Id = @userid LIMIT 1");
+                adapter.ExecuteQuery("INSERT INTO user_quests (user_id,quest_id) VALUES (@userid,@questid)");
+            }
+
+            switch (GetQuest(Id).Type.ToLower())
+            {
+                case "identity":
+                    Session.GetHabbo().LevelIdentity++;
+                    break;
+                case "room_builder":
+                    Session.GetHabbo().LevelBuilder++;
+                    break;
+                case "social":
+                    Session.GetHabbo().LevelSocial++;
+                    break;
+                case "explore":
+                    Session.GetHabbo().LevelExplorer++;
+                    break;
+            }
+            Session.GetHabbo().LoadQuests();
+
+            ServerMessage Message = new ServerMessage(801);
+            Quest Quest = GetQuest(Id);
+            Quest.Serialize(Message, Session, true);
+            ParseNeed(Session, Message);
+            Message.AppendInt32(1);
+
+            Session.SendMessage(Message);
+            Session.GetHabbo().ActivityPoints += Quest.PixelReward;
+            Session.GetHabbo().UpdateActivityPointsBalance(true);
+            Session.GetHabbo().CurrentQuestProgress = 0;
+        }
+
+		public void ParseNeed(GameClient Session, ServerMessage Message)
 		{
-			Session.GetHabbo().CurrentQuestId = 0u;
-			Session.GetHabbo().uint_7 = uint_0;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
-			{
-				@class.AddParamWithValue("userid", Session.GetHabbo().Id);
-				@class.AddParamWithValue("questid", uint_0);
-				@class.ExecuteQuery(string.Concat(new string[]
-				{
-					"UPDATE user_stats SET quest_id = '0',quest_progress = '0', lev_",
-					this.method_6(uint_0).Type.Replace("room_", ""),
-					" = lev_",
-					this.method_6(uint_0).Type.Replace("room_", ""),
-					" + 1 WHERE Id = @userid LIMIT 1"
-				}));
-				@class.ExecuteQuery("INSERT INTO user_quests (user_id,quest_id) VALUES (@userid,@questid)");
-			}
-			string text = this.method_6(uint_0).Type.ToLower();
-			if (text != null)
-			{
-				if (!(text == "identity"))
-				{
-					if (!(text == "room_builder"))
-					{
-						if (!(text == "social"))
-						{
-							if (text == "explore")
-							{
-								Session.GetHabbo().int_9++;
-							}
-						}
-						else
-						{
-							Session.GetHabbo().int_7++;
-						}
-					}
-					else
-					{
-						Session.GetHabbo().int_6++;
-					}
-				}
-				else
-				{
-					Session.GetHabbo().int_8++;
-				}
-			}
-			Session.GetHabbo().LoadQuests();
-			ServerMessage Message = new ServerMessage(801u);
-			Quest class2 = this.method_6(uint_0);
-			class2.Serialize(Message, Session, true);
-			this.method_9(Session, Message);
-			Message.AppendInt32(1);
-			Session.SendMessage(Message);
-			Session.GetHabbo().ActivityPoints += class2.PixelReward;
-			Session.GetHabbo().UpdateActivityPointsBalance(true);
-			Session.GetHabbo().CurrentQuestProgress = 0;
-		}
-		public void method_9(GameClient Session, ServerMessage Message5_0)
-		{
-			bool flag = false;
-			bool flag2 = false;
-			bool flag3 = false;
-			bool flag4 = false;
+			bool DidSocial = false;
+			bool DidBuilder = false;
+			bool DidId = false;
+			bool DidExplorer = false;
 			int num = 0;
 			int num2 = 0;
 			int num3 = 0;
 			int num4 = 0;
-			foreach (Quest current in this.Quests)
+			foreach (Quest Quest in Quests)
 			{
-				if (current.QuestId() == Session.GetHabbo().CurrentQuestId)
+                if (Quest.QuestId() == Session.GetHabbo().CurrentQuestId)
+                {
+                    Quest.Serialize(Message, Session, false);
+
+                    switch (Quest.Type.ToLower())
+                    {
+                        case "social":
+                            DidSocial = true;
+                            break;
+                        case "room_builder":
+                            DidBuilder = true;
+                            break;
+                        case "identity":
+                            DidId = true;
+                            break;
+                        case "explore":
+                            DidExplorer = true;
+                            break;
+                    }
+                }
+				if (Quest.Type.ToLower() == "room_builder" && num2 < Session.GetHabbo().LevelBuilder)
 				{
-					current.Serialize(Message5_0, Session, false);
-					string text = current.Type.ToLower();
-					if (text != null)
-					{
-						if (!(text == "social"))
-						{
-							if (!(text == "room_builder"))
-							{
-								if (!(text == "identity"))
-								{
-									if (text == "explore")
-									{
-										flag4 = true;
-									}
-								}
-								else
-								{
-									flag3 = true;
-								}
-							}
-							else
-							{
-								flag2 = true;
-							}
-						}
-						else
-						{
-							flag = true;
-						}
-					}
+					num2 = Quest.Level;
 				}
-				if (current.Type.ToLower() == "room_builder" && num2 < Session.GetHabbo().int_6)
+				if (Quest.Type.ToLower() == "social" && num < Session.GetHabbo().LevelSocial)
 				{
-					num2 = current.Level;
+					num = Quest.Level;
 				}
-				if (current.Type.ToLower() == "social" && num < Session.GetHabbo().int_7)
+				if (Quest.Type.ToLower() == "identity" && num3 < Session.GetHabbo().LevelIdentity)
 				{
-					num = current.Level;
+					num3 = Quest.Level;
 				}
-				if (current.Type.ToLower() == "identity" && num3 < Session.GetHabbo().int_8)
+				if (Quest.Type.ToLower() == "explore" && num4 < Session.GetHabbo().LevelExplorer)
 				{
-					num3 = current.Level;
+					num4 = Quest.Level;
 				}
-				if (current.Type.ToLower() == "explore" && num4 < Session.GetHabbo().int_9)
+				if (Quest.Type.ToLower() == "room_builder" && !DidBuilder && Quest.Level == GetHighestLevelForType("room_builder") && Session.GetHabbo().LevelBuilder == this.GetHighestLevelForType("room_builder"))
 				{
-					num4 = current.Level;
+					Quest.Serialize(Message, Session, false);
+					DidBuilder = true;
 				}
-				if (current.Type.ToLower() == "room_builder" && !flag2 && current.Level == this.GetHighestLevelForType("room_builder") && Session.GetHabbo().int_6 == this.GetHighestLevelForType("room_builder"))
+				if (Quest.Type.ToLower() == "social" && !DidSocial && Quest.Level == GetHighestLevelForType("social") && Session.GetHabbo().LevelSocial == this.GetHighestLevelForType("room_social"))
 				{
-					current.Serialize(Message5_0, Session, false);
-					flag2 = true;
+					Quest.Serialize(Message, Session, false);
+					DidSocial = true;
 				}
-				if (current.Type.ToLower() == "social" && !flag && current.Level == this.GetHighestLevelForType("social") && Session.GetHabbo().int_7 == this.GetHighestLevelForType("room_social"))
+				if (Quest.Type.ToLower() == "identity" && !DidId && Quest.Level == GetHighestLevelForType("identity") && Session.GetHabbo().LevelIdentity == this.GetHighestLevelForType("identity"))
 				{
-					current.Serialize(Message5_0, Session, false);
-					flag = true;
+					Quest.Serialize(Message, Session, false);
+					DidId = true;
 				}
-				if (current.Type.ToLower() == "identity" && !flag3 && current.Level == this.GetHighestLevelForType("identity") && Session.GetHabbo().int_8 == this.GetHighestLevelForType("identity"))
+				if (Quest.Type.ToLower() == "explore" && !DidExplorer && Quest.Level == GetHighestLevelForType("explore") && Session.GetHabbo().LevelExplorer == this.GetHighestLevelForType("explore"))
 				{
-					current.Serialize(Message5_0, Session, false);
-					flag3 = true;
+					Quest.Serialize(Message, Session, false);
+					DidExplorer = true;
 				}
-				if (current.Type.ToLower() == "explore" && !flag4 && current.Level == this.GetHighestLevelForType("explore") && Session.GetHabbo().int_9 == this.GetHighestLevelForType("explore"))
+				if (Quest.Type.ToLower() == "room_builder" && !DidBuilder && Quest.Level == Session.GetHabbo().LevelBuilder + 1)
 				{
-					current.Serialize(Message5_0, Session, false);
-					flag4 = true;
+					Quest.Serialize(Message, Session, false);
+					DidBuilder = true;
 				}
-				if (current.Type.ToLower() == "room_builder" && !flag2 && current.Level == Session.GetHabbo().int_6 + 1)
+				if (Quest.Type.ToLower() == "social" && !DidSocial && Quest.Level == Session.GetHabbo().LevelSocial + 1)
 				{
-					current.Serialize(Message5_0, Session, false);
-					flag2 = true;
+					Quest.Serialize(Message, Session, false);
+					DidSocial = true;
 				}
-				if (current.Type.ToLower() == "social" && !flag && current.Level == Session.GetHabbo().int_7 + 1)
+				if (Quest.Type.ToLower() == "identity" && !DidId && Quest.Level == Session.GetHabbo().LevelIdentity + 1)
 				{
-					current.Serialize(Message5_0, Session, false);
-					flag = true;
+					Quest.Serialize(Message, Session, false);
+					DidId = true;
 				}
-				if (current.Type.ToLower() == "identity" && !flag3 && current.Level == Session.GetHabbo().int_8 + 1)
+				if (Quest.Type.ToLower() == "explore" && !DidExplorer && Quest.Level == Session.GetHabbo().LevelExplorer + 1)
 				{
-					current.Serialize(Message5_0, Session, false);
-					flag3 = true;
-				}
-				if (current.Type.ToLower() == "explore" && !flag4 && current.Level == Session.GetHabbo().int_9 + 1)
-				{
-					current.Serialize(Message5_0, Session, false);
-					flag4 = true;
+					Quest.Serialize(Message, Session, false);
+					DidExplorer = true;
 				}
 			}
-			if (!flag2 || !flag || !flag3 || !flag4)
+			if (!DidBuilder || !DidSocial || !DidId || !DidExplorer)
 			{
-				foreach (Quest current in this.Quests)
+				foreach (Quest Quest in Quests)
 				{
-					if (current.Type.ToLower() == "room_builder" && !flag2 && current.Level == num2)
+					if (Quest.Type.ToLower() == "room_builder" && !DidBuilder && Quest.Level == num2)
 					{
-						current.Serialize(Message5_0, Session, false);
-						flag2 = true;
+						Quest.Serialize(Message, Session, false);
+						DidBuilder = true;
 					}
-					if (current.Type.ToLower() == "social" && !flag && current.Level == num)
+					if (Quest.Type.ToLower() == "social" && !DidSocial && Quest.Level == num)
 					{
-						current.Serialize(Message5_0, Session, false);
-						flag = true;
+						Quest.Serialize(Message, Session, false);
+						DidSocial = true;
 					}
-					if (current.Type.ToLower() == "identity" && !flag3 && current.Level == num3)
+					if (Quest.Type.ToLower() == "identity" && !DidId && Quest.Level == num3)
 					{
-						current.Serialize(Message5_0, Session, false);
-						flag3 = true;
+						Quest.Serialize(Message, Session, false);
+						DidId = true;
 					}
-					if (current.Type.ToLower() == "explore" && !flag4 && current.Level == num4)
+					if (Quest.Type.ToLower() == "explore" && !DidExplorer && Quest.Level == num4)
 					{
-						current.Serialize(Message5_0, Session, false);
-						flag4 = true;
+						Quest.Serialize(Message, Session, false);
+						DidExplorer = true;
 					}
 				}
 			}

@@ -4,7 +4,7 @@ using Phoenix.Messages;
 using Phoenix.HabboHotel.Users.Messenger;
 namespace Phoenix.Communication.Messages.Messenger
 {
-	internal sealed class AcceptBuddyMessageEvent : MessageEvent
+	internal class AcceptBuddyMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{

@@ -3,7 +3,7 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Messenger
 {
-	internal sealed class DeclineBuddyMessageEvent : MessageEvent
+	internal class DeclineBuddyMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{

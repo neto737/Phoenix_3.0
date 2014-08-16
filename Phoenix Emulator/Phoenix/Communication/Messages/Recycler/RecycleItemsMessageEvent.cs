@@ -6,7 +6,7 @@ using Phoenix.HabboHotel.Catalogs;
 using Phoenix.Storage;
 namespace Phoenix.Communication.Messages.Recycler
 {
-	internal sealed class RecycleItemsMessageEvent : MessageEvent
+	internal class RecycleItemsMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
@@ -24,14 +24,14 @@ namespace Phoenix.Communication.Messages.Recycler
 						}
 						Session.GetHabbo().GetInventoryComponent().RemoveItem(item.Id, 0, false);
 					}
-					uint num2 = PhoenixEnvironment.GetGame().GetCatalog().GenerateItemId();
+					uint Id = PhoenixEnvironment.GetGame().GetCatalog().GenerateItemId();
 					EcotronReward randomEcotronReward = PhoenixEnvironment.GetGame().GetCatalog().GetRandomEcotronReward();
 					using (DatabaseClient client = PhoenixEnvironment.GetDatabase().GetClient())
 					{
 						client.ExecuteQuery(string.Concat(new object[]
 						{
 							"INSERT INTO items (Id,user_id,base_item,extra_data,wall_pos) VALUES ('",
-							num2,
+							Id,
 							"','",
 							Session.GetHabbo().Id,
 							"','1478','",
@@ -41,7 +41,7 @@ namespace Phoenix.Communication.Messages.Recycler
 						client.ExecuteQuery(string.Concat(new object[]
 						{
 							"INSERT INTO user_presents (item_id,base_id,amount,extra_data) VALUES ('",
-							num2,
+							Id,
 							"','",
 							randomEcotronReward.BaseId,
 							"','1','')"
@@ -50,7 +50,7 @@ namespace Phoenix.Communication.Messages.Recycler
 					Session.GetHabbo().GetInventoryComponent().UpdateItems(true);
 					ServerMessage message = new ServerMessage(508);
 					message.AppendBoolean(true);
-					message.AppendUInt(num2);
+					message.AppendUInt(Id);
 					Session.SendMessage(message);
 				}
 			}

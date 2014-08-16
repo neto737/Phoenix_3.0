@@ -129,7 +129,7 @@ namespace Phoenix.HabboHotel.Navigators
 			}
 		}
 
-		public ServerMessage method_5()
+		public ServerMessage SerializePublicRooms()
 		{
 			ServerMessage Frontpage = new ServerMessage(450);
 			Frontpage.AppendInt32(PublicItems.Count);
@@ -148,7 +148,7 @@ namespace Phoenix.HabboHotel.Navigators
 			return Frontpage;
 		}
 
-		public ServerMessage method_6(GameClient Session)
+		public ServerMessage SerializeFavoriteRooms(GameClient Session)
 		{
 			ServerMessage Rooms = new ServerMessage(451);
 			Rooms.AppendInt32(0);
@@ -162,7 +162,7 @@ namespace Phoenix.HabboHotel.Navigators
 			return Rooms;
 		}
 
-		public ServerMessage method_7(GameClient Session)
+		public ServerMessage SerializeRecentRooms(GameClient Session)
 		{
 			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
 			{
@@ -173,7 +173,7 @@ namespace Phoenix.HabboHotel.Navigators
 				{
 					foreach (DataRow dataRow in dataTable.Rows)
 					{
-						RoomData class2 = PhoenixEnvironment.GetGame().GetRoomManager().method_17((uint)dataRow["Id"], dataRow);
+						RoomData class2 = PhoenixEnvironment.GetGame().GetRoomManager().FetchRoomData((uint)dataRow["Id"], dataRow);
 						class2.method_1(dataRow);
 						list.Add(class2);
 						list2.Add(class2.Id);
@@ -202,7 +202,7 @@ namespace Phoenix.HabboHotel.Navigators
 			Message.AppendInt32(EventRooms.Count);
 			foreach (Room Room in EventRooms)
 			{
-				RoomData Data = Room.Class27_0;
+				RoomData Data = Room.RoomData;
 				Data.Serialize(Message, true, false);
 			}
 			return Message;
@@ -289,7 +289,7 @@ namespace Phoenix.HabboHotel.Navigators
 			{
 				foreach (DataRow dataRow in table.Rows)
 				{
-					RoomData item = PhoenixEnvironment.GetGame().GetRoomManager().method_17((uint)dataRow["Id"], dataRow);
+					RoomData item = PhoenixEnvironment.GetGame().GetRoomManager().FetchRoomData((uint)dataRow["Id"], dataRow);
 					list.Add(item);
 				}
 			}
@@ -408,7 +408,7 @@ namespace Phoenix.HabboHotel.Navigators
 					{
 						break;
 					}
-					list.Add(current.Class27_0);
+					list.Add(current.RoomData);
 					num++;
 				}
 				using (IEnumerator<RoomData> enumerator2 = enumerable.GetEnumerator())
@@ -442,7 +442,7 @@ namespace Phoenix.HabboHotel.Navigators
 					GameClient class3 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(class2.Id);
 					if (class3 != null && class3.GetHabbo() != null && class3.GetHabbo().CurrentRoom != null)
 					{
-						RoomData class27_ = class3.GetHabbo().CurrentRoom.Class27_0;
+						RoomData class27_ = class3.GetHabbo().CurrentRoom.RoomData;
 						if (!dictionary3.ContainsKey(class27_))
 						{
 							dictionary3.Add(class27_, class27_.UsersNow);
@@ -491,7 +491,7 @@ namespace Phoenix.HabboHotel.Navigators
 				while (enumerator3.MoveNext())
 				{
 					DataRow dataRow = (DataRow)enumerator3.Current;
-					list.Add(PhoenixEnvironment.GetGame().GetRoomManager().method_17((uint)dataRow["Id"], dataRow));
+					list.Add(PhoenixEnvironment.GetGame().GetRoomManager().FetchRoomData((uint)dataRow["Id"], dataRow));
 				}
 				goto IL_508;
 			}
@@ -519,7 +519,7 @@ namespace Phoenix.HabboHotel.Navigators
 					break;
 				}
 				num2++;
-				list.Add(current4.Class27_0);
+				list.Add(current4.RoomData);
 			}
 			IL_508:
 			Message.AppendInt32(list.Count);

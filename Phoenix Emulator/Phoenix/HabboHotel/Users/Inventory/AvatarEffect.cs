@@ -1,7 +1,7 @@
 using System;
 namespace Phoenix.HabboHotel.Users.Inventory
 {
-	internal sealed class AvatarEffect
+	class AvatarEffect
 	{
 		public int EffectId;
 		public int TotalDuration;

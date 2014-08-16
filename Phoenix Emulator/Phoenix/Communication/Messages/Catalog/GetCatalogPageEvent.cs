@@ -4,32 +4,32 @@ using Phoenix.Messages;
 using Phoenix.HabboHotel.Catalogs;
 namespace Phoenix.Communication.Messages.Catalog
 {
-	internal sealed class GetCatalogPageEvent : MessageEvent
+	internal class GetCatalogPageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			CatalogPage @class = PhoenixEnvironment.GetGame().GetCatalog().method_5(Event.PopWiredInt32());
-			if (@class != null && @class.Enabled && @class.Visible && @class.MinRank <= Session.GetHabbo().Rank)
+			CatalogPage Page = PhoenixEnvironment.GetGame().GetCatalog().method_5(Event.PopWiredInt32());
+			if (Page != null && Page.Enabled && Page.Visible && Page.MinRank <= Session.GetHabbo().Rank)
 			{
-				if (@class.ClubOnly && !Session.GetHabbo().GetSubscriptionManager().HasSubscription("habbo_club"))
+				if (Page.ClubOnly && !Session.GetHabbo().GetSubscriptionManager().HasSubscription("habbo_club"))
 				{
 					Session.SendNotif("This page is for Phoenix Club members only!");
 				}
 				else
 				{
-					Session.SendMessage(@class.GetMessage);
-					if (@class.Layout == "recycler")
+					Session.SendMessage(Page.GetMessage);
+					if (Page.Layout == "recycler")
 					{
-						ServerMessage Message = new ServerMessage(507u);
+						ServerMessage Message = new ServerMessage(507);
 						Message.AppendBoolean(true);
 						Message.AppendBoolean(false);
 						Session.SendMessage(Message);
 					}
 					else
 					{
-						if (@class.Layout == "club_buy")
+						if (Page.Layout == "club_buy")
 						{
-							ServerMessage Message2 = new ServerMessage(625u);
+							ServerMessage Message2 = new ServerMessage(625);
 							if (Session.GetHabbo().Vip)
 							{
 								Message2.AppendInt32(2);

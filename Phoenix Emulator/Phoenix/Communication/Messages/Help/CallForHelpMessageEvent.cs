@@ -8,7 +8,7 @@ namespace Phoenix.Communication.Messages.Help
 		public void parse(GameClient Session, ClientMessage Event)
 		{
 			bool flag = false;
-			if (PhoenixEnvironment.GetGame().GetModerationTool().method_9(Session.GetHabbo().Id))
+			if (PhoenixEnvironment.GetGame().GetModerationTool().UsersHasPendingTicket(Session.GetHabbo().Id))
 			{
 				flag = true;
 			}
@@ -18,7 +18,7 @@ namespace Phoenix.Communication.Messages.Help
 				Event.PopWiredInt32();
 				int int_ = Event.PopWiredInt32();
 				uint uint_ = Event.PopWiredUInt();
-				PhoenixEnvironment.GetGame().GetModerationTool().method_3(Session, int_, uint_, string_);
+				PhoenixEnvironment.GetGame().GetModerationTool().SendNewTicket(Session, int_, uint_, string_);
 			}
 			ServerMessage Message = new ServerMessage(321u);
 			Message.AppendBoolean(flag);

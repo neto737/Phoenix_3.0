@@ -5,7 +5,7 @@ using Phoenix.HabboHotel.Users.Badges;
 using Phoenix.Storage;
 namespace Phoenix.Communication.Messages.Inventory.Badges
 {
-	internal sealed class SetActivatedBadgesEvent : MessageEvent
+	internal class SetActivatedBadgesEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{

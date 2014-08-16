@@ -15,7 +15,7 @@ namespace Phoenix.Communication.Messages.Rooms.Action
 				RoomUser class2 = @class.GetRoomUserByHabbo(uint_);
 				if (class2 != null && !class2.IsBot && (!@class.CheckRights(class2.GetClient(), true) && !class2.GetClient().GetHabbo().HasRole("acc_unkickable")))
 				{
-					@class.method_78(Session.GetHabbo().Id);
+					@class.TryStopTrade(Session.GetHabbo().Id);
 					@class.RemoveUserFromRoom(class2.GetClient(), true, true);
 				}
 			}
