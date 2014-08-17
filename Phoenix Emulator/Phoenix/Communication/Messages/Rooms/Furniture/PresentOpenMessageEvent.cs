@@ -42,7 +42,7 @@ namespace Phoenix.Communication.Messages.Rooms.Furniture
 								{
 									class3.ExecuteQuery("DELETE FROM user_presents WHERE item_id = '" + class2.Id + "' LIMIT 1");
 								}
-								PhoenixEnvironment.GetGame().GetCatalog().method_9(Session, class4, (int)dataRow["amount"], (string)dataRow["extra_data"], true, 0u);
+								PhoenixEnvironment.GetGame().GetCatalog().DeliverItems(Session, class4, (int)dataRow["amount"], (string)dataRow["extra_data"], true, 0u);
 							}
 						}
 					}

@@ -5,7 +5,7 @@ using Phoenix.Messages;
 using Phoenix.HabboHotel.Rooms;
 namespace Phoenix.Communication.Messages.Marketplace
 {
-	internal sealed class MakeOfferMessageEvent : MessageEvent
+	internal class MakeOfferMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
@@ -13,20 +13,20 @@ namespace Phoenix.Communication.Messages.Marketplace
 			{
 				if (Session.GetHabbo().InRoom)
 				{
-					Room class14_ = Session.GetHabbo().CurrentRoom;
-					RoomUser @class = class14_.GetRoomUserByHabbo(Session.GetHabbo().Id);
-					if (@class.IsTrading)
+					Room Room = Session.GetHabbo().CurrentRoom;
+					RoomUser User = Room.GetRoomUserByHabbo(Session.GetHabbo().Id);
+					if (User.IsTrading)
 					{
 						return;
 					}
 				}
-				int int_ = Event.PopWiredInt32();
+				int SellingPrice = Event.PopWiredInt32();
 				Event.PopWiredInt32();
-				uint uint_ = Event.PopWiredUInt();
-				UserItem class2 = Session.GetHabbo().GetInventoryComponent().GetItem(uint_);
-				if (class2 != null && class2.GetBaseItem().AllowTrade)
+				uint ItemId = Event.PopWiredUInt();
+				UserItem Item = Session.GetHabbo().GetInventoryComponent().GetItem(ItemId);
+				if (Item != null && Item.GetBaseItem().AllowTrade)
 				{
-					PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().method_1(Session, class2.Id, int_);
+					PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().SellItem(Session, Item.Id, SellingPrice);
 				}
 			}
 		}

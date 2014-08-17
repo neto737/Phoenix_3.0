@@ -5,7 +5,7 @@ using Phoenix.HabboHotel.Rooms;
 using Phoenix.Storage;
 namespace Phoenix.Communication.Messages.Register
 {
-	internal sealed class UpdateFigureDataMessageEvent : MessageEvent
+	internal class UpdateFigureDataMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{

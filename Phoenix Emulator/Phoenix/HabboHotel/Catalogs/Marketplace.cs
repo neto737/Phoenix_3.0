@@ -27,10 +27,10 @@ namespace Phoenix.HabboHotel.Catalogs
 		{
 			return class39_0.GetBaseItem().AllowTrade && class39_0.GetBaseItem().AllowMarketplaceSell;
 		}
-		public void method_1(GameClient Session, uint uint_0, int int_0)
+		public void SellItem(GameClient Session, uint ItemId, int SellingPrice)
 		{
-			UserItem @class = Session.GetHabbo().GetInventoryComponent().GetItem(uint_0);
-			if (@class == null || int_0 > GlobalClass.MaxMarketPlacePrice || !this.method_0(@class))
+			UserItem @class = Session.GetHabbo().GetInventoryComponent().GetItem(ItemId);
+			if (@class == null || SellingPrice > GlobalClass.MaxMarketPlacePrice || !this.method_0(@class))
 			{
 				ServerMessage Message = new ServerMessage(610u);
 				Message.AppendBoolean(false);
@@ -38,8 +38,8 @@ namespace Phoenix.HabboHotel.Catalogs
 			}
 			else
 			{
-				int num = this.method_2((float)int_0);
-				int num2 = int_0 + num;
+				int num = this.method_2((float)SellingPrice);
+				int num2 = SellingPrice + num;
 				int num3 = 1;
 				if (@class.GetBaseItem().Type == 'i')
 				{
@@ -52,13 +52,13 @@ namespace Phoenix.HabboHotel.Catalogs
 					class2.ExecuteQuery(string.Concat(new object[]
 					{
 						"INSERT INTO catalog_marketplace_offers (furni_id, item_id,user_id,asking_price,total_price,public_name,sprite_id,item_type,timestamp,extra_data) VALUES ('",
-						uint_0,
+						ItemId,
 						"','",
 						@class.BaseItem,
 						"','",
 						Session.GetHabbo().Id,
 						"','",
-						int_0,
+						SellingPrice,
 						"','",
 						num2,
 						"',@public_name,'",
@@ -70,7 +70,7 @@ namespace Phoenix.HabboHotel.Catalogs
 						"',@extra_data)"
 					}));
 				}
-				Session.GetHabbo().GetInventoryComponent().RemoveItem(uint_0, 0u, true);
+				Session.GetHabbo().GetInventoryComponent().RemoveItem(ItemId, 0u, true);
 				ServerMessage Message2 = new ServerMessage(610u);
 				Message2.AppendBoolean(true);
 				Session.SendMessage(Message2);
@@ -92,21 +92,21 @@ namespace Phoenix.HabboHotel.Catalogs
 				','
 			})[0];
 		}
-		public ServerMessage method_5(int int_0, int int_1, string string_0, int int_2)
+		public ServerMessage SerializeOffers(int MinCost, int MaxCost, string SearchQuery, int FilterMode)
 		{
 			DataTable dataTable = null;
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.Append("WHERE state = '1' AND timestamp >= " + this.method_4());
-			if (int_0 >= 0)
+			if (MinCost >= 0)
 			{
-				stringBuilder.Append(" AND total_price > " + int_0);
+				stringBuilder.Append(" AND total_price > " + MinCost);
 			}
-			if (int_1 >= 0)
+			if (MaxCost >= 0)
 			{
-				stringBuilder.Append(" AND total_price < " + int_1);
+				stringBuilder.Append(" AND total_price < " + MaxCost);
 			}
 			string text;
-			switch (int_2)
+			switch (FilterMode)
 			{
 			case 1:
 				text = "ORDER BY asking_price DESC";
@@ -116,8 +116,8 @@ namespace Phoenix.HabboHotel.Catalogs
 			IL_82:
 			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				@class.AddParamWithValue("search_query", "%" + string_0 + "%");
-				if (string_0.Length >= 1)
+				@class.AddParamWithValue("search_query", "%" + SearchQuery + "%");
+				if (SearchQuery.Length >= 1)
 				{
 					stringBuilder.Append(" AND public_name LIKE @search_query");
 				}
@@ -144,7 +144,7 @@ namespace Phoenix.HabboHotel.Catalogs
 						this.list_1.Add(item);
 					}
 				}
-				return this.method_6(int_0, int_1);
+				return this.method_6(MinCost, MaxCost);
 			}
 			else
 			{
@@ -274,13 +274,13 @@ namespace Phoenix.HabboHotel.Catalogs
 				}
 			}
 		}
-		public ServerMessage method_9(uint uint_0)
+		public ServerMessage SerializeOwnOffers(uint HabboId)
 		{
 			int int_ = 0;
 			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				DataTable dataTable = @class.ReadDataTable("SELECT timestamp, state, offer_id, item_type, sprite_id, total_price FROM catalog_marketplace_offers WHERE user_id = '" + uint_0 + "'");
-				string text = @class.ReadDataRow("SELECT SUM(asking_price) FROM catalog_marketplace_offers WHERE state = '2' AND user_id = '" + uint_0 + "'")[0].ToString();
+				DataTable dataTable = @class.ReadDataTable("SELECT timestamp, state, offer_id, item_type, sprite_id, total_price FROM catalog_marketplace_offers WHERE user_id = '" + HabboId + "'");
+				string text = @class.ReadDataRow("SELECT SUM(asking_price) FROM catalog_marketplace_offers WHERE state = '2' AND user_id = '" + HabboId + "'")[0].ToString();
 				if (text.Length > 0)
 				{
 					int_ = int.Parse(text);

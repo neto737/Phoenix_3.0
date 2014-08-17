@@ -4,13 +4,13 @@ using Phoenix.Util;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Marketplace
 {
-	internal sealed class GetMarketplaceConfigurationMessageEvent : MessageEvent
+	internal class GetMarketplaceConfigurationMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
 			DateTime now = DateTime.Now;
 			TimeSpan timeSpan = now - PhoenixEnvironment.ServerStarted;
-			ServerMessage Message = new ServerMessage(612u);
+			ServerMessage Message = new ServerMessage(612);
 			Message.AppendBoolean(true);
 			Message.AppendInt32(GlobalClass.MarketPlaceTax);
 			Message.AppendInt32(1);

@@ -567,7 +567,7 @@ namespace Phoenix.HabboHotel.Catalogs
 								}
 								else
 								{
-									this.method_9(Session, class2.GetBaseItem(), class2.Amount, string_0, true, 0u);
+									this.DeliverItems(Session, class2.GetBaseItem(), class2.Amount, string_0, true, 0u);
 									if (class2.uint_2 > 0u)
 									{
 										PhoenixEnvironment.GetGame().GetAchievementManager().UnlockAchievement(Session, class2.uint_2, 1);
@@ -621,7 +621,7 @@ namespace Phoenix.HabboHotel.Catalogs
 		{
 			return string_0.Length >= 1 && string_0.Length <= 16 && PhoenixEnvironment.IsValidAlphaNumeric(string_0) && !(string_0 != ChatCommandHandler.ApplyWordFilter(string_0));
 		}
-		public void method_9(GameClient Session, Item Item, int int_0, string string_0, bool bool_0, uint uint_1)
+		public void DeliverItems(GameClient Session, Item Item, int int_0, string string_0, bool bool_0, uint uint_1)
 		{
 			string text = Item.Type.ToString();
 			if (text != null)

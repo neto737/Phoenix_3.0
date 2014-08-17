@@ -217,7 +217,7 @@ namespace Phoenix.HabboHotel.Support
 			}
 		}
 
-        public void SendNewTicket(GameClient Session, int Category, uint ReportedUser, string Message)
+        public void SendNewTicket(GameClient Session, int Type, uint ReportedUser, string Message)
 		{
 			if (Session.GetHabbo().CurrentRoomId > 0)
 			{
@@ -227,11 +227,11 @@ namespace Phoenix.HabboHotel.Support
 				{
 					adapter.AddParamWithValue("message", Message);
 					adapter.AddParamWithValue("name", Data.Name);
-					adapter.ExecuteQuery("INSERT INTO moderation_tickets (score,type,status,sender_id,reported_id,moderator_id,message,room_id,room_name,timestamp) VALUES (1,'" + Category + "','open','" + Session.GetHabbo().Id + "','" + ReportedUser + "','0',@message,'" + Data.Id + "',@name,UNIX_TIMESTAMP())");
+					adapter.ExecuteQuery("INSERT INTO moderation_tickets (score,type,status,sender_id,reported_id,moderator_id,message,room_id,room_name,timestamp) VALUES (1,'" + Type + "','open','" + Session.GetHabbo().Id + "','" + ReportedUser + "','0',@message,'" + Data.Id + "',@name,UNIX_TIMESTAMP())");
 					adapter.ExecuteQuery("UPDATE user_info SET cfhs = cfhs + 1 WHERE user_id = '" + Session.GetHabbo().Id + "' LIMIT 1");
 					TicketId = (uint)adapter.ReadDataRow("SELECT Id FROM moderation_tickets WHERE sender_id = '" + Session.GetHabbo().Id + "' ORDER BY Id DESC LIMIT 1")[0];
 				}
-				SupportTicket Ticket = new SupportTicket(TicketId, 1, Category, Session.GetHabbo().Id, ReportedUser, Message, Data.Id, Data.Name, PhoenixEnvironment.GetUnixTimestamp(), 0u);
+				SupportTicket Ticket = new SupportTicket(TicketId, 1, Type, Session.GetHabbo().Id, ReportedUser, Message, Data.Id, Data.Name, PhoenixEnvironment.GetUnixTimestamp(), 0u);
 				this.Tickets.Add(Ticket);
 				this.SendTicketToModerators(Ticket);
 			}

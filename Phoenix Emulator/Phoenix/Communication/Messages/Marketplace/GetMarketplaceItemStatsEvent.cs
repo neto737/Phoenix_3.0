@@ -6,24 +6,24 @@ using Phoenix.Messages;
 using Phoenix.Storage;
 namespace Phoenix.Communication.Messages.Marketplace
 {
-	internal sealed class GetMarketplaceItemStatsEvent : MessageEvent
+	internal class GetMarketplaceItemStatsEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
 			int int_ = Event.PopWiredInt32();
-			int num = Event.PopWiredInt32();
-			ServerMessage Message = new ServerMessage(617u);
+			int Sprite = Event.PopWiredInt32();
+			ServerMessage Message = new ServerMessage(617);
 			Message.AppendInt32(1);
-			Message.AppendInt32(PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().method_7(num));
+			Message.AppendInt32(PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().method_7(Sprite));
 			Dictionary<int, DataRow> dictionary = new Dictionary<int, DataRow>();
-			DataTable dataTable = null;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			DataTable Table = null;
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				dataTable = @class.ReadDataTable("SELECT * FROM catalog_marketplace_data WHERE daysago > -30 AND sprite = " + num + " LIMIT 30;");
+				Table = adapter.ReadDataTable("SELECT * FROM catalog_marketplace_data WHERE daysago > -30 AND sprite = " + Sprite + " LIMIT 30;");
 			}
-			if (dataTable != null)
+			if (Table != null)
 			{
-				foreach (DataRow dataRow in dataTable.Rows)
+				foreach (DataRow dataRow in Table.Rows)
 				{
 					dictionary.Add(Convert.ToInt32(dataRow["daysago"]), dataRow);
 				}
@@ -45,7 +45,7 @@ namespace Phoenix.Communication.Messages.Marketplace
 				}
 			}
 			Message.AppendInt32(int_);
-			Message.AppendInt32(num);
+			Message.AppendInt32(Sprite);
 			Session.SendMessage(Message);
 		}
 	}

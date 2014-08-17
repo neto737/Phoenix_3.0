@@ -8,11 +8,12 @@ namespace Phoenix.Communication.Messages.Help
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			uint uint_ = Event.PopWiredUInt();
-			HelpCategory @class = PhoenixEnvironment.GetGame().GetHelpTool().GetCategory(uint_);
-			if (@class != null)
+			uint CategoryId = Event.PopWiredUInt();
+
+			HelpCategory Category = PhoenixEnvironment.GetGame().GetHelpTool().GetCategory(CategoryId);
+			if (Category != null)
 			{
-				Session.SendMessage(PhoenixEnvironment.GetGame().GetHelpTool().SerializeCategory(@class));
+				Session.SendMessage(PhoenixEnvironment.GetGame().GetHelpTool().SerializeCategory(Category));
 			}
 		}
 	}

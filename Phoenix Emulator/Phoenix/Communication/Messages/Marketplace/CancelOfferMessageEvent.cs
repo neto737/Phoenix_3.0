@@ -6,38 +6,38 @@ using Phoenix.HabboHotel.Items;
 using Phoenix.Storage;
 namespace Phoenix.Communication.Messages.Marketplace
 {
-	internal sealed class CancelOfferMessageEvent : MessageEvent
+	internal class CancelOfferMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
 			if (Session != null)
 			{
-				uint num = Event.PopWiredUInt();
-				DataRow dataRow = null;
-				using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+				uint ItemId = Event.PopWiredUInt();
+				DataRow Row = null;
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					dataRow = @class.ReadDataRow("SELECT furni_id, item_id, user_id, extra_data, offer_id, state, timestamp FROM catalog_marketplace_offers WHERE offer_id = '" + num + "' LIMIT 1");
+					Row = adapter.ReadDataRow("SELECT furni_id, item_id, user_id, extra_data, offer_id, state, timestamp FROM catalog_marketplace_offers WHERE offer_id = '" + ItemId + "' LIMIT 1");
 				}
-				if (dataRow != null)
+				if (Row != null)
 				{
-					int num2 = (int)Math.Floor(((double)dataRow["timestamp"] + 172800.0 - PhoenixEnvironment.GetUnixTimestamp()) / 60.0);
-					int num3 = int.Parse(dataRow["state"].ToString());
+					int num2 = (int)Math.Floor(((double)Row["timestamp"] + 172800.0 - PhoenixEnvironment.GetUnixTimestamp()) / 60.0);
+					int num3 = int.Parse(Row["state"].ToString());
 					if (num2 <= 0)
 					{
 						num3 = 3;
 					}
-					if ((uint)dataRow["user_id"] == Session.GetHabbo().Id && num3 != 2)
+					if ((uint)Row["user_id"] == Session.GetHabbo().Id && num3 != 2)
 					{
-						Item class2 = PhoenixEnvironment.GetGame().GetItemManager().GetItem((uint)dataRow["item_id"]);
+						Item class2 = PhoenixEnvironment.GetGame().GetItemManager().GetItem((uint)Row["item_id"]);
 						if (class2 != null)
 						{
-							PhoenixEnvironment.GetGame().GetCatalog().method_9(Session, class2, 1, (string)dataRow["extra_data"], false, (uint)dataRow["furni_id"]);
-							using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+							PhoenixEnvironment.GetGame().GetCatalog().DeliverItems(Session, class2, 1, (string)Row["extra_data"], false, (uint)Row["furni_id"]);
+							using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 							{
-								@class.ExecuteQuery("DELETE FROM catalog_marketplace_offers WHERE offer_id = '" + num + "' LIMIT 1");
+								adapter.ExecuteQuery("DELETE FROM catalog_marketplace_offers WHERE offer_id = '" + ItemId + "' LIMIT 1");
 							}
-							ServerMessage Message = new ServerMessage(614u);
-							Message.AppendUInt((uint)dataRow["offer_id"]);
+							ServerMessage Message = new ServerMessage(614);
+							Message.AppendUInt((uint)Row["offer_id"]);
 							Message.AppendBoolean(true);
 							Session.SendMessage(Message);
 						}

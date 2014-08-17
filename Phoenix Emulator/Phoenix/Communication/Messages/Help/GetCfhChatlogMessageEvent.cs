@@ -5,19 +5,19 @@ using Phoenix.HabboHotel.Rooms;
 using Phoenix.Messages;
 namespace Phoenix.Communication.Messages.Help
 {
-	internal sealed class GetCfhChatlogMessageEvent : MessageEvent
+	internal class GetCfhChatlogMessageEvent : MessageEvent
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
 			if (Session.GetHabbo().HasRole("acc_supporttool"))
 			{
-				SupportTicket @class = PhoenixEnvironment.GetGame().GetModerationTool().GetTicket(Event.PopWiredUInt());
-				if (@class != null)
+				SupportTicket Ticket = PhoenixEnvironment.GetGame().GetModerationTool().GetTicket(Event.PopWiredUInt());
+				if (Ticket != null)
 				{
-                    RoomData class2 = PhoenixEnvironment.GetGame().GetRoomManager().GenerateNullableRoomData(@class.RoomId);
-					if (class2 != null)
+                    RoomData Data = PhoenixEnvironment.GetGame().GetRoomManager().GenerateNullableRoomData(Ticket.RoomId);
+					if (Data != null)
 					{
-                        Session.SendMessage(PhoenixEnvironment.GetGame().GetModerationTool().SerializeTicketChatlog(@class, class2, @class.Timestamp));
+                        Session.SendMessage(PhoenixEnvironment.GetGame().GetModerationTool().SerializeTicketChatlog(Ticket, Data, Ticket.Timestamp));
 					}
 				}
 			}
