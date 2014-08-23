@@ -12,31 +12,31 @@ namespace Phoenix.HabboHotel.Roles
         public Dictionary<string, int> CommandsList = new Dictionary<string, int>();
         public Dictionary<string, int> PetCommandsList = new Dictionary<string, int>();
         public Dictionary<uint, string> RankBadge = new Dictionary<uint, string>();
-        private Dictionary<uint, int> RankFlood = new Dictionary<uint, int>();
-        private Dictionary<uint, List<string>> RankPermissions = new Dictionary<uint, List<string>>();
-        private Dictionary<uint, List<string>> UserPermissions = new Dictionary<uint, List<string>>();
+        public Dictionary<uint, int> RankFlood = new Dictionary<uint, int>();
+        public Dictionary<uint, List<string>> RankPermissions = new Dictionary<uint, List<string>>();
+        public Dictionary<uint, List<string>> UserPermissions = new Dictionary<uint, List<string>>();
 
         public void ClearPermissions()
         {
-            this.RankBadge.Clear();
-            this.UserPermissions.Clear();
-            this.RankPermissions.Clear();
-            this.RankFlood.Clear();
+            RankBadge.Clear();
+            UserPermissions.Clear();
+            RankPermissions.Clear();
+            RankFlood.Clear();
         }
 
         public bool ContainsRank(uint Rank)
         {
-            return this.RankPermissions.ContainsKey(Rank);
+            return RankPermissions.ContainsKey(Rank);
         }
 
         public bool ContainsUser(uint UserID)
         {
-            return this.UserPermissions.ContainsKey(UserID);
+            return UserPermissions.ContainsKey(UserID);
         }
 
         public int FloodTime(uint RankId)
         {
-            return this.RankFlood[RankId];
+            return RankFlood[RankId];
         }
 
         public List<string> GetRightsForHabbo(uint UserID, uint Rank)
@@ -44,9 +44,9 @@ namespace Phoenix.HabboHotel.Roles
             List<string> list = new List<string>();
             if (this.ContainsUser(UserID))
             {
-                return this.UserPermissions[UserID];
+                return UserPermissions[UserID];
             }
-            return this.RankPermissions[Rank];
+            return RankPermissions[Rank];
         }
 
         public bool HasWiredConditionRole(string command, GameClient Session)
@@ -265,753 +265,753 @@ namespace Phoenix.HabboHotel.Roles
             return false;
         }
 
-        public void LoadRoles(DatabaseClient dbClient)
+        public void LoadRoles(DatabaseClient adapter)
         {
             Logging.Write(TextManager.GetText("emu_loadroles"));
             this.ClearPermissions();
-            DataTable table = dbClient.ReadDataTable("SELECT * FROM ranks ORDER BY id ASC;");
+            DataTable table = adapter.ReadDataTable("SELECT * FROM ranks ORDER BY id ASC;");
             if (table != null)
             {
                 foreach (DataRow row in table.Rows)
                 {
-                    this.RankBadge.Add((uint)row["id"], row["badgeid"].ToString());
+                    RankBadge.Add((uint)row["id"], row["badgeid"].ToString());
                 }
             }
-            table = dbClient.ReadDataTable("SELECT * FROM permissions_users ORDER BY userid ASC;");
+            table = adapter.ReadDataTable("SELECT * FROM permissions_users ORDER BY userid ASC;");
             if (table != null)
             {
-                foreach (DataRow row2 in table.Rows)
+                foreach (DataRow Row in table.Rows)
                 {
-                    List<string> list = new List<string>();
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_update_settings"].ToString()))
+                    List<string> Command = new List<string>();
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_settings"].ToString()))
                     {
-                        list.Add("cmd_update_settings");
+                        Command.Add("cmd_update_settings");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_update_bans"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_bans"].ToString()))
                     {
-                        list.Add("cmd_update_bans");
+                        Command.Add("cmd_update_bans");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_update_bots"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_bots"].ToString()))
                     {
-                        list.Add("cmd_update_bots");
+                        Command.Add("cmd_update_bots");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_update_catalogue"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_catalogue"].ToString()))
                     {
-                        list.Add("cmd_update_catalogue");
+                        Command.Add("cmd_update_catalogue");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_update_navigator"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_navigator"].ToString()))
                     {
-                        list.Add("cmd_update_navigator");
+                        Command.Add("cmd_update_navigator");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_update_items"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_items"].ToString()))
                     {
-                        list.Add("cmd_update_items");
+                        Command.Add("cmd_update_items");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_award"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_award"].ToString()))
                     {
-                        list.Add("cmd_award");
+                        Command.Add("cmd_award");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_coords"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_coords"].ToString()))
                     {
-                        list.Add("cmd_coords");
+                        Command.Add("cmd_coords");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_override"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_override"].ToString()))
                     {
-                        list.Add("cmd_override");
+                        Command.Add("cmd_override");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_coins"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_coins"].ToString()))
                     {
-                        list.Add("cmd_coins");
+                        Command.Add("cmd_coins");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_pixels"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_pixels"].ToString()))
                     {
-                        list.Add("cmd_pixels");
+                        Command.Add("cmd_pixels");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_ha"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_ha"].ToString()))
                     {
-                        list.Add("cmd_ha");
+                        Command.Add("cmd_ha");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_hal"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_hal"].ToString()))
                     {
-                        list.Add("cmd_hal");
+                        Command.Add("cmd_hal");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_freeze"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_freeze"].ToString()))
                     {
-                        list.Add("cmd_freeze");
+                        Command.Add("cmd_freeze");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_enable"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_enable"].ToString()))
                     {
-                        list.Add("cmd_enable");
+                        Command.Add("cmd_enable");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_roommute"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_roommute"].ToString()))
                     {
-                        list.Add("cmd_roommute");
+                        Command.Add("cmd_roommute");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_setspeed"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_setspeed"].ToString()))
                     {
-                        list.Add("cmd_setspeed");
+                        Command.Add("cmd_setspeed");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_masscredits"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_masscredits"].ToString()))
                     {
-                        list.Add("cmd_masscredits");
+                        Command.Add("cmd_masscredits");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_globalcredits"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_globalcredits"].ToString()))
                     {
-                        list.Add("cmd_globalcredits");
+                        Command.Add("cmd_globalcredits");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_masspixels"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_masspixels"].ToString()))
                     {
-                        list.Add("cmd_masspixels");
+                        Command.Add("cmd_masspixels");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_globalpixels"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_globalpixels"].ToString()))
                     {
-                        list.Add("cmd_globalpixels");
+                        Command.Add("cmd_globalpixels");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_roombadge"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_roombadge"].ToString()))
                     {
-                        list.Add("cmd_roombadge");
+                        Command.Add("cmd_roombadge");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_massbadge"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_massbadge"].ToString()))
                     {
-                        list.Add("cmd_massbadge");
+                        Command.Add("cmd_massbadge");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_userinfo"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_userinfo"].ToString()))
                     {
-                        list.Add("cmd_userinfo");
+                        Command.Add("cmd_userinfo");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_userinfo_viewip"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_userinfo_viewip"].ToString()))
                     {
-                        list.Add("cmd_userinfo_viewip");
+                        Command.Add("cmd_userinfo_viewip");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_shutdown"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_shutdown"].ToString()))
                     {
-                        list.Add("cmd_shutdown");
+                        Command.Add("cmd_shutdown");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_givebadge"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_givebadge"].ToString()))
                     {
-                        list.Add("cmd_givebadge");
+                        Command.Add("cmd_givebadge");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_removebadge"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_removebadge"].ToString()))
                     {
-                        list.Add("cmd_removebadge");
+                        Command.Add("cmd_removebadge");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_summon"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_summon"].ToString()))
                     {
-                        list.Add("cmd_summon");
+                        Command.Add("cmd_summon");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_invisible"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_invisible"].ToString()))
                     {
-                        list.Add("cmd_invisible");
+                        Command.Add("cmd_invisible");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_ban"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_ban"].ToString()))
                     {
-                        list.Add("cmd_ban");
+                        Command.Add("cmd_ban");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_superban"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_superban"].ToString()))
                     {
-                        list.Add("cmd_superban");
+                        Command.Add("cmd_superban");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_roomkick"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_roomkick"].ToString()))
                     {
-                        list.Add("cmd_roomkick");
+                        Command.Add("cmd_roomkick");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_roomalert"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_roomalert"].ToString()))
                     {
-                        list.Add("cmd_roomalert");
+                        Command.Add("cmd_roomalert");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_mute"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_mute"].ToString()))
                     {
-                        list.Add("cmd_mute");
+                        Command.Add("cmd_mute");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_unmute"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_unmute"].ToString()))
                     {
-                        list.Add("cmd_unmute");
+                        Command.Add("cmd_unmute");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_alert"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_alert"].ToString()))
                     {
-                        list.Add("cmd_alert");
+                        Command.Add("cmd_alert");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_motd"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_motd"].ToString()))
                     {
-                        list.Add("cmd_motd");
+                        Command.Add("cmd_motd");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_kick"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_kick"].ToString()))
                     {
-                        list.Add("cmd_kick");
+                        Command.Add("cmd_kick");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_update_filter"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_filter"].ToString()))
                     {
-                        list.Add("cmd_update_filter");
+                        Command.Add("cmd_update_filter");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_update_permissions"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_permissions"].ToString()))
                     {
-                        list.Add("cmd_update_permissions");
+                        Command.Add("cmd_update_permissions");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_sa"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_sa"].ToString()))
                     {
-                        list.Add("cmd_sa");
+                        Command.Add("cmd_sa");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["receive_sa"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["receive_sa"].ToString()))
                     {
-                        list.Add("receive_sa");
+                        Command.Add("receive_sa");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_ipban"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_ipban"].ToString()))
                     {
-                        list.Add("cmd_ipban");
+                        Command.Add("cmd_ipban");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_spull"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_spull"].ToString()))
                     {
-                        list.Add("cmd_spull");
+                        Command.Add("cmd_spull");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_disconnect"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_disconnect"].ToString()))
                     {
-                        list.Add("cmd_disconnect");
+                        Command.Add("cmd_disconnect");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_update_achievements"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_achievements"].ToString()))
                     {
-                        list.Add("cmd_update_achievements");
+                        Command.Add("cmd_update_achievements");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_update_texts"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_texts"].ToString()))
                     {
-                        list.Add("cmd_update_texts");
+                        Command.Add("cmd_update_texts");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_teleport"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_teleport"].ToString()))
                     {
-                        list.Add("cmd_teleport");
+                        Command.Add("cmd_teleport");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_points"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_points"].ToString()))
                     {
-                        list.Add("cmd_points");
+                        Command.Add("cmd_points");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_masspoints"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_masspoints"].ToString()))
                     {
-                        list.Add("cmd_masspoints");
+                        Command.Add("cmd_masspoints");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_globalpoints"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_globalpoints"].ToString()))
                     {
-                        list.Add("cmd_globalpoints");
+                        Command.Add("cmd_globalpoints");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["cmd_empty"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_empty"].ToString()))
                     {
-                        list.Add("cmd_empty");
+                        Command.Add("cmd_empty");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["ignore_roommute"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["ignore_roommute"].ToString()))
                     {
-                        list.Add("ignore_roommute");
+                        Command.Add("ignore_roommute");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["acc_anyroomrights"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_anyroomrights"].ToString()))
                     {
-                        list.Add("acc_anyroomrights");
+                        Command.Add("acc_anyroomrights");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["acc_anyroomowner"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_anyroomowner"].ToString()))
                     {
-                        list.Add("acc_anyroomowner");
+                        Command.Add("acc_anyroomowner");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["acc_supporttool"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_supporttool"].ToString()))
                     {
-                        list.Add("acc_supporttool");
+                        Command.Add("acc_supporttool");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["acc_chatlogs"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_chatlogs"].ToString()))
                     {
-                        list.Add("acc_chatlogs");
+                        Command.Add("acc_chatlogs");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["acc_enter_fullrooms"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_enter_fullrooms"].ToString()))
                     {
-                        list.Add("acc_enter_fullrooms");
+                        Command.Add("acc_enter_fullrooms");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["acc_enter_anyroom"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_enter_anyroom"].ToString()))
                     {
-                        list.Add("acc_enter_anyroom");
+                        Command.Add("acc_enter_anyroom");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["acc_restrictedrooms"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_restrictedrooms"].ToString()))
                     {
-                        list.Add("acc_restrictedrooms");
+                        Command.Add("acc_restrictedrooms");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["acc_unkickable"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_unkickable"].ToString()))
                     {
-                        list.Add("acc_unkickable");
+                        Command.Add("acc_unkickable");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["acc_unbannable"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_unbannable"].ToString()))
                     {
-                        list.Add("acc_unbannable");
+                        Command.Add("acc_unbannable");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["ignore_friendsettings"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["ignore_friendsettings"].ToString()))
                     {
-                        list.Add("ignore_friendsettings");
+                        Command.Add("ignore_friendsettings");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_give_sql"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_sql"].ToString()))
                     {
-                        list.Add("wired_give_sql");
+                        Command.Add("wired_give_sql");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_give_badge"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_badge"].ToString()))
                     {
-                        list.Add("wired_give_badge");
+                        Command.Add("wired_give_badge");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_give_effect"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_effect"].ToString()))
                     {
-                        list.Add("wired_give_effect");
+                        Command.Add("wired_give_effect");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_give_award"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_award"].ToString()))
                     {
-                        list.Add("wired_give_award");
+                        Command.Add("wired_give_award");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_give_dance"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_dance"].ToString()))
                     {
-                        list.Add("wired_give_dance");
+                        Command.Add("wired_give_dance");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_give_send"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_send"].ToString()))
                     {
-                        list.Add("wired_give_send");
+                        Command.Add("wired_give_send");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_give_credits"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_credits"].ToString()))
                     {
-                        list.Add("wired_give_credits");
+                        Command.Add("wired_give_credits");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_give_pixels"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_pixels"].ToString()))
                     {
-                        list.Add("wired_give_pixels");
+                        Command.Add("wired_give_pixels");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_give_points"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_points"].ToString()))
                     {
-                        list.Add("wired_give_points");
+                        Command.Add("wired_give_points");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_give_rank"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_rank"].ToString()))
                     {
-                        list.Add("wired_give_rank");
+                        Command.Add("wired_give_rank");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_give_respect"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_respect"].ToString()))
                     {
-                        list.Add("wired_give_respect");
+                        Command.Add("wired_give_respect");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_give_handitem"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_handitem"].ToString()))
                     {
-                        list.Add("wired_give_handitem");
+                        Command.Add("wired_give_handitem");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_give_alert"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_alert"].ToString()))
                     {
-                        list.Add("wired_give_alert");
+                        Command.Add("wired_give_alert");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_cnd_roomusers"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_roomusers"].ToString()))
                     {
-                        list.Add("wired_cnd_roomusers");
+                        Command.Add("wired_cnd_roomusers");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_cnd_userhasachievement"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_userhasachievement"].ToString()))
                     {
-                        list.Add("wired_cnd_userhasachievement");
+                        Command.Add("wired_cnd_userhasachievement");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_cnd_userhasbadge"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_userhasbadge"].ToString()))
                     {
-                        list.Add("wired_cnd_userhasbadge");
+                        Command.Add("wired_cnd_userhasbadge");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_cnd_userhasvip"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_userhasvip"].ToString()))
                     {
-                        list.Add("wired_cnd_userhasvip");
+                        Command.Add("wired_cnd_userhasvip");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_cnd_userhaseffect"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_userhaseffect"].ToString()))
                     {
-                        list.Add("wired_cnd_userhaseffect");
+                        Command.Add("wired_cnd_userhaseffect");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_cnd_userrank"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_userrank"].ToString()))
                     {
-                        list.Add("wired_cnd_userrank");
+                        Command.Add("wired_cnd_userrank");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_cnd_usercredits"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_usercredits"].ToString()))
                     {
-                        list.Add("wired_cnd_usercredits");
+                        Command.Add("wired_cnd_usercredits");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_cnd_userpixels"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_userpixels"].ToString()))
                     {
-                        list.Add("wired_cnd_userpixels");
+                        Command.Add("wired_cnd_userpixels");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_cnd_userpoints"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_userpoints"].ToString()))
                     {
-                        list.Add("wired_cnd_userpoints");
+                        Command.Add("wired_cnd_userpoints");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_cnd_usergroups"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_usergroups"].ToString()))
                     {
-                        list.Add("wired_cnd_usergroups");
+                        Command.Add("wired_cnd_usergroups");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_cnd_wearing"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_wearing"].ToString()))
                     {
-                        list.Add("wired_cnd_wearing");
+                        Command.Add("wired_cnd_wearing");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row2["wired_cnd_carrying"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_carrying"].ToString()))
                     {
-                        list.Add("wired_cnd_carrying");
+                        Command.Add("wired_cnd_carrying");
                     }
-                    this.UserPermissions.Add((uint)row2["userid"], list);
+                    this.UserPermissions.Add((uint)Row["userid"], Command);
                 }
             }
-            table = dbClient.ReadDataTable("SELECT * FROM permissions_ranks ORDER BY rank ASC;");
+            table = adapter.ReadDataTable("SELECT * FROM permissions_ranks ORDER BY rank ASC;");
             if (table != null)
             {
-                foreach (DataRow row3 in table.Rows)
+                foreach (DataRow Row in table.Rows)
                 {
-                    this.RankFlood.Add((uint)row3["rank"], (int)row3["floodtime"]);
+                    this.RankFlood.Add((uint)Row["rank"], (int)Row["floodtime"]);
                 }
-                foreach (DataRow row4 in table.Rows)
+                foreach (DataRow Row in table.Rows)
                 {
                     List<string> list2 = new List<string>();
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_update_settings"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_settings"].ToString()))
                     {
                         list2.Add("cmd_update_settings");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_update_bans"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_bans"].ToString()))
                     {
                         list2.Add("cmd_update_bans");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_update_bots"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_bots"].ToString()))
                     {
                         list2.Add("cmd_update_bots");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_update_catalogue"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_catalogue"].ToString()))
                     {
                         list2.Add("cmd_update_catalogue");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_update_navigator"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_navigator"].ToString()))
                     {
                         list2.Add("cmd_update_navigator");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_update_items"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_items"].ToString()))
                     {
                         list2.Add("cmd_update_items");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_award"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_award"].ToString()))
                     {
                         list2.Add("cmd_award");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_coords"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_coords"].ToString()))
                     {
                         list2.Add("cmd_coords");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_override"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_override"].ToString()))
                     {
                         list2.Add("cmd_override");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_coins"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_coins"].ToString()))
                     {
                         list2.Add("cmd_coins");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_pixels"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_pixels"].ToString()))
                     {
                         list2.Add("cmd_pixels");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_ha"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_ha"].ToString()))
                     {
                         list2.Add("cmd_ha");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_hal"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_hal"].ToString()))
                     {
                         list2.Add("cmd_hal");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_freeze"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_freeze"].ToString()))
                     {
                         list2.Add("cmd_freeze");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_enable"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_enable"].ToString()))
                     {
                         list2.Add("cmd_enable");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_roommute"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_roommute"].ToString()))
                     {
                         list2.Add("cmd_roommute");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_setspeed"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_setspeed"].ToString()))
                     {
                         list2.Add("cmd_setspeed");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_masscredits"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_masscredits"].ToString()))
                     {
                         list2.Add("cmd_masscredits");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_globalcredits"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_globalcredits"].ToString()))
                     {
                         list2.Add("cmd_globalcredits");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_masspixels"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_masspixels"].ToString()))
                     {
                         list2.Add("cmd_masspixels");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_globalpixels"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_globalpixels"].ToString()))
                     {
                         list2.Add("cmd_globalpixels");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_roombadge"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_roombadge"].ToString()))
                     {
                         list2.Add("cmd_roombadge");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_massbadge"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_massbadge"].ToString()))
                     {
                         list2.Add("cmd_massbadge");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_userinfo"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_userinfo"].ToString()))
                     {
                         list2.Add("cmd_userinfo");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_userinfo_viewip"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_userinfo_viewip"].ToString()))
                     {
                         list2.Add("cmd_userinfo_viewip");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_shutdown"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_shutdown"].ToString()))
                     {
                         list2.Add("cmd_shutdown");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_givebadge"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_givebadge"].ToString()))
                     {
                         list2.Add("cmd_givebadge");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_removebadge"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_removebadge"].ToString()))
                     {
                         list2.Add("cmd_removebadge");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_summon"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_summon"].ToString()))
                     {
                         list2.Add("cmd_summon");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_invisible"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_invisible"].ToString()))
                     {
                         list2.Add("cmd_invisible");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_ban"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_ban"].ToString()))
                     {
                         list2.Add("cmd_ban");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_superban"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_superban"].ToString()))
                     {
                         list2.Add("cmd_superban");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_roomkick"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_roomkick"].ToString()))
                     {
                         list2.Add("cmd_roomkick");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_roomalert"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_roomalert"].ToString()))
                     {
                         list2.Add("cmd_roomalert");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_mute"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_mute"].ToString()))
                     {
                         list2.Add("cmd_mute");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_unmute"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_unmute"].ToString()))
                     {
                         list2.Add("cmd_unmute");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_alert"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_alert"].ToString()))
                     {
                         list2.Add("cmd_alert");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_motd"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_motd"].ToString()))
                     {
                         list2.Add("cmd_motd");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_kick"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_kick"].ToString()))
                     {
                         list2.Add("cmd_kick");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_update_filter"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_filter"].ToString()))
                     {
                         list2.Add("cmd_update_filter");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_update_permissions"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_permissions"].ToString()))
                     {
                         list2.Add("cmd_update_permissions");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_sa"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_sa"].ToString()))
                     {
                         list2.Add("cmd_sa");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["receive_sa"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["receive_sa"].ToString()))
                     {
                         list2.Add("receive_sa");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_ipban"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_ipban"].ToString()))
                     {
                         list2.Add("cmd_ipban");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_spull"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_spull"].ToString()))
                     {
                         list2.Add("cmd_spull");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_disconnect"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_disconnect"].ToString()))
                     {
                         list2.Add("cmd_disconnect");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_update_achievements"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_achievements"].ToString()))
                     {
                         list2.Add("cmd_update_achievements");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_update_texts"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_update_texts"].ToString()))
                     {
                         list2.Add("cmd_update_texts");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_teleport"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_teleport"].ToString()))
                     {
                         list2.Add("cmd_teleport");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_points"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_points"].ToString()))
                     {
                         list2.Add("cmd_points");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_masspoints"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_masspoints"].ToString()))
                     {
                         list2.Add("cmd_masspoints");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_globalpoints"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_globalpoints"].ToString()))
                     {
                         list2.Add("cmd_globalpoints");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["cmd_empty"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmd_empty"].ToString()))
                     {
                         list2.Add("cmd_empty");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["ignore_roommute"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["ignore_roommute"].ToString()))
                     {
                         list2.Add("ignore_roommute");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["acc_anyroomrights"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_anyroomrights"].ToString()))
                     {
                         list2.Add("acc_anyroomrights");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["acc_anyroomowner"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_anyroomowner"].ToString()))
                     {
                         list2.Add("acc_anyroomowner");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["acc_supporttool"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_supporttool"].ToString()))
                     {
                         list2.Add("acc_supporttool");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["acc_chatlogs"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_chatlogs"].ToString()))
                     {
                         list2.Add("acc_chatlogs");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["acc_enter_fullrooms"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_enter_fullrooms"].ToString()))
                     {
                         list2.Add("acc_enter_fullrooms");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["acc_enter_anyroom"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_enter_anyroom"].ToString()))
                     {
                         list2.Add("acc_enter_anyroom");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["acc_restrictedrooms"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_restrictedrooms"].ToString()))
                     {
                         list2.Add("acc_restrictedrooms");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["acc_unkickable"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_unkickable"].ToString()))
                     {
                         list2.Add("acc_unkickable");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["acc_unbannable"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["acc_unbannable"].ToString()))
                     {
                         list2.Add("acc_unbannable");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["ignore_friendsettings"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["ignore_friendsettings"].ToString()))
                     {
                         list2.Add("ignore_friendsettings");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_give_sql"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_sql"].ToString()))
                     {
                         list2.Add("wired_give_sql");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_give_badge"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_badge"].ToString()))
                     {
                         list2.Add("wired_give_badge");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_give_effect"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_effect"].ToString()))
                     {
                         list2.Add("wired_give_effect");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_give_award"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_award"].ToString()))
                     {
                         list2.Add("wired_give_award");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_give_dance"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_dance"].ToString()))
                     {
                         list2.Add("wired_give_dance");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_give_send"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_send"].ToString()))
                     {
                         list2.Add("wired_give_send");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_give_credits"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_credits"].ToString()))
                     {
                         list2.Add("wired_give_credits");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_give_pixels"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_pixels"].ToString()))
                     {
                         list2.Add("wired_give_pixels");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_give_points"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_points"].ToString()))
                     {
                         list2.Add("wired_give_points");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_give_rank"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_rank"].ToString()))
                     {
                         list2.Add("wired_give_rank");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_give_respect"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_respect"].ToString()))
                     {
                         list2.Add("wired_give_respect");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_give_handitem"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_handitem"].ToString()))
                     {
                         list2.Add("wired_give_handitem");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_give_alert"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_give_alert"].ToString()))
                     {
                         list2.Add("wired_give_alert");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_cnd_roomusers"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_roomusers"].ToString()))
                     {
                         list2.Add("wired_cnd_roomusers");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_cnd_userhasachievement"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_userhasachievement"].ToString()))
                     {
                         list2.Add("wired_cnd_userhasachievement");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_cnd_userhasbadge"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_userhasbadge"].ToString()))
                     {
                         list2.Add("wired_cnd_userhasbadge");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_cnd_userhasvip"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_userhasvip"].ToString()))
                     {
                         list2.Add("wired_cnd_userhasvip");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_cnd_userhaseffect"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_userhaseffect"].ToString()))
                     {
                         list2.Add("wired_cnd_userhaseffect");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_cnd_userrank"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_userrank"].ToString()))
                     {
                         list2.Add("wired_cnd_userrank");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_cnd_usercredits"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_usercredits"].ToString()))
                     {
                         list2.Add("wired_cnd_usercredits");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_cnd_userpixels"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_userpixels"].ToString()))
                     {
                         list2.Add("wired_cnd_userpixels");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_cnd_userpoints"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_userpoints"].ToString()))
                     {
                         list2.Add("wired_cnd_userpoints");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_cnd_usergroups"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_usergroups"].ToString()))
                     {
                         list2.Add("wired_cnd_usergroups");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_cnd_wearing"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_wearing"].ToString()))
                     {
                         list2.Add("wired_cnd_wearing");
                     }
-                    if (PhoenixEnvironment.EnumToBool(row4["wired_cnd_carrying"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["wired_cnd_carrying"].ToString()))
                     {
                         list2.Add("wired_cnd_carrying");
                     }
-                    this.RankPermissions.Add((uint)row4["rank"], list2);
+                    this.RankPermissions.Add((uint)Row["rank"], list2);
                 }
             }
-            table = dbClient.ReadDataTable("SELECT * FROM permissions_vip;");
+            table = adapter.ReadDataTable("SELECT * FROM permissions_vip;");
             if (table != null)
             {
                 GlobalClass.cmdPushEnabled = false;
@@ -1020,29 +1020,35 @@ namespace Phoenix.HabboHotel.Roles
                 GlobalClass.cmdMimicEnabled = false;
                 GlobalClass.cmdMoonwalkEnabled = false;
                 GlobalClass.cmdFollowEnabled = false;
-                foreach (DataRow row5 in table.Rows)
+                GlobalClass.cmdFacelessEnabled = false;
+
+                foreach (DataRow Row in table.Rows)
                 {
-                    if (PhoenixEnvironment.EnumToBool(row5["cmdPush"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmdPush"].ToString()))
                     {
                         GlobalClass.cmdPushEnabled = true;
                     }
-                    if (PhoenixEnvironment.EnumToBool(row5["cmdPull"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmdPull"].ToString()))
                     {
                         GlobalClass.cmdPullEnabled = true;
                     }
-                    if (PhoenixEnvironment.EnumToBool(row5["cmdFlagme"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmdFlagme"].ToString()))
                     {
                         GlobalClass.cmdFlagmeEnabled = true;
                     }
-                    if (PhoenixEnvironment.EnumToBool(row5["cmdMimic"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmdMimic"].ToString()))
                     {
                         GlobalClass.cmdMimicEnabled = true;
                     }
-                    if (PhoenixEnvironment.EnumToBool(row5["cmdMoonwalk"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmdMoonwalk"].ToString()))
                     {
                         GlobalClass.cmdMoonwalkEnabled = true;
                     }
-                    if (PhoenixEnvironment.EnumToBool(row5["cmdFollow"].ToString()))
+                    if (PhoenixEnvironment.EnumToBool(Row["cmdFaceless"].ToString()))
+                    {
+                        GlobalClass.cmdFacelessEnabled = true;
+                    }
+                    if (PhoenixEnvironment.EnumToBool(Row["cmdFollow"].ToString()))
                     {
                         GlobalClass.cmdFollowEnabled = true;
                     }
@@ -1144,6 +1150,7 @@ namespace Phoenix.HabboHotel.Roles
             this.CommandsList.Add("getoff", 81); //Developer command
             this.CommandsList.Add(TextManager.GetText("cmd_giveitem_name"), 83); //Developer command
             this.CommandsList.Add("lay", 84); //normal user
+            this.CommandsList.Add(TextManager.GetText("cmd_faceless_name"), 85);
             Logging.WriteLine("completed!");
             try
             {
@@ -1152,19 +1159,17 @@ namespace Phoenix.HabboHotel.Roles
                     Logging.WriteLine("Commands loaded:" + this.CommandsList.Count.ToString());
                 }
             }
-            catch
-            {
-            }
+            catch { }
         }
 
         public int RankCount()
         {
-            return this.RankBadge.Count;
+            return RankBadge.Count;
         }
 
         public bool RankHasRight(uint RankId, string Role)
         {
-            if (!this.ContainsRank(RankId))
+            if (!ContainsRank(RankId))
             {
                 return false;
             }
@@ -1174,22 +1179,22 @@ namespace Phoenix.HabboHotel.Roles
 
         public string RanksBadge(uint Rank)
         {
-            return this.RankBadge[Rank];
+            return RankBadge[Rank];
         }
 
         public bool UserHasPermission(uint UserID, string Role)
         {
-            if (!this.ContainsUser(UserID))
+            if (!ContainsUser(UserID))
             {
                 return false;
             }
-            List<string> list = this.UserPermissions[UserID];
-            return list.Contains(Role);
+            List<string> Permission = this.UserPermissions[UserID];
+            return Permission.Contains(Role);
         }
 
         public bool UserHasPersonalPermissions(uint UserID)
         {
-            return this.ContainsUser(UserID);
+            return ContainsUser(UserID);
         }
     }
 }

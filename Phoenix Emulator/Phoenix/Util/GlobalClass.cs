@@ -31,6 +31,7 @@ namespace Phoenix.Util
 		private static bool cmdFlagme = false;
 		private static bool cmdMimic = false;
 		private static bool cmdMoonwalk = false;
+        private static bool cmdFaceless = false; //Faceless command
 		private static bool cmdFollow = false;
 		private static bool cmdCredits = false;
 		public static bool ShuttingDown = false;
@@ -53,6 +54,7 @@ namespace Phoenix.Util
 				cmdCredits = value;
 			}
 		}
+
 		public static bool AllowFriendlyFurni
 		{
 			get
@@ -64,6 +66,7 @@ namespace Phoenix.Util
 				ss_allowfurnidrops = value;
 			}
 		}
+
 		public static bool SecureSessions
 		{
 			get
@@ -75,6 +78,7 @@ namespace Phoenix.Util
 				ss_SecureSessions = value;
 			}
 		}
+
 		public static string ExternalLinkMode
 		{
 			get
@@ -86,6 +90,7 @@ namespace Phoenix.Util
 				ss_ExternalLinkMode = value;
 			}
 		}
+
 		public static string Motd
 		{
 			get
@@ -97,6 +102,7 @@ namespace Phoenix.Util
 				ss_motd = value.Replace("\\n", "\n");
 			}
 		}
+
 		public static bool VIPclothesforHCusers
 		{
 			get
@@ -108,6 +114,7 @@ namespace Phoenix.Util
 				ss_vipclothesforhcusers = value;
 			}
 		}
+
 		public static bool RecordChatlogs
 		{
 			get
@@ -119,6 +126,7 @@ namespace Phoenix.Util
 				ss_RecordChatlogs = value;
 			}
 		}
+
 		public static bool RecordCmdlogs
 		{
 			get
@@ -130,6 +138,7 @@ namespace Phoenix.Util
 				ss_RecordCmdlogs = value;
 			}
 		}
+
 		public static bool RecordRoomVisits
 		{
 			get
@@ -141,6 +150,7 @@ namespace Phoenix.Util
 				roomlogs = value;
 			}
 		}
+
 		public static int Timer
 		{
 			get
@@ -152,6 +162,7 @@ namespace Phoenix.Util
 				ss_timer = value;
 			}
 		}
+
 		public static int Credits
 		{
 			get
@@ -163,6 +174,7 @@ namespace Phoenix.Util
 				ss_credits = value;
 			}
 		}
+
 		public static int Points
 		{
 			get
@@ -174,6 +186,7 @@ namespace Phoenix.Util
 				ss_points = value;
 			}
 		}
+
 		public static int Pixels
 		{
 			get
@@ -185,6 +198,7 @@ namespace Phoenix.Util
 				ss_pixels = value;
 			}
 		}
+
 		public static int MaxRoomsPerUser
 		{
 			get
@@ -196,6 +210,7 @@ namespace Phoenix.Util
 				ss_maxroomsperuser = value;
 			}
 		}
+
 		public static bool cmdPushEnabled
 		{
 			get
@@ -207,6 +222,7 @@ namespace Phoenix.Util
 				cmdPush = value;
 			}
 		}
+
 		public static bool cmdFollowEnabled
 		{
 			get
@@ -218,6 +234,7 @@ namespace Phoenix.Util
 				cmdFollow = value;
 			}
 		}
+
 		public static bool cmdPullEnabled
 		{
 			get
@@ -229,6 +246,7 @@ namespace Phoenix.Util
 				cmdPull = value;
 			}
 		}
+
 		public static bool cmdFlagmeEnabled
 		{
 			get
@@ -240,6 +258,7 @@ namespace Phoenix.Util
 				cmdFlagme = value;
 			}
 		}
+
 		public static bool cmdMimicEnabled
 		{
 			get
@@ -251,6 +270,7 @@ namespace Phoenix.Util
 				cmdMimic = value;
 			}
 		}
+
 		public static bool cmdMoonwalkEnabled
 		{
 			get
@@ -261,6 +281,18 @@ namespace Phoenix.Util
 			{
 				cmdMoonwalk = value;
 			}
+        }
+
+        public static bool cmdFacelessEnabled
+        {
+            get
+            {
+                return cmdFaceless;
+            }
+            set
+            {
+                cmdFaceless = value;
+            }
         }
         #endregion
     }

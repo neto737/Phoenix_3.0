@@ -1564,6 +1564,77 @@ namespace Phoenix.HabboHotel.Misc
                                 return false;
                             }
                         #endregion
+                        #region CMD Faceless
+                        case 85:
+                            string[] figureParts;
+                            string[] headParts;
+
+                            if (!GlobalClass.cmdFacelessEnabled)
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
+                                return true;
+                            }
+                            if (!Session.GetHabbo().Vip)
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_permission_vip"));
+                                return true;
+                            }
+
+                            figureParts = Session.GetHabbo().Look.Split('.');
+                            foreach (string Part in figureParts)
+                            {
+                                if(Part.StartsWith("hd"))
+                                {
+                                    headParts = Part.Split('-');
+
+                                    if (!headParts[1].Equals("99999"))
+                                        headParts[1] = "99999";
+                                    else
+                                        break;
+
+                                    string NewHead = "hd-" + headParts[1] + "-" + headParts[2];
+
+                                    Session.GetHabbo().Look = Session.GetHabbo().Look.Replace(Part, NewHead);
+                                    break;
+                                }
+                            }
+
+                            using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
+                            {
+                                adapter.AddParamWithValue("look", Session.GetHabbo().Look);
+                                adapter.AddParamWithValue("username", Session.GetHabbo().Username);
+                                adapter.ExecuteQuery("UPDATE users SET look = @look WHERE username = @username");
+                            }
+
+                            Room Room = Session.GetHabbo().CurrentRoom;
+
+                            if (Room == null)
+                                break;
+
+                            RoomUser User = Room.GetRoomUserByHabbo(Session.GetHabbo().Id);
+
+                            if (User == null)
+                                break;
+                            					    
+                            ServerMessage UserUpdate = new ServerMessage(266);
+					        UserUpdate.AppendInt32(-1);
+					        UserUpdate.AppendStringWithBreak(Session.GetHabbo().Look);
+					        UserUpdate.AppendStringWithBreak(Session.GetHabbo().Gender.ToLower());
+					        UserUpdate.AppendStringWithBreak(Session.GetHabbo().Motto);
+					        UserUpdate.AppendInt32(Session.GetHabbo().AchievementScore);
+				        	UserUpdate.AppendStringWithBreak("");
+					        Session.SendMessage(UserUpdate);
+					
+                            ServerMessage RoomUpdate = new ServerMessage(266);
+					        RoomUpdate.AppendInt32(User.VirtualId);
+					        RoomUpdate.AppendStringWithBreak(Session.GetHabbo().Look);
+					        RoomUpdate.AppendStringWithBreak(Session.GetHabbo().Gender.ToLower());
+					        RoomUpdate.AppendStringWithBreak(Session.GetHabbo().Motto);
+					        RoomUpdate.AppendInt32(Session.GetHabbo().AchievementScore);
+					        RoomUpdate.AppendStringWithBreak("");
+					        Room.SendMessage(RoomUpdate, null);
+                            return true;
+                        #endregion
                         #endregion
 
                         #region Normal Commands
@@ -1901,6 +1972,10 @@ namespace Phoenix.HabboHotel.Misc
                                 if (GlobalClass.cmdMoonwalkEnabled)
                                 {
                                     Command = Command + TextManager.GetText("cmd_moonwalk_desc") + "\r\r";
+                                }
+                                if (GlobalClass.cmdFacelessEnabled)
+                                {
+                                    Command = Command + TextManager.GetText("cmd_faceless_desc") + "\r\r";
                                 }
                                 if (GlobalClass.cmdMimicEnabled)
                                 {
