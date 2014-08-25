@@ -67,44 +67,50 @@ namespace Phoenix.HabboHotel.Rooms
 		{
 			get
 			{
-				return new Coord(this.X, this.Y);
+				return new Coord(X, Y);
 			}
 		}
+
 		public bool IsPet
 		{
 			get
 			{
-				return this.IsBot && this.BotData.IsPet;
+				return IsBot && BotData.IsPet;
 			}
 		}
+
 		internal bool IsDancing
 		{
 			get
 			{
-				return this.DanceId >= 1;
+				return DanceId >= 1;
 			}
 		}
+
 		internal bool NeedsAutokick
 		{
 			get
 			{
-				return !this.IsBot && this.IdleTime >= GlobalClass.IdleKick;
+				return !IsBot && IdleTime >= GlobalClass.IdleKick;
 			}
 		}
+
 		internal bool IsTrading
 		{
 			get
 			{
-				return !this.IsBot && this.Statusses.ContainsKey("trd");
+				return !IsBot && Statusses.ContainsKey("trd");
 			}
 		}
+
 		internal bool IsBot
 		{
 			get
 			{
-				return this.BotData != null;
+				return BotData != null;
 			}
 		}
+
 		public RoomUser(uint UserId, uint RoomId, int VirtualId, bool Invisible)
 		{
 			this.HabboId = UserId;
@@ -130,22 +136,24 @@ namespace Phoenix.HabboHotel.Rooms
 			this.Visible = Invisible;
 			this.ChangedClothes = "";
 		}
+
 		public void Unidle()
 		{
-			this.IdleTime = 0;
-			if (this.IsAsleep)
+			IdleTime = 0;
+			if (IsAsleep)
 			{
-				this.IsAsleep = false;
+				IsAsleep = false;
 				ServerMessage Message = new ServerMessage(486);
-				Message.AppendInt32(this.VirtualId);
+				Message.AppendInt32(VirtualId);
 				Message.AppendBoolean(false);
-				this.GetRoom().SendMessage(Message, null);
+				GetRoom().SendMessage(Message, null);
 			}
 		}
+
 		internal void Chat(GameClient Session, string Message, bool Shout)
 		{
 			string val = Message;
-			if (Session == null || (Session.GetHabbo().HasRole("ignore_roommute") || !this.GetRoom().RoomMuted))
+			if (Session == null || (Session.GetHabbo().HasRole("ignore_roommute") || !GetRoom().RoomMuted))
 			{
 				this.Unidle();
 				if (!this.IsBot && this.GetClient().GetHabbo().Muted)
@@ -301,6 +309,7 @@ namespace Phoenix.HabboHotel.Rooms
 				}
 			}
 		}
+
 		internal int GetSpeechEmotion(string Message)
 		{
 			Message = Message.ToLower();
@@ -322,6 +331,7 @@ namespace Phoenix.HabboHotel.Rooms
 			}
 			return 0;
 		}
+
 		internal void ClearMovement(bool Update)
 		{
 			this.IsWalking = false;
@@ -338,10 +348,12 @@ namespace Phoenix.HabboHotel.Rooms
 				this.UpdateNeeded = true;
 			}
 		}
+
 		internal void MoveTo(Coord c)
 		{
 			this.MoveTo(c.X, c.Y);
 		}
+
 		internal void MoveTo(int X, int Y)
 		{
 			if (this.GetRoom().ValidTile(X, Y) && !this.GetRoom().SquareHasUsers(X, Y))
@@ -363,17 +375,20 @@ namespace Phoenix.HabboHotel.Rooms
 				}
 			}
 		}
+
 		internal void UnlockWalking()
 		{
 			this.AllowOverride = false;
 			this.CanWalk = true;
 		}
+
 		internal void SetPos(int pX, int pY, double pZ)
 		{
 			this.X = pX;
 			this.Y = pY;
 			this.Z = pZ;
 		}
+
 		public void CarryItem(int Item)
 		{
 			this.CarryItemID = Item;
@@ -394,97 +409,94 @@ namespace Phoenix.HabboHotel.Rooms
 			Message.AppendInt32(Item);
 			this.GetRoom().SendMessage(Message, null);
 		}
+
 		public void SetRot(int Rotation)
 		{
 			this.SetRot(Rotation, false);
 		}
-		public void SetRot(int Rotation, bool HeadOnly)
-		{
-			if (!this.Statusses.ContainsKey("lay") && !this.IsWalking)
-			{
-				int num = this.RotBody - Rotation;
-				this.RotHead = this.RotBody;
-				if (this.Statusses.ContainsKey("sit") || HeadOnly)
-				{
-					if (this.RotBody == 2 || this.RotBody == 4)
-					{
-						if (num > 0)
-						{
-							this.RotHead = this.RotBody - 1;
-						}
-						else
-						{
-							if (num < 0)
-							{
-								this.RotHead = this.RotBody + 1;
-							}
-						}
-					}
-					else
-					{
-						if (this.RotBody == 0 || this.RotBody == 6)
-						{
-							if (num > 0)
-							{
-								this.RotHead = this.RotBody - 1;
-							}
-							else
-							{
-								if (num < 0)
-								{
-									this.RotHead = this.RotBody + 1;
-								}
-							}
-						}
-					}
-				}
-				else
-				{
-					if (num <= -2 || num >= 2)
-					{
-						this.RotHead = Rotation;
-						this.RotBody = Rotation;
-					}
-					else
-					{
-						this.RotHead = Rotation;
-					}
-				}
-				this.UpdateNeeded = true;
-			}
-		}
-		public void AddStatus(string Key, string Value)
-		{
-			this.Statusses[Key] = Value;
-		}
+
+        public void SetRot(int Rotation, bool HeadOnly)
+        {
+            if (!Statusses.ContainsKey("lay") && !IsWalking)
+            {
+                int diff = RotBody - Rotation;
+                RotHead = RotBody;
+                if (Statusses.ContainsKey("sit") || HeadOnly)
+                {
+                    if (RotBody == 2 || RotBody == 4)
+                    {
+                        if (diff > 0)
+                        {
+                            RotHead = RotBody - 1;
+                        }
+                        else if (diff < 0)
+                        {
+                            RotHead = RotBody + 1;
+                        }
+                    }
+                    else
+                    {
+                        if (RotBody == 0 || RotBody == 6)
+                        {
+                            if (diff > 0)
+                            {
+                                RotHead = RotBody - 1;
+                            }
+                            else if (diff < 0)
+                            {
+                                RotHead = RotBody + 1;
+                            }
+                        }
+                    }
+                }
+                else if (diff <= -2 || diff >= 2)
+                {
+                    RotHead = Rotation;
+                    RotBody = Rotation;
+                }
+                else
+                {
+                    RotHead = Rotation;
+                }
+            }
+            UpdateNeeded = true;
+        }
+
+        public void AddStatus(string Key, string Value)
+        {
+            Statusses[Key] = Value;
+        }
+
 		public void RemoveStatus(string Key)
 		{
-			if (this.Statusses.ContainsKey(Key))
+			if (Statusses.ContainsKey(Key))
 			{
-				this.Statusses.Remove(Key);
+				Statusses.Remove(Key);
 			}
 		}
+
 		public void ResetStatus()
 		{
-			this.Statusses = new Dictionary<string, string>();
+			Statusses = new Dictionary<string, string>();
 		}
+
 		public void Serialize(ServerMessage Message)
 		{
-			if (Message != null && !this.IsSpectator)
+			if (Message != null && !IsSpectator)
 			{
-				if (!this.IsBot)
+				if (!IsBot)
 				{
-					if (this.GetClient() != null && this.GetClient().GetHabbo() != null)
+					if (GetClient() != null && GetClient().GetHabbo() != null)
 					{
-						Habbo habbo = this.GetClient().GetHabbo();
+						Habbo habbo = GetClient().GetHabbo();
 						Message.AppendUInt(habbo.Id);
 						Message.AppendStringWithBreak(habbo.Username);
 						Message.AppendStringWithBreak(habbo.Motto);
 						Message.AppendStringWithBreak(habbo.Look);
-						Message.AppendInt32(this.VirtualId);
-						Message.AppendInt32(this.X);
-						Message.AppendInt32(this.Y);
-						Message.AppendStringWithBreak(this.Z.ToString().Replace(',', '.'));
+						Message.AppendInt32(VirtualId);
+						Message.AppendInt32(X);
+						Message.AppendInt32(Y);
+						Message.AppendStringWithBreak(Z.ToString().Replace(',', '.'));
 						Message.AppendInt32(2);
 						Message.AppendInt32(1);
 						Message.AppendStringWithBreak(habbo.Gender.ToLower());
@@ -504,37 +516,38 @@ namespace Phoenix.HabboHotel.Rooms
 				}
 				else
 				{
-					Message.AppendInt32(this.BotAI.BaseId);
-					Message.AppendStringWithBreak(this.BotData.Name);
-					Message.AppendStringWithBreak(this.BotData.Motto);
-					Message.AppendStringWithBreak(this.BotData.Look);
-					Message.AppendInt32(this.VirtualId);
-					Message.AppendInt32(this.X);
-					Message.AppendInt32(this.Y);
-					Message.AppendStringWithBreak(this.Z.ToString().Replace(',', '.'));
+					Message.AppendInt32(BotAI.BaseId);
+					Message.AppendStringWithBreak(BotData.Name);
+					Message.AppendStringWithBreak(BotData.Motto);
+					Message.AppendStringWithBreak(BotData.Look);
+					Message.AppendInt32(VirtualId);
+					Message.AppendInt32(X);
+					Message.AppendInt32(Y);
+					Message.AppendStringWithBreak(Z.ToString().Replace(',', '.'));
 					Message.AppendInt32(4);
-					Message.AppendInt32((this.BotData.AiType == AIType.Pet) ? 2 : 3);
-					if (this.BotData.AiType == AIType.Pet)
+					Message.AppendInt32((BotData.AiType == AIType.Pet) ? 2 : 3);
+					if (BotData.AiType == AIType.Pet)
 					{
 						Message.AppendInt32(0);
 					}
 				}
 			}
 		}
+
 		public void SerializeStatus(ServerMessage Message)
 		{
-			if (!this.IsSpectator)
+			if (!IsSpectator)
 			{
-				Message.AppendInt32(this.VirtualId);
-				Message.AppendInt32(this.X);
-				Message.AppendInt32(this.Y);
-				Message.AppendStringWithBreak(this.Z.ToString().Replace(',', '.'));
-				Message.AppendInt32(this.RotHead);
-				Message.AppendInt32(this.RotBody);
+				Message.AppendInt32(VirtualId);
+				Message.AppendInt32(X);
+				Message.AppendInt32(Y);
+				Message.AppendStringWithBreak(Z.ToString().Replace(',', '.'));
+				Message.AppendInt32(RotHead);
+				Message.AppendInt32(RotBody);
 				Message.AppendString("/");
 				try
 				{
-					foreach (KeyValuePair<string, string> current in this.Statusses)
+					foreach (KeyValuePair<string, string> current in Statusses)
 					{
 						Message.AppendString(current.Key);
 						Message.AppendString(" ");
@@ -542,24 +555,23 @@ namespace Phoenix.HabboHotel.Rooms
 						Message.AppendString("/");
 					}
 				}
-				catch
-				{
-				}
+                catch { }
 				Message.AppendStringWithBreak("/");
 			}
 		}
 
 		public GameClient GetClient()
 		{
-			if (this.IsBot)
+			if (IsBot)
 			{
 				return null;
 			}
-			return PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(this.HabboId);
+			return PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(HabboId);
 		}
+
 		private Room GetRoom()
 		{
-			return PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(this.RoomId);
+			return PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(RoomId);
 		}
 	}
 }

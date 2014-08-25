@@ -1565,7 +1565,7 @@ namespace Phoenix.HabboHotel.Misc
                             }
                         #endregion
                         #region CMD Faceless
-                        case 85:
+                        case 85: //CMD Faceless
                             string[] figureParts;
                             string[] headParts;
 

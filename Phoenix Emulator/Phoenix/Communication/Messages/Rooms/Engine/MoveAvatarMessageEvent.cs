@@ -8,10 +8,10 @@ namespace Phoenix.Communication.Messages.Rooms.Engine
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			Room class14_ = Session.GetHabbo().CurrentRoom;
-			if (class14_ != null)
+			Room Room = Session.GetHabbo().CurrentRoom;
+			if (Room != null)
 			{
-				RoomUser @class = class14_.GetRoomUserByHabbo(Session.GetHabbo().Id);
+				RoomUser @class = Room.GetRoomUserByHabbo(Session.GetHabbo().Id);
 				if (@class != null && @class.CanWalk)
 				{
 					int num = Event.PopWiredInt32();
