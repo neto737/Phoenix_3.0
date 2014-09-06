@@ -58,7 +58,7 @@ namespace Phoenix.HabboHotel.Items.Interactors
 		public override void OnTrigger(GameClient Session, RoomItem Item, int int_0, bool bool_0)
 		{
 			RoomUser roomUserByHabbo = Item.GetRoom().GetRoomUserByHabbo(Session.GetHabbo().Id);
-			if (roomUserByHabbo != null && roomUserByHabbo.class34_1 == null)
+			if (roomUserByHabbo != null && roomUserByHabbo.Riding == null)
 			{
 				if ((roomUserByHabbo.Coordinate == Item.Coordinate) || (roomUserByHabbo.Coordinate == Item.SquareInFront))
 				{

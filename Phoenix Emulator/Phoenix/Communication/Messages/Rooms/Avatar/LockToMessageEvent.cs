@@ -22,7 +22,7 @@ namespace Phoenix.Communication.Messages.Rooms.Avatar
 					{
 						int rotation = Rotation.Calculate(roomUserByHabbo.X, roomUserByHabbo.Y, num, num2);
 						roomUserByHabbo.SetRot(rotation);
-						if (roomUserByHabbo.class34_1 != null && roomUserByHabbo.Target != null)
+						if (roomUserByHabbo.Riding != null && roomUserByHabbo.Target != null)
 						{
 							roomUserByHabbo.Target.SetRot(rotation);
 						}

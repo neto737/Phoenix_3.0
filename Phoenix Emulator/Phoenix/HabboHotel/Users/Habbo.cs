@@ -161,7 +161,7 @@ namespace Phoenix.HabboHotel.Users
 		{
 			if (Session != null)
 			{
-				PhoenixEnvironment.GetGame().GetClientManager().method_0(Id, Username, Session);
+				PhoenixEnvironment.GetGame().GetClientManager().RegisterClientShit(Id, Username, Session);
 			}
 			this.Id = Id;
 			this.Username = Username;
@@ -472,7 +472,7 @@ namespace Phoenix.HabboHotel.Users
 			if (!this.bool_9)
 			{
 				this.bool_9 = true;
-				PhoenixEnvironment.GetGame().GetClientManager().method_1(this.Id, this.Username);
+				PhoenixEnvironment.GetGame().GetClientManager().NullClientShit(this.Id, this.Username);
 				if (!this.bool_16)
 				{
 					this.bool_16 = true;

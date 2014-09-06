@@ -133,8 +133,8 @@ namespace Phoenix.HabboHotel
 			}
 			if (GetClientManager() != null)
 			{
-				GetClientManager().method_6();
-				GetClientManager().method_11();
+				GetClientManager().Clear();
+				GetClientManager().StopConnectionChecker();
 			}
 			if (GetPixelManager() != null)
 			{

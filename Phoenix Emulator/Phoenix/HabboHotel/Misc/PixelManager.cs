@@ -33,7 +33,7 @@ namespace Phoenix.HabboHotel.Misc
 				{
 					if (PhoenixEnvironment.GetGame() != null && PhoenixEnvironment.GetGame().GetClientManager() != null)
 					{
-						PhoenixEnvironment.GetGame().GetClientManager().method_29();
+						PhoenixEnvironment.GetGame().GetClientManager().CheckPixelUpdates();
 					}
 					Thread.Sleep(15000);
 				}

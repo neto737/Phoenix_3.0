@@ -18,47 +18,39 @@ namespace Phoenix.HabboHotel.RoomBots
 			this.EnergyTimer = new Random((VirtualId ^ 2) + DateTime.Now.Millisecond).Next(10, 60);
 		}
 
-		private int method_4()
-		{
-			RoomUser @class = base.GetRoomUser();
-			int result = 5;
-			if (@class.PetData.Level >= 1)
-			{
-				result = PhoenixEnvironment.GetRandomNumber(1, 8);
-			}
-			else
-			{
-				if (@class.PetData.Level >= 5)
-				{
-					result = PhoenixEnvironment.GetRandomNumber(1, 7);
-				}
-				else
-				{
-					if (@class.PetData.Level >= 10)
-					{
-						result = PhoenixEnvironment.GetRandomNumber(1, 6);
-					}
-				}
-			}
-			return result;
-		}
-		private void method_5(int int_4, int int_5, bool bool_0)
-		{
-			RoomUser RoomUser = base.GetRoomUser();
-			if (bool_0)
-			{
-				int randomX = PhoenixEnvironment.GetRandomNumber(0, base.GetRoom().Model.MapSizeX);
-				int randomY = PhoenixEnvironment.GetRandomNumber(0, base.GetRoom().Model.MapSizeY);
-				RoomUser.MoveTo(randomX, randomY);
-			}
-			else
-			{
-				if (int_4 < base.GetRoom().Model.MapSizeX && int_5 < base.GetRoom().Model.MapSizeY && int_4 >= 0 && int_5 >= 0)
-				{
-					RoomUser.MoveTo(int_4, int_5);
-				}
-			}
-		}
+        private int LevelStake()
+        {
+            RoomUser roomUser = base.GetRoomUser();
+            int randomNumber = 5;
+            if (roomUser.PetData.Level >= 1)
+            {
+                randomNumber = PhoenixEnvironment.GetRandomNumber(1, 8);
+            }
+            if (roomUser.PetData.Level >= 5)
+            {
+                randomNumber = PhoenixEnvironment.GetRandomNumber(1, 7);
+            }
+            if (roomUser.PetData.Level >= 10)
+            {
+                randomNumber = PhoenixEnvironment.GetRandomNumber(1, 6);
+            }
+            return randomNumber;
+        }
+
+        private void PetMove(int X, int Y, bool Random)
+        {
+            RoomUser RoomUser = base.GetRoomUser();
+            if (Random)
+            {
+                int randomX = PhoenixEnvironment.GetRandomNumber(0, base.GetRoom().Model.MapSizeX);
+                int randomY = PhoenixEnvironment.GetRandomNumber(0, base.GetRoom().Model.MapSizeY);
+                RoomUser.MoveTo(randomX, randomY);
+            }
+            else if (X < base.GetRoom().Model.MapSizeX && Y < base.GetRoom().Model.MapSizeY && X >= 0 && Y >= 0)
+            {
+                RoomUser.MoveTo(X, Y);
+            }
+        }
 
 		public override void OnSelfEnterRoom()
 		{
@@ -67,19 +59,19 @@ namespace Phoenix.HabboHotel.RoomBots
 				base.GetRoomUser().X = base.GetRoomUser().PetData.X;
 				base.GetRoomUser().Y = base.GetRoomUser().PetData.Y;
 			}
-			this.method_5(0, 0, true);
+			this.PetMove(0, 0, true);
 		}
 
 		public override void OnSelfLeaveRoom(bool Kicked)
 		{
-			if (base.GetBotData().RoomUser != null)
+			if (base.GetBotData().Rider != null)
 			{
-				RoomUser User = base.GetBotData().RoomUser;
-				if (User.class34_1 != null && User == base.GetBotData().RoomUser)
+				RoomUser User = base.GetBotData().Rider;
+				if (User.Riding != null && User == base.GetBotData().Rider)
 				{
-					base.GetBotData().RoomUser = null;
+					base.GetBotData().Rider = null;
 					User.GetClient().GetHabbo().GetAvatarEffectsInventoryComponent().ApplyEffect(-1, true);
-					User.class34_1 = null;
+					User.Riding = null;
 					User.Target = null;
 				}
 			}
@@ -150,15 +142,15 @@ namespace Phoenix.HabboHotel.RoomBots
 		{
 			if (Session != null && Session.GetHabbo() != null)
 			{
-				string string_ = Session.GetHabbo().Username;
-				RoomUser @class = base.GetRoom().GetRoomUserByHabbo(Session.GetHabbo().Id);
-				if (base.GetBotData().RoomUser != null && @class != null && @class.class34_1 != null && @class == base.GetBotData().RoomUser)
+				string username = Session.GetHabbo().Username;
+				RoomUser roomUserByHabbo = base.GetRoom().GetRoomUserByHabbo(Session.GetHabbo().Id);
+				if (base.GetBotData().Rider != null && roomUserByHabbo != null && roomUserByHabbo.Riding != null && roomUserByHabbo == base.GetBotData().Rider)
 				{
-					base.GetBotData().RoomUser = null;
+					base.GetBotData().Rider = null;
 				}
 				try
 				{
-					if (string_.ToLower() == base.GetRoomUser().PetData.OwnerName.ToLower() && string_.ToLower() != base.GetRoom().Owner.ToLower())
+					if (username.ToLower() == base.GetRoomUser().PetData.OwnerName.ToLower() && username.ToLower() != base.GetRoom().Owner.ToLower())
 					{
 						base.GetRoom().RemoveBot(base.GetRoomUser().PetData.VirtualId, false);
 						Session.GetHabbo().GetInventoryComponent().AddPet(base.GetRoomUser().PetData);
@@ -173,7 +165,7 @@ namespace Phoenix.HabboHotel.RoomBots
 		public override void OnUserSay(RoomUser User, string Message)
 		{
 			RoomUser Pet = base.GetRoomUser();
-			if (Pet.BotData.RoomUser == null)
+			if (Pet.BotData.Rider == null)
 			{
 				if (Message.ToLower().Equals(Pet.PetData.Name.ToLower()))
 				{
@@ -184,7 +176,7 @@ namespace Phoenix.HabboHotel.RoomBots
 					if (Message.ToLower().StartsWith(Pet.PetData.Name.ToLower() + " ") && User.GetClient().GetHabbo().Username.ToLower() == base.GetRoomUser().PetData.OwnerName.ToLower())
 					{
 						string key = Message.Substring(Pet.PetData.Name.ToLower().Length + 1);
-                        if ((Pet.PetData.Energy >= 10 && this.method_4() < 6) || Pet.PetData.Level >= 15)
+                        if ((Pet.PetData.Energy >= 10 && this.LevelStake() < 6) || Pet.PetData.Level >= 15)
                         {
                             Pet.Statusses.Clear();
                             if (!PhoenixEnvironment.GetGame().GetRoleManager().PetCommandsList.ContainsKey(key))
@@ -212,7 +204,7 @@ namespace Phoenix.HabboHotel.RoomBots
                                         Pet.Statusses.Add("lay", Pet.Z.ToString());
                                         break;
                                     case 2:
-                                        this.method_5(0, 0, true);
+                                        this.PetMove(0, 0, true);
                                         Pet.PetData.AddExpirience(5, 5);
                                         break;
                                     case 3:
@@ -268,7 +260,7 @@ namespace Phoenix.HabboHotel.RoomBots
                                                 NewY = User.Y + 1;
                                             }
                                             Pet.PetData.AddExpirience(15, 15);
-                                            this.method_5(NewX, NewY, false);
+                                            this.PetMove(NewX, NewY, false);
                                             break;
                                         }
                                     case 7:
@@ -351,167 +343,25 @@ namespace Phoenix.HabboHotel.RoomBots
             if (SpeechTimer <= 0)
             {
                 RoomUser Pet = base.GetRoomUser();
-                string[] PetDog = new string[]
-				{
-					TextManager.GetText("pet_chatter_dog1"),
-					TextManager.GetText("pet_chatter_dog2"),
-					TextManager.GetText("pet_chatter_dog3"),
-					TextManager.GetText("pet_chatter_dog4"),
-					TextManager.GetText("pet_chatter_dog5")
-				};
-                string[] PetCat = new string[]
-				{
-					TextManager.GetText("pet_chatter_cat1"),
-					TextManager.GetText("pet_chatter_cat2"),
-					TextManager.GetText("pet_chatter_cat3"),
-					TextManager.GetText("pet_chatter_cat4"),
-					TextManager.GetText("pet_chatter_cat5")
-				};
-                string[] PetCroc = new string[]
-				{
-					TextManager.GetText("pet_chatter_croc1"),
-					TextManager.GetText("pet_chatter_croc2"),
-					TextManager.GetText("pet_chatter_croc3"),
-					TextManager.GetText("pet_chatter_croc4"),
-					TextManager.GetText("pet_chatter_croc5")
-				};
-                string[] PetDogg = new string[]
-				{
-					TextManager.GetText("pet_chatter_dog1"),
-					TextManager.GetText("pet_chatter_dog2"),
-					TextManager.GetText("pet_chatter_dog3"),
-					TextManager.GetText("pet_chatter_dog4"),
-					TextManager.GetText("pet_chatter_dog5")
-				};
-                string[] PetBear = new string[]
-				{
-					TextManager.GetText("pet_chatter_bear1"),
-					TextManager.GetText("pet_chatter_bear2"),
-					TextManager.GetText("pet_chatter_bear3"),
-					TextManager.GetText("pet_chatter_bear4"),
-					TextManager.GetText("pet_chatter_bear5")
-				};
-                string[] PetPig = new string[]
-				{
-					TextManager.GetText("pet_chatter_pig1"),
-					TextManager.GetText("pet_chatter_pig2"),
-					TextManager.GetText("pet_chatter_pig3"),
-					TextManager.GetText("pet_chatter_pig4"),
-					TextManager.GetText("pet_chatter_pig5")
-				};
-                string[] PetLion = new string[]
-				{
-					TextManager.GetText("pet_chatter_lion1"),
-					TextManager.GetText("pet_chatter_lion2"),
-					TextManager.GetText("pet_chatter_lion3"),
-					TextManager.GetText("pet_chatter_lion4"),
-					TextManager.GetText("pet_chatter_lion5")
-				};
-                string[] PetRhino = new string[]
-				{
-					TextManager.GetText("pet_chatter_rhino1"),
-					TextManager.GetText("pet_chatter_rhino2"),
-					TextManager.GetText("pet_chatter_rhino3"),
-					TextManager.GetText("pet_chatter_rhino4"),
-					TextManager.GetText("pet_chatter_rhino5")
-				};
-                string[] PetSpider = new string[]
-				{
-					TextManager.GetText("pet_chatter_spider1"),
-					TextManager.GetText("pet_chatter_spider2"),
-					TextManager.GetText("pet_chatter_spider3"),
-					TextManager.GetText("pet_chatter_spider4"),
-					TextManager.GetText("pet_chatter_spider5")
-				};
-                string[] PetTurtle = new string[]
-				{
-					TextManager.GetText("pet_chatter_turtle1"),
-					TextManager.GetText("pet_chatter_turtle2"),
-					TextManager.GetText("pet_chatter_turtle3"),
-					TextManager.GetText("pet_chatter_turtle4"),
-					TextManager.GetText("pet_chatter_turtle5")
-				};
-                string[] PetChic = new string[]
-				{
-					TextManager.GetText("pet_chatter_chic1"),
-					TextManager.GetText("pet_chatter_chic2"),
-					TextManager.GetText("pet_chatter_chic3"),
-					TextManager.GetText("pet_chatter_chic4"),
-					TextManager.GetText("pet_chatter_chic5")
-				};
-                string[] PetFrog = new string[]
-				{
-					TextManager.GetText("pet_chatter_frog1"),
-					TextManager.GetText("pet_chatter_frog2"),
-					TextManager.GetText("pet_chatter_frog3"),
-					TextManager.GetText("pet_chatter_frog4"),
-					TextManager.GetText("pet_chatter_frog5")
-				};
-                string[] PetDragon = new string[]
-				{
-					TextManager.GetText("pet_chatter_dragon1"),
-					TextManager.GetText("pet_chatter_dragon2"),
-					TextManager.GetText("pet_chatter_dragon3"),
-					TextManager.GetText("pet_chatter_dragon4"),
-					TextManager.GetText("pet_chatter_dragon5")
-				};
-                string[] PetHorse = new string[]
-				{
-					TextManager.GetText("pet_chatter_horse1"),
-					TextManager.GetText("pet_chatter_horse2"),
-					TextManager.GetText("pet_chatter_horse3"),
-					TextManager.GetText("pet_chatter_horse4"),
-					TextManager.GetText("pet_chatter_horse5")
-				};
-                string[] PetMonkey = new string[]
-				{
-					TextManager.GetText("pet_chatter_monkey1"),
-					TextManager.GetText("pet_chatter_monkey2"),
-					TextManager.GetText("pet_chatter_monkey3"),
-					TextManager.GetText("pet_chatter_monkey4"),
-					TextManager.GetText("pet_chatter_monkey5")
-				};
-                string[] PetGeneric = new string[]
-				{
-					TextManager.GetText("pet_chatter_generic1"),
-					TextManager.GetText("pet_chatter_generic2"),
-					TextManager.GetText("pet_chatter_generic3"),
-					TextManager.GetText("pet_chatter_generic4"),
-					TextManager.GetText("pet_chatter_generic5")
-				};
-                string[] array17 = new string[]
-				{
-					"sit",
-					"lay",
-					"snf",
-					"ded",
-					"jmp",
-					"snf",
-					"sit",
-					"snf"
-				};
-                string[] array18 = new string[]
-				{
-					"sit",
-					"lay"
-				};
-                string[] array19 = new string[]
-				{
-					"wng",
-					"grn",
-					"flm",
-					"std",
-					"swg",
-					"sit",
-					"lay",
-					"snf",
-					"plf",
-					"jmp",
-					"flm",
-					"crk",
-					"rlx",
-					"flm"
-				};
+                string[] PetDog = new string[] { TextManager.GetText("pet_chatter_dog1"), TextManager.GetText("pet_chatter_dog2"), TextManager.GetText("pet_chatter_dog3"),	TextManager.GetText("pet_chatter_dog4"), TextManager.GetText("pet_chatter_dog5") };
+                string[] PetCat = new string[] { TextManager.GetText("pet_chatter_cat1"), TextManager.GetText("pet_chatter_cat2"), TextManager.GetText("pet_chatter_cat3"), TextManager.GetText("pet_chatter_cat4"), TextManager.GetText("pet_chatter_cat5") };
+                string[] PetCroc = new string[] { TextManager.GetText("pet_chatter_croc1"), TextManager.GetText("pet_chatter_croc2"), TextManager.GetText("pet_chatter_croc3"), TextManager.GetText("pet_chatter_croc4"), TextManager.GetText("pet_chatter_croc5") };
+                string[] PetDogg = new string[] { TextManager.GetText("pet_chatter_dog1"), TextManager.GetText("pet_chatter_dog2"), TextManager.GetText("pet_chatter_dog3"), TextManager.GetText("pet_chatter_dog4"), TextManager.GetText("pet_chatter_dog5") };
+                string[] PetBear = new string[] { TextManager.GetText("pet_chatter_bear1"), TextManager.GetText("pet_chatter_bear2"), TextManager.GetText("pet_chatter_bear3"), TextManager.GetText("pet_chatter_bear4"), TextManager.GetText("pet_chatter_bear5") };
+                string[] PetPig = new string[] { TextManager.GetText("pet_chatter_pig1"), TextManager.GetText("pet_chatter_pig2"), TextManager.GetText("pet_chatter_pig3"), TextManager.GetText("pet_chatter_pig4"), TextManager.GetText("pet_chatter_pig5") };
+                string[] PetLion = new string[] { TextManager.GetText("pet_chatter_lion1"), TextManager.GetText("pet_chatter_lion2"), TextManager.GetText("pet_chatter_lion3"), TextManager.GetText("pet_chatter_lion4"), TextManager.GetText("pet_chatter_lion5") };
+                string[] PetRhino = new string[] { TextManager.GetText("pet_chatter_rhino1"), TextManager.GetText("pet_chatter_rhino2"), TextManager.GetText("pet_chatter_rhino3"), TextManager.GetText("pet_chatter_rhino4"), TextManager.GetText("pet_chatter_rhino5") };
+                string[] PetSpider = new string[] { TextManager.GetText("pet_chatter_spider1"), TextManager.GetText("pet_chatter_spider2"), TextManager.GetText("pet_chatter_spider3"), TextManager.GetText("pet_chatter_spider4"), TextManager.GetText("pet_chatter_spider5") };
+                string[] PetTurtle = new string[] { TextManager.GetText("pet_chatter_turtle1"), TextManager.GetText("pet_chatter_turtle2"), TextManager.GetText("pet_chatter_turtle3"), TextManager.GetText("pet_chatter_turtle4"), TextManager.GetText("pet_chatter_turtle5") };
+                string[] PetChic = new string[] { TextManager.GetText("pet_chatter_chic1"), TextManager.GetText("pet_chatter_chic2"), TextManager.GetText("pet_chatter_chic3"), TextManager.GetText("pet_chatter_chic4"), TextManager.GetText("pet_chatter_chic5") };
+                string[] PetFrog = new string[] { TextManager.GetText("pet_chatter_frog1"), TextManager.GetText("pet_chatter_frog2"), TextManager.GetText("pet_chatter_frog3"), TextManager.GetText("pet_chatter_frog4"), TextManager.GetText("pet_chatter_frog5") };
+                string[] PetDragon = new string[] { TextManager.GetText("pet_chatter_dragon1"), TextManager.GetText("pet_chatter_dragon2"), TextManager.GetText("pet_chatter_dragon3"), TextManager.GetText("pet_chatter_dragon4"), TextManager.GetText("pet_chatter_dragon5") };
+                string[] PetHorse = new string[] { TextManager.GetText("pet_chatter_horse1"), TextManager.GetText("pet_chatter_horse2"), TextManager.GetText("pet_chatter_horse3"), TextManager.GetText("pet_chatter_horse4"), TextManager.GetText("pet_chatter_horse5") };
+                string[] PetMonkey = new string[] { TextManager.GetText("pet_chatter_monkey1"), TextManager.GetText("pet_chatter_monkey2"), TextManager.GetText("pet_chatter_monkey3"), TextManager.GetText("pet_chatter_monkey4"), TextManager.GetText("pet_chatter_monkey5") };
+                string[] PetGeneric = new string[] { TextManager.GetText("pet_chatter_generic1"), TextManager.GetText("pet_chatter_generic2"), TextManager.GetText("pet_chatter_generic3"), TextManager.GetText("pet_chatter_generic4"), TextManager.GetText("pet_chatter_generic5") };
+                string[] array17 = new string[] { "sit", "lay", "snf", "ded", "jmp", "snf", "sit", "snf" };
+                string[] array18 = new string[]	{ "sit", "lay" };
+                string[] array19 = new string[] { "wng", "grn", "flm", "std", "swg", "sit", "lay", "snf", "plf", "jmp", "flm", "crk", "rlx", "flm" };
                 if (Pet != null)
                 {
                     Random RandomSpeech = new Random();
@@ -519,22 +369,19 @@ namespace Phoenix.HabboHotel.RoomBots
                     if (num == 2)
                     {
                         Pet.Statusses.Clear();
-                        if (base.GetRoomUser().BotData.RoomUser == null)
+                        if (base.GetRoomUser().BotData.Rider == null)
                         {
                             if (Pet.PetData.Type == 13)
                             {
                                 Pet.Statusses.Add(array18[RandomSpeech.Next(0, array18.Length - 1)], Pet.Z.ToString());
                             }
+                            else if (Pet.PetData.Type != 12)
+                            {
+                                Pet.Statusses.Add(array17[RandomSpeech.Next(0, array17.Length - 1)], Pet.Z.ToString());
+                            }
                             else
                             {
-                                if (Pet.PetData.Type != 12)
-                                {
-                                    Pet.Statusses.Add(array17[RandomSpeech.Next(0, array17.Length - 1)], Pet.Z.ToString());
-                                }
-                                else
-                                {
-                                    Pet.Statusses.Add(array19[RandomSpeech.Next(0, array19.Length - 1)], Pet.Z.ToString());
-                                }
+                                Pet.Statusses.Add(array19[RandomSpeech.Next(0, array19.Length - 1)], Pet.Z.ToString());
                             }
                         }
                     }
@@ -599,9 +446,9 @@ namespace Phoenix.HabboHotel.RoomBots
 			if (EnergyTimer <= 0)
 			{
 				base.GetRoomUser().PetData.PetEnergy(-10);
-				if (base.GetRoomUser().BotData.RoomUser == null)
+				if (base.GetRoomUser().BotData.Rider == null)
 				{
-					method_5(0, 0, true);
+					PetMove(0, 0, true);
 				}
 				EnergyTimer = 30;
 			}

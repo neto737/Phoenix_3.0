@@ -102,7 +102,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 				if (Room != null && (this.GetClient() != null && this.GetClient().GetHabbo() != null))
 				{
 					RoomUser User = Room.GetRoomUserByHabbo(this.GetClient().GetHabbo().Id);
-					if (User != null && (User.byte_1 <= 0 || EffectId == -1 || bool_0) && (User.class34_1 == null || EffectId == 77 || EffectId == -1))
+					if (User != null && (User.byte_1 <= 0 || EffectId == -1 || bool_0) && (User.Riding == null || EffectId == 77 || EffectId == -1))
 					{
 						this.CurrentEffect = EffectId;
 						if (User.GetClient() != null && User.GetClient().GetHabbo().CurrentQuestId == 19 && (this.CurrentEffect == 28 || this.CurrentEffect == 29 || this.CurrentEffect == 30 || this.CurrentEffect == 37))
@@ -127,7 +127,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 				if (class2 != null)
 				{
 					RoomUser User = class2.GetRoomUserByHabbo(this.GetClient().GetHabbo().Id);
-					if (User.byte_1 <= 0 && User.class34_1 == null)
+					if (User.byte_1 <= 0 && User.Riding == null)
 					{
 						using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 						{

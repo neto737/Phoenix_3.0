@@ -16,7 +16,7 @@ namespace Phoenix.Communication.Messages.Messenger
 					ServerMessage Message = new ServerMessage(134);
 					Message.AppendUInt(0);
 					Message.AppendString(Session.GetHabbo().Username + ": " + text);
-					PhoenixEnvironment.GetGame().GetClientManager().method_17(Session, Message);
+					PhoenixEnvironment.GetGame().GetClientManager().SendStaffChat(Session, Message);
 				}
 				else
 				{

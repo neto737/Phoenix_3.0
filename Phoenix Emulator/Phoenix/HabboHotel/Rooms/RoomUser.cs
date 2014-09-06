@@ -45,7 +45,7 @@ namespace Phoenix.HabboHotel.Rooms
 		internal bool bool_5;
 		public RoomUser Target;
 		public RoomItem Item;
-		public RoomBot class34_1;
+		public RoomBot Riding;
 		public Pet PetData;
 		public bool IsWalking;
 		public bool UpdateNeeded;

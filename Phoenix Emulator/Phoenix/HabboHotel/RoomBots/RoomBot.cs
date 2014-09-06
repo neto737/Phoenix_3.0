@@ -30,7 +30,7 @@ namespace Phoenix.HabboHotel.RoomBots
 
 		public List<RandomSpeech> RandomSpeech;
 		public List<BotResponse> Responses;
-		public RoomUser RoomUser;
+		public RoomUser Rider;
 
 		public bool IsPet
 		{
@@ -40,11 +40,11 @@ namespace Phoenix.HabboHotel.RoomBots
 			}
 		}
 
-		public bool Boolean_1
+		public bool Trader
 		{
 			get
 			{
-				return this.AiType == AIType.const_3;
+				return this.AiType == AIType.Trader;
 			}
 		}
 
@@ -67,7 +67,7 @@ namespace Phoenix.HabboHotel.RoomBots
 			this.maxY = Max_Y;
 			this.EffectId = EffectId;
 			this.bool_0 = true;
-			this.RoomUser = null;
+			this.Rider = null;
 			this.LoadRandomSpeech(BotSpeeches);
 			this.LoadResponses(BotResponses);
 		}
@@ -121,7 +121,7 @@ namespace Phoenix.HabboHotel.RoomBots
                     return new PetBot(VirtualId);
                 case AIType.Guide:
                     return new GuideBot();
-                case AIType.const_3:
+                case AIType.Trader:
                     return new GuideBotMovement(VirtualId);
             }
             return new GenericBot(VirtualId);

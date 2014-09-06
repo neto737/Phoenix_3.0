@@ -344,7 +344,7 @@ namespace Phoenix
             {
                 ServerMessage message = new ServerMessage(139);
                 message.AppendStringWithBreak(Message);
-                GetGame().GetClientManager().QueueBroadcaseMessage(message);
+                GetGame().GetClientManager().BroadcastMessage(message);
             }
             catch
             {

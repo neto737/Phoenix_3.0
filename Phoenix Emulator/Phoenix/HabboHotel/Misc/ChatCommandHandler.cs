@@ -432,7 +432,7 @@ namespace Phoenix.HabboHotel.Misc
 								Session.GetHabbo().Username
 							}));
                                 Message.AppendStringWithBreak(msg);
-                                PhoenixEnvironment.GetGame().GetClientManager().QueueBroadcaseMessage(Message);
+                                PhoenixEnvironment.GetGame().GetClientManager().BroadcastMessage(Message);
                                 PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
                                 return true;
                             }
@@ -1085,7 +1085,7 @@ namespace Phoenix.HabboHotel.Misc
                                     PhoenixEnvironment.GetGame().GetCatalog().Initialize(adapter);
                                 }
                                 PhoenixEnvironment.GetGame().GetCatalog().InitCache();
-                                PhoenixEnvironment.GetGame().GetClientManager().QueueBroadcaseMessage(new ServerMessage(441u));
+                                PhoenixEnvironment.GetGame().GetClientManager().BroadcastMessage(new ServerMessage(441u));
                                 PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
                                 return true;
                             }
@@ -1656,7 +1656,7 @@ namespace Phoenix.HabboHotel.Misc
                             TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
                             TargetRoomUser = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
                             RoomUser TargetRoomUser3 = TargetRoom.method_57(Params[1]);
-                            if (TargetRoomUser.class34_1 != null)
+                            if (TargetRoomUser.Riding != null)
                             {
                                 Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_ride_err_riding"));
                                 return true;
@@ -1683,10 +1683,10 @@ namespace Phoenix.HabboHotel.Misc
                                     return true;
                                 }
                             }
-                            if (TargetRoomUser3.BotData.RoomUser == null)
+                            if (TargetRoomUser3.BotData.Rider == null)
                             {
-                                TargetRoomUser3.BotData.RoomUser = TargetRoomUser;
-                                TargetRoomUser.class34_1 = TargetRoomUser3.BotData;
+                                TargetRoomUser3.BotData.Rider = TargetRoomUser;
+                                TargetRoomUser.Riding = TargetRoomUser3.BotData;
                                 TargetRoomUser.X = TargetRoomUser3.X;
                                 TargetRoomUser.Y = TargetRoomUser3.Y;
                                 TargetRoomUser.Z = TargetRoomUser3.Z + 1.0;
@@ -1710,11 +1710,11 @@ namespace Phoenix.HabboHotel.Misc
                         case 81:
                             TargetRoom = PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(Session.GetHabbo().CurrentRoomId);
                             TargetRoomUser = TargetRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
-                            if (TargetRoomUser.class34_1 != null)
+                            if (TargetRoomUser.Riding != null)
                             {
                                 Session.GetHabbo().GetAvatarEffectsInventoryComponent().ApplyEffect(-1, true);
-                                TargetRoomUser.class34_1.RoomUser = null;
-                                TargetRoomUser.class34_1 = null;
+                                TargetRoomUser.Riding.Rider = null;
+                                TargetRoomUser.Riding = null;
                                 TargetRoomUser.Z -= 1.0;
                                 TargetRoomUser.Statusses.Clear();
                                 TargetRoomUser.UpdateNeeded = true;
@@ -2041,7 +2041,7 @@ namespace Phoenix.HabboHotel.Misc
                         case 68: //CMD About
                             DateTime now = DateTime.Now;
                             TimeSpan timeSpan = now - PhoenixEnvironment.ServerStarted;
-                            int UsersOnline = PhoenixEnvironment.GetGame().GetClientManager().connectionCount + -1;
+                            int UsersOnline = PhoenixEnvironment.GetGame().GetClientManager().ClientCount + -1;
                             int RoomsLoaded = PhoenixEnvironment.GetGame().GetRoomManager().LoadedRoomsCount;
                             string UsersAndRooms = "";
                             if (GlobalClass.ShowUsersAndRoomsInAbout)
@@ -2114,7 +2114,7 @@ namespace Phoenix.HabboHotel.Misc
                             {
                                 return true;
                             }
-                            if (TargetRoomUser.byte_1 > 0 || TargetRoomUser.class34_1 != null)
+                            if (TargetRoomUser.byte_1 > 0 || TargetRoomUser.Riding != null)
                             {
                                 return true;
                             }

@@ -5,7 +5,7 @@ namespace Phoenix.HabboHotel.RoomBots
 	{
 		Pet,
 		Guide,
-		const_2,
-		const_3
+		Generic,
+		Trader
 	}
 }

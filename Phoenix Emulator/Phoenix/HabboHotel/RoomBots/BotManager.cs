@@ -59,13 +59,13 @@ namespace Phoenix.HabboHotel.RoomBots
 					}
 					else
 					{
-						enum2_ = AIType.const_2;
+						enum2_ = AIType.Generic;
 					}
 					IL_204:
 					this.Bots.Add(new RoomBot((uint)dataRow["Id"], (uint)dataRow["room_id"], enum2_, (string)dataRow["walk_mode"], (string)dataRow["name"], (string)dataRow["motto"], (string)dataRow["look"], (int)dataRow["x"], (int)dataRow["y"], (int)dataRow["z"], (int)dataRow["rotation"], (int)dataRow["min_x"], (int)dataRow["min_y"], (int)dataRow["max_x"], (int)dataRow["max_y"], ref Speech, ref Response, (int)dataRow["effect"]));
 					continue;
 					IL_201:
-					enum2_ = AIType.const_2;
+					enum2_ = AIType.Generic;
 					goto IL_204;
 				}
 				Logging.WriteLine("completed!");

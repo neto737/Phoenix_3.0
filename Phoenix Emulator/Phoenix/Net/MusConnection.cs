@@ -286,7 +286,7 @@ namespace Phoenix.Net
 						TextManager.GetText("mus_hal_tail")
 					}));
 					Message4.AppendStringWithBreak(text4);
-					PhoenixEnvironment.GetGame().GetClientManager().QueueBroadcaseMessage(Message4);
+					PhoenixEnvironment.GetGame().GetClientManager().BroadcastMessage(Message4);
                     break;
 
                 case "updatemotto":

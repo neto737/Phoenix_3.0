@@ -32,7 +32,7 @@ namespace Phoenix.Communication.Messages.Rooms.Engine
 							catch
 							{
 								@class.Target = null;
-								@class.class34_1 = null;
+								@class.Riding = null;
 								@class.MoveTo(num, num2);
 								Session.GetHabbo().GetAvatarEffectsInventoryComponent().ApplyEffect(-1, true);
 								return;

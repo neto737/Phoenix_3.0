@@ -360,7 +360,7 @@ namespace Phoenix.HabboHotel.Support
 
 		public void SendTicketToModerators(SupportTicket Ticket)
 		{
-			PhoenixEnvironment.GetGame().GetClientManager().QueueBroadcaseMessage(Ticket.Serialize(), "acc_supporttool");
+			PhoenixEnvironment.GetGame().GetClientManager().BroadcastMessage(Ticket.Serialize(), "acc_supporttool");
 		}
 
 		public void PerformRoomAction(GameClient Session, uint RoomId, bool KickUsers, bool LockRoom, bool InappropriateRoom)
