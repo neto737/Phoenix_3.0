@@ -231,7 +231,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			if (FromDatabase)
 			{
 				this.LoadInventory();
-				this.method_18();
+				this.RunDBUpdate();
 			}
 			if (this.GetClient() != null)
 			{
@@ -390,7 +390,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 			}
 		}
 
-		internal void method_18()
+		internal void RunDBUpdate()
 		{
 			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{

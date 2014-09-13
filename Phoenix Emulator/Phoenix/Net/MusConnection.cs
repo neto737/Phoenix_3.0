@@ -9,7 +9,7 @@ using Phoenix.HabboHotel.Users;
 using Phoenix.Messages;
 using Phoenix.HabboHotel.Rooms;
 using Phoenix.Storage;
-using Phoenix.HabboHotel.Guilds;
+using Phoenix.HabboHotel.Groups;
 using Phoenix.Util;
 namespace Phoenix.Net
 {
@@ -155,7 +155,7 @@ namespace Phoenix.Net
 
                     using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
                     {
-                        GuildManager.UpdateGroup(adapter, int_2);
+                        GroupManager.UpdateGroup(adapter, int_2);
                     }
                     break;
 

@@ -104,7 +104,7 @@ namespace Phoenix.Communication.Messages.Rooms.Avatar
 									PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, "flagme", "OldName: " + Session.GetHabbo().Username + " NewName: " + text);
 									Session.GetHabbo().Username = text;
 									Session.GetHabbo().UpdateRooms(class3);
-                                    foreach (RoomData current2 in Session.GetHabbo().list_6)
+                                    foreach (RoomData current2 in Session.GetHabbo().UsersRooms)
 									{
 										current2.Owner = text;
 									}

@@ -3,7 +3,7 @@ using System.Data;
 using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 using Phoenix.Storage;
-using Phoenix.HabboHotel.Guilds;
+using Phoenix.HabboHotel.Groups;
 namespace Phoenix.Communication.Messages.Users
 {
 	internal sealed class JoinGuildEvent : MessageEvent
@@ -13,8 +13,8 @@ namespace Phoenix.Communication.Messages.Users
 			int num = Event.PopWiredInt32();
 			if (num > 0 && (Session != null && Session.GetHabbo() != null))
 			{
-                Guild @class = GuildManager.GetGuild(num);
-				if (@class != null && !Session.GetHabbo().list_0.Contains(@class.Id) && !@class.List.Contains((int)Session.GetHabbo().Id))
+                Group @class = GroupManager.GetGroup(num);
+				if (@class != null && !Session.GetHabbo().GroupReqs.Contains(@class.Id) && !@class.List.Contains((int)Session.GetHabbo().Id))
 				{
 					if (@class.Locked == "open") 
 					{
@@ -35,7 +35,7 @@ namespace Phoenix.Communication.Messages.Users
 					}
 					if (@class.Locked == "locked")
 					{
-						Session.GetHabbo().list_0.Add(@class.Id);
+						Session.GetHabbo().GroupReqs.Add(@class.Id);
 						using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
 						{
 							class2.ExecuteQuery(string.Concat(new object[]
@@ -91,7 +91,7 @@ namespace Phoenix.Communication.Messages.Users
 								flag = true;
 							}
 						}
-						if (Session.GetHabbo().list_0.Contains(@class.Id))
+						if (Session.GetHabbo().GroupReqs.Contains(@class.Id))
 						{
 							Message.AppendInt32(2);
 						}

@@ -9,7 +9,7 @@ namespace Phoenix.Communication.Messages.Navigator
 		public void parse(GameClient Session, ClientMessage Event)
 		{
 			ServerMessage Message = new ServerMessage(512);
-			if (Session.GetHabbo().list_6.Count > GlobalClass.MaxRoomsPerUser)
+			if (Session.GetHabbo().UsersRooms.Count > GlobalClass.MaxRoomsPerUser)
 			{
 				Message.AppendBoolean(true);
 				Message.AppendInt32(GlobalClass.MaxRoomsPerUser);

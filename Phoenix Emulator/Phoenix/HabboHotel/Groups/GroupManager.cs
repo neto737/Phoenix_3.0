@@ -3,54 +3,54 @@ using System.Collections.Generic;
 using System.Data;
 using Phoenix.Core;
 using Phoenix.Storage;
-namespace Phoenix.HabboHotel.Guilds
+namespace Phoenix.HabboHotel.Groups
 {
-	internal sealed class GuildManager
+	internal class GroupManager
 	{
-        public static Dictionary<int, Guild> GuildList = new Dictionary<int, Guild>();
+        public static Dictionary<int, Group> GroupList = new Dictionary<int, Group>();
 
         public static void LoadGroups(DatabaseClient dbClient)
         {
             Logging.Write("Loading groups...");
-            GuildManager.ClearGroups();
+            GroupManager.ClearGroups();
             DataTable dataTable = dbClient.ReadDataTable("SELECT * FROM groups;");
             foreach (DataRow dataRow in dataTable.Rows)
             {
-                GuildManager.GuildList.Add((int)dataRow["Id"], new Guild((int)dataRow["Id"], dataRow, dbClient));
+                GroupManager.GroupList.Add((int)dataRow["Id"], new Group((int)dataRow["Id"], dataRow, dbClient));
             }
             Logging.WriteLine("completed!");
         }
 
 		public static void ClearGroups()
 		{
-			GuildManager.GuildList.Clear();
+			GroupManager.GroupList.Clear();
 		}
 
-        public static Guild GetGuild(int id)
+        public static Group GetGroup(int id)
         {
-            if (GuildList.ContainsKey(id))
+            if (GroupList.ContainsKey(id))
             {
-                return GuildList[id];
+                return GroupList[id];
             }
             return null;
         }
 
 		public static void UpdateGroup(DatabaseClient dbClient, int id)
 		{
-            Guild guild = GuildManager.GetGuild(id);
-			if (guild != null)
+            Group group = GroupManager.GetGroup(id);
+			if (group != null)
 			{
 				DataRow Row = dbClient.ReadDataRow("SELECT * FROM groups WHERE Id = " + id + " LIMIT 1");
-				guild.Name = (string)Row["name"];
-				guild.Badge = (string)Row["badge"];
-				guild.RoomId = (uint)Row["roomid"];
-				guild.Desc = (string)Row["desc"];
-				guild.Locked = (string)Row["locked"];
-				guild.List.Clear();
+				group.Name = (string)Row["name"];
+				group.Badge = (string)Row["badge"];
+				group.RoomId = (uint)Row["roomid"];
+				group.Desc = (string)Row["desc"];
+				group.Locked = (string)Row["locked"];
+				group.List.Clear();
 				DataTable dataTable = dbClient.ReadDataTable("SELECT userid FROM group_memberships WHERE groupid = " + id + ";");
 				foreach (DataRow row2 in dataTable.Rows)
 				{
-					guild.AddMember((int)row2["userid"]);
+					group.AddMember((int)row2["userid"]);
 				}
 			}
 		}

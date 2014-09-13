@@ -30,18 +30,16 @@ namespace Phoenix.HabboHotel.Users.Messenger
 			{
 				foreach (DataRow dataRow in getFriendList.Rows)
 				{
-					this.friends.Add((uint)dataRow["Id"], new MessengerBuddy((uint)dataRow["Id"], dataRow["username"] as string, dataRow["look"] as string, dataRow["motto"] as string, dataRow["last_online"] as string));
+					friends.Add((uint)dataRow["Id"], new MessengerBuddy((uint)dataRow["Id"], dataRow["username"] as string, dataRow["look"] as string, dataRow["motto"] as string, dataRow["last_online"] as string));
 				}
 				try
 				{
-					if (this.GetClient().GetHabbo().HasRole("receive_sa"))
+					if (GetClient().GetHabbo().HasRole("receive_sa"))
 					{
-						this.friends.Add(0, new MessengerBuddy(0, "Staff Chat", this.GetClient().GetHabbo().Look, "Staff Chat Room", "0"));
+						friends.Add(0, new MessengerBuddy(0, "Staff Chat", GetClient().GetHabbo().Look, "Staff Chat Room", "0"));
 					}
 				}
-				catch
-				{
-				}
+                catch { }
 			}
 		}
 
@@ -73,7 +71,7 @@ namespace Phoenix.HabboHotel.Users.Messenger
 			return this.mRequests[RequestId] as MessengerRequest;
 		}
 
-		internal void method_5(bool bool_1)
+		internal void OnStatusChanged(bool bool_1)
 		{
 			Hashtable hashtable = this.friends.Clone() as Hashtable;
 			foreach (MessengerBuddy @class in hashtable.Values)

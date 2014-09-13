@@ -26,7 +26,7 @@ namespace Phoenix.Communication.Messages.Rooms.Settings
 							if (class3 != null && !class3.IsBot)
 							{
 								class3.GetClient().SendMessage(new ServerMessage(18u));
-								class3.GetClient().GetHabbo().method_11();
+								class3.GetClient().GetHabbo().OnLeaveRoom();
 							}
 						}
 						PhoenixEnvironment.GetGame().GetRoomManager().UnloadRoom(class2);

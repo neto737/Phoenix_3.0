@@ -16,7 +16,7 @@ using Phoenix.HabboHotel.RoomBots;
 using Phoenix.HabboHotel.Quests;
 using Phoenix.Util;
 using Phoenix.Storage;
-using Phoenix.HabboHotel.Guilds;
+using Phoenix.HabboHotel.Groups;
 using Phoenix.HabboHotel.SoundMachine;
 namespace Phoenix.HabboHotel
 {
@@ -40,7 +40,7 @@ namespace Phoenix.HabboHotel
 		private Marketplace Marketplace;
 		private QuestManager QuestManager;
 		private TextManager TextManage;
-		private GuildManager Guilds;
+		private GroupManager Guilds;
 		public Game(int conns)
 		{
 			ClientManager = new GameClientManager(conns);
@@ -70,7 +70,7 @@ namespace Phoenix.HabboHotel
 				Marketplace = new Marketplace();
 				QuestManager = new QuestManager();
 				TextManage = new TextManager();
-                Guilds = new GuildManager();
+                Guilds = new GroupManager();
 				TextManager.LoadTexts(adapter);
 				BanManager.LoadBans(adapter);
                 RoleManager.LoadRoles(adapter);
@@ -91,7 +91,7 @@ namespace Phoenix.HabboHotel
 				PixelManager.Start();
 				ChatCommandHandler.InitFilter(adapter);
 				QuestManager.InitQuests();
-				GuildManager.LoadGroups(adapter);
+				GroupManager.LoadGroups(adapter);
 				DatabaseCleanup(adapter, 1);
 			}
 			Task = new Task(new Action(LowPriorityWorker.Process));

@@ -3,7 +3,7 @@ using System.Data;
 using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 using Phoenix.Storage;
-using Phoenix.HabboHotel.Guilds;
+using Phoenix.HabboHotel.Groups;
 namespace Phoenix.Communication.Messages.Users
 {
 	internal sealed class GetHabboGroupDetailsMessageEvent : MessageEvent
@@ -13,7 +13,7 @@ namespace Phoenix.Communication.Messages.Users
 			int num = Event.PopWiredInt32();
 			if (num > 0 && (Session != null && Session.GetHabbo() != null))
 			{
-                Guild @class = GuildManager.GetGuild(num);
+                Group @class = GroupManager.GetGroup(num);
 				if (@class != null)
 				{
 					ServerMessage Message = new ServerMessage(311u);
@@ -56,7 +56,7 @@ namespace Phoenix.Communication.Messages.Users
 							flag = true;
 						}
 					}
-					if (Session.GetHabbo().list_0.Contains(@class.Id))
+					if (Session.GetHabbo().GroupReqs.Contains(@class.Id))
 					{
 						Message.AppendInt32(2);
 					}

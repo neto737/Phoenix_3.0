@@ -34,6 +34,7 @@ namespace Phoenix.Net
 				throw new Exception("Could not set up MUS socket:\n" + ex.ToString());
 			}
 		}
+
 		public void OnEvent_NewConnection(IAsyncResult iAr)
 		{
             try
@@ -49,9 +50,8 @@ namespace Phoenix.Net
                     Sock.Close();
                 }
             }
-            catch (Exception)
-            {
-            }
+            catch (Exception) { }
+
             this.Sock.BeginAccept(new AsyncCallback(this.OnEvent_NewConnection), this.Sock);
 		}
 	}

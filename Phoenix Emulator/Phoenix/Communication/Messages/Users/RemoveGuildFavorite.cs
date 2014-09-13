@@ -4,7 +4,7 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 using Phoenix.HabboHotel.Rooms;
 using Phoenix.Storage;
-using Phoenix.HabboHotel.Guilds;
+using Phoenix.HabboHotel.Groups;
 namespace Phoenix.Communication.Messages.Users
 {
 	internal sealed class RemoveGuildFavorite : MessageEvent
@@ -35,7 +35,7 @@ namespace Phoenix.Communication.Messages.Users
 					Message2.AppendInt32(dataTable_.Rows.Count);
 					foreach (DataRow dataRow in dataTable_.Rows)
 					{
-                        Guild class3 = GuildManager.GetGuild((int)dataRow["groupid"]);
+                        Group class3 = GroupManager.GetGroup((int)dataRow["groupid"]);
 						Message2.AppendInt32(class3.Id);
 						Message2.AppendStringWithBreak(class3.Name);
 						Message2.AppendStringWithBreak(class3.Badge);

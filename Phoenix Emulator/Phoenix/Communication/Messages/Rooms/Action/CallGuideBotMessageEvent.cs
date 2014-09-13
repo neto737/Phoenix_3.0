@@ -24,7 +24,7 @@ namespace Phoenix.Communication.Messages.Rooms.Action
 						return;
 					}
 				}
-				if (Session.GetHabbo().bool_10)
+				if (Session.GetHabbo().CalledGuideBot)
 				{
 					ServerMessage Message = new ServerMessage(33u);
 					Message.AppendInt32(4010);
@@ -42,7 +42,7 @@ namespace Phoenix.Communication.Messages.Rooms.Action
 						class3.SetRot(Rotation.Calculate(class3.X, class3.Y, class4.X, class4.Y));
 					}
 					PhoenixEnvironment.GetGame().GetAchievementManager().UnlockAchievement(Session, 6u, 1);
-					Session.GetHabbo().bool_10 = true;
+					Session.GetHabbo().CalledGuideBot = true;
 				}
 			}
 		}

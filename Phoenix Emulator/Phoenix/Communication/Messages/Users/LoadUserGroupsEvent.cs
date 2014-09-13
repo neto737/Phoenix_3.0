@@ -2,7 +2,7 @@ using System;
 using System.Data;
 using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
-using Phoenix.HabboHotel.Guilds;
+using Phoenix.HabboHotel.Groups;
 namespace Phoenix.Communication.Messages.Users
 {
 	internal sealed class LoadUserGroupsEvent : MessageEvent
@@ -16,7 +16,7 @@ namespace Phoenix.Communication.Messages.Users
 				Message.AppendInt32(dataTable_.Rows.Count);
 				foreach (DataRow dataRow in dataTable_.Rows)
 				{
-                    Guild @class = GuildManager.GetGuild((int)dataRow["groupid"]);
+                    Group @class = GroupManager.GetGroup((int)dataRow["groupid"]);
 					Message.AppendInt32(@class.Id);
 					Message.AppendStringWithBreak(@class.Name);
 					Message.AppendStringWithBreak(@class.Badge);

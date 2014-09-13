@@ -604,10 +604,10 @@ namespace Phoenix.HabboHotel.Items
 						try
 						{
 							RoomUser @class = this.GetRoom().GetRoomUserByHabbo(this.InteractingUser);
-							if (@class.GetClient().GetHabbo().int_1 > 0)
+							if (@class.GetClient().GetHabbo().Rigger > 0)
 							{
-								this.ExtraData = @class.GetClient().GetHabbo().int_1.ToString();
-								@class.GetClient().GetHabbo().int_1 = 0;
+								this.ExtraData = @class.GetClient().GetHabbo().Rigger.ToString();
+								@class.GetClient().GetHabbo().Rigger = 0;
 							}
 							else
 							{

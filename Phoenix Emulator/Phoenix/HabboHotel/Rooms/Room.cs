@@ -18,7 +18,7 @@ using Phoenix.Messages;
 using Phoenix.HabboHotel.RoomBots;
 using Phoenix.HabboHotel.Navigators;
 using Phoenix.Storage;
-using Phoenix.HabboHotel.Guilds;
+using Phoenix.HabboHotel.Groups;
 using Phoenix.HabboHotel.SoundMachine;
 using Phoenix.HabboHotel.Users;
 namespace Phoenix.HabboHotel.Rooms
@@ -91,7 +91,7 @@ namespace Phoenix.HabboHotel.Rooms
         public List<RoomItem> WF_Triggers;
         public List<RoomItem> WF_Effects;
         public List<RoomItem> WF_Conditions;
-        public List<Guild> list_17;
+        public List<Phoenix.HabboHotel.Groups.Group> list_17;
         public double[,] double_0;
         private byte[,] byte_0;
         public Coord[,] mBedMap;
@@ -354,7 +354,7 @@ namespace Phoenix.HabboHotel.Rooms
             this.bool_5 = true;
             this.mRoomData = class27_1;
             this.bool_8 = bool_17;
-            this.list_17 = new List<Guild>();
+            this.list_17 = new List<Phoenix.HabboHotel.Groups.Group>();
             this.list_4 = new List<uint>();
             this.bbTiles = new List<RoomItem>();
             this.bbbTiles = new List<RoomItem>();
@@ -3481,7 +3481,7 @@ namespace Phoenix.HabboHotel.Rooms
                     this.bool_10 = true;
                 }
                 Session.GetHabbo().CurrentRoomId = this.Id;
-                Session.GetHabbo().GetMessenger().method_5(false);
+                Session.GetHabbo().GetMessenger().OnStatusChanged(false);
                 Session.GetHabbo().RoomVisits++;
                 int num2 = Session.GetHabbo().RoomVisits;
                 if (num2 <= 500)
@@ -3560,16 +3560,16 @@ namespace Phoenix.HabboHotel.Rooms
                         }
                     }
                 }
-                Session.GetHabbo().method_10(this.Id);
+                Session.GetHabbo().OnEnterRoom(this.Id);
                 if (Session.GetHabbo().GroupID > 0)
                 {
-                    Guild class3 = GuildManager.GetGuild(Session.GetHabbo().GroupID);
+                    Phoenix.HabboHotel.Groups.Group class3 = GroupManager.GetGroup(Session.GetHabbo().GroupID);
                     if (class3 != null && !this.list_17.Contains(class3))
                     {
                         this.list_17.Add(class3);
                         ServerMessage Message2 = new ServerMessage(309u);
                         Message2.AppendInt32(this.list_17.Count);
-                        foreach (Guild current in this.list_17)
+                        foreach (Phoenix.HabboHotel.Groups.Group current in this.list_17)
                         {
                             Message2.AppendInt32(current.Id);
                             Message2.AppendStringWithBreak(current.Badge);
@@ -3672,7 +3672,7 @@ namespace Phoenix.HabboHotel.Rooms
                                     @class.Riding = null;
                                     Session.GetHabbo().GetAvatarEffectsInventoryComponent().CurrentEffect = -1;
                                 }
-                                Session.GetHabbo().method_11();
+                                Session.GetHabbo().OnLeaveRoom();
                                 this.bool_10 = true;
                                 this.method_51();
                                 List<RoomUser> list = new List<RoomUser>();

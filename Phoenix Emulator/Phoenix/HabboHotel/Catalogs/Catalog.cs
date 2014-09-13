@@ -177,14 +177,14 @@ namespace Phoenix.HabboHotel.Catalogs
 								}
 								if (timeSpan.Seconds < 4 && Session.GetHabbo().FloodCount > 3)
 								{
-									Session.GetHabbo().bool_15 = true;
+									Session.GetHabbo().Flooded = true;
 									return false;
 								}
-								if (Session.GetHabbo().bool_15 && timeSpan.Seconds < Session.GetHabbo().MaxFloodTime())
+								if (Session.GetHabbo().Flooded && timeSpan.Seconds < Session.GetHabbo().MaxFloodTime())
 								{
 									return false;
 								}
-								Session.GetHabbo().bool_15 = false;
+								Session.GetHabbo().Flooded = false;
 								Session.GetHabbo().FloodTime = DateTime.Now;
 								Session.GetHabbo().FloodCount++;
 							}

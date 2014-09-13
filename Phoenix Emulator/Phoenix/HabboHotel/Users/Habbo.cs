@@ -11,10 +11,10 @@ using Phoenix.Messages;
 using Phoenix.HabboHotel.Users.Messenger;
 using Phoenix.HabboHotel.Users.Badges;
 using Phoenix.Storage;
-using Phoenix.HabboHotel.Guilds;
+using Phoenix.HabboHotel.Groups;
 namespace Phoenix.HabboHotel.Users
 {
-	internal sealed class Habbo
+	internal class Habbo
 	{
 		public uint Id;
 		public string Username;
@@ -30,14 +30,14 @@ namespace Phoenix.HabboHotel.Users
 		public string Gender;
 		public int GroupID;
 		public DataTable GroupMemberships;
-		public List<int> list_0;
-		public int int_1;
+		public List<int> GroupReqs;
+		public int Rigger;
 		public int Credits;
 		public int ActivityPoints;
 		public double LastActivityPointsUpdate;
 		public bool Muted;
 		public int MuteLength;
-		internal bool bool_4 = false;
+		//internal bool bool_4 = false;
 		public uint LoadingRoom;
 		public bool LoadingChecksPassed;
 		public bool Waitingfordoorbell;
@@ -47,7 +47,7 @@ namespace Phoenix.HabboHotel.Users
 		public uint TeleporterId;
 		public List<uint> FavoriteRooms;
 		public List<uint> MutedUsers;
-		public List<string> list_3;
+		public List<string> Tags;
 		public Dictionary<uint, int> Achievements;
 		public List<uint> RatedRooms;
 		private SubscriptionManager SubscriptionManager;
@@ -66,8 +66,8 @@ namespace Phoenix.HabboHotel.Users
 		public uint LastQuestId;
 		public int NewbieStatus;
 		public bool SpectatorMode;
-		public bool bool_9;
-		public bool bool_10;
+		public bool Disconnected;
+		public bool CalledGuideBot;
 		public bool BlockNewFriends;
 		public bool HideInRom;
 		public bool HideOnline;
@@ -77,7 +77,7 @@ namespace Phoenix.HabboHotel.Users
 		public int AchievementScore;
 		public int RoomVisits;
 		public int Stat_OnlineTime;
-		public int int_16;
+		public int Stat_LoginTime;
 		public int Respect;
 		public int RespectGiven;
 		public int GiftsGiven;
@@ -85,12 +85,12 @@ namespace Phoenix.HabboHotel.Users
 		public int DailyRespectPoints;
 		public int DailyPetRespectPoints;
 		private HabboData HabboData;
-		internal List<RoomData> list_6;
+		internal List<RoomData> UsersRooms;
 		public int FloodCount;
 		public DateTime FloodTime;
-		public bool bool_15;
+		public bool Flooded;
 		public int BuyCount;
-		private bool bool_16 = false;
+		private bool HabboInfoSaved = false;
         public bool FriendStreamEnabled;
 
 		public bool InRoom
@@ -100,6 +100,7 @@ namespace Phoenix.HabboHotel.Users
 				return this.CurrentRoomId >= 1;
 			}
 		}
+
 		public Room CurrentRoom
 		{
 			get
@@ -110,10 +111,11 @@ namespace Phoenix.HabboHotel.Users
 				}
 				else
 				{
-					return PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(this.CurrentRoomId);
+					return PhoenixEnvironment.GetGame().GetRoomManager().GetRoom(CurrentRoomId);
 				}
 			}
 		}
+
 		internal HabboData GetHabboData
 		{
 			get
@@ -121,12 +123,13 @@ namespace Phoenix.HabboHotel.Users
 				return this.HabboData;
 			}
 		}
+
 		internal string GetQueryString
 		{
 			get
 			{
-				this.bool_16 = true;
-				int num = (int)PhoenixEnvironment.GetUnixTimestamp() - this.int_16;
+				this.HabboInfoSaved = true;
+				int num = (int)PhoenixEnvironment.GetUnixTimestamp() - this.Stat_LoginTime;
 				string text = string.Concat(new object[]
 				{
 					"UPDATE users SET last_online = UNIX_TIMESTAMP(), online = '0', activity_points_lastupdate = '",
@@ -157,6 +160,7 @@ namespace Phoenix.HabboHotel.Users
 				});
 			}
 		}
+
         public Habbo(uint Id, string Username, string RealName, string SSO, uint Rank, string Motto, string Look, string Gender, int Credits, int Pixels, double Activity_Points_LastUpdate, bool Muted, uint HomeRoom, int NewbieStatus, bool BlockNewFriends, bool HideInRoom, bool HideOnline, bool Vip, int Volume, int Points, bool AcceptTrading, string LastIp, GameClient Session, HabboData HabboData, bool FriendStream)
 		{
 			if (Session != null)
@@ -179,44 +183,45 @@ namespace Phoenix.HabboHotel.Users
 			this.LastActivityPointsUpdate = Activity_Points_LastUpdate;
 			this.AcceptTrading = AcceptTrading;
 			this.Muted = Muted;
-			this.LoadingRoom = 0u;
+			this.LoadingRoom = 0;
 			this.LoadingChecksPassed = false;
 			this.Waitingfordoorbell = false;
 			this.CurrentRoomId = 0;
 			this.HomeRoom = HomeRoom;
 			this.FavoriteRooms = new List<uint>();
 			this.MutedUsers = new List<uint>();
-			this.list_3 = new List<string>();
+			this.Tags = new List<string>();
 			this.Achievements = new Dictionary<uint, int>();
 			this.RatedRooms = new List<uint>();
 			this.NewbieStatus = NewbieStatus;
-			this.bool_10 = false;
+			this.CalledGuideBot = false;
 			this.BlockNewFriends = BlockNewFriends;
 			this.HideInRom = HideInRoom;
 			this.HideOnline = HideOnline;
 			this.Vip = Vip;
 			this.Volume = Volume;
-			this.int_1 = 0;
+			this.Rigger = 0;
 			this.BuyCount = 1;
 			this.LastIp = LastIp;
 			this.IsTeleporting = false;
-			this.TeleporterId = 0u;
+			this.TeleporterId = 0;
 			this.Session = Session;
 			this.HabboData = HabboData;
-			this.list_6 = new List<RoomData>();
-			this.list_0 = new List<int>();
+			this.UsersRooms = new List<RoomData>();
+			this.GroupReqs = new List<int>();
             this.FriendStreamEnabled = FriendStream;
 			DataRow dataRow = null;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				@class.AddParamWithValue("user_id", Id);
-				dataRow = @class.ReadDataRow("SELECT * FROM user_stats WHERE Id = @user_id LIMIT 1");
+				adapter.AddParamWithValue("user_id", Id);
+				dataRow = adapter.ReadDataRow("SELECT * FROM user_stats WHERE Id = @user_id LIMIT 1");
 				if (dataRow == null)
 				{
-					@class.ExecuteQuery("INSERT INTO user_stats (Id) VALUES ('" + Id + "')");
-					dataRow = @class.ReadDataRow("SELECT * FROM user_stats WHERE Id = @user_id LIMIT 1");
+					adapter.ExecuteQuery("INSERT INTO user_stats (Id) VALUES ('" + Id + "')");
+					dataRow = adapter.ReadDataRow("SELECT * FROM user_stats WHERE Id = @user_id LIMIT 1");
 				}
-				this.GroupMemberships = @class.ReadDataTable("SELECT * FROM group_memberships WHERE userid = @user_id");
+				this.GroupMemberships = adapter.ReadDataTable("SELECT * FROM group_memberships WHERE userid = @user_id");
 				IEnumerator enumerator;
 				if (this.GroupMemberships != null)
 				{
@@ -226,19 +231,19 @@ namespace Phoenix.HabboHotel.Users
 						while (enumerator.MoveNext())
 						{
 							DataRow dataRow2 = (DataRow)enumerator.Current;
-                            Guild class2 = GuildManager.GetGuild((int)dataRow2["groupid"]);
+                            Group class2 = GroupManager.GetGroup((int)dataRow2["groupid"]);
 							if (class2 == null)
 							{
-								DataTable dataTable = @class.ReadDataTable("SELECT * FROM groups WHERE Id = " + (int)dataRow2["groupid"] + " LIMIT 1;");
+								DataTable dataTable = adapter.ReadDataTable("SELECT * FROM groups WHERE Id = " + (int)dataRow2["groupid"] + " LIMIT 1;");
 								IEnumerator enumerator2 = dataTable.Rows.GetEnumerator();
 								try
 								{
 									while (enumerator2.MoveNext())
 									{
 										DataRow dataRow3 = (DataRow)enumerator2.Current;
-                                        if (!GuildManager.GuildList.ContainsKey((int)dataRow3["Id"]))
+                                        if (!GroupManager.GroupList.ContainsKey((int)dataRow3["Id"]))
 										{
-                                            GuildManager.GuildList.Add((int)dataRow3["Id"], new Guild((int)dataRow3["Id"], dataRow3, @class));
+                                            GroupManager.GroupList.Add((int)dataRow3["Id"], new Group((int)dataRow3["Id"], dataRow3, adapter));
 										}
 									}
 									continue;
@@ -267,7 +272,7 @@ namespace Phoenix.HabboHotel.Users
 						}
 					}
 					int num = (int)dataRow["groupid"];
-                    Guild class3 = GuildManager.GetGuild(num);
+                    Group class3 = GroupManager.GetGroup(num);
 					if (class3 != null)
 					{
 						this.GroupID = num;
@@ -281,14 +286,14 @@ namespace Phoenix.HabboHotel.Users
 				{
 					this.GroupID = 0;
 				}
-				DataTable dataTable2 = @class.ReadDataTable("SELECT groupid FROM group_requests WHERE userid = '" + Id + "';");
+				DataTable dataTable2 = adapter.ReadDataTable("SELECT groupid FROM group_requests WHERE userid = '" + Id + "';");
 				enumerator = dataTable2.Rows.GetEnumerator();
 				try
 				{
 					while (enumerator.MoveNext())
 					{
 						DataRow dataRow2 = (DataRow)enumerator.Current;
-						this.list_0.Add((int)dataRow2["groupid"]);
+						this.GroupReqs.Add((int)dataRow2["groupid"]);
 					}
 				}
 				finally
@@ -301,7 +306,7 @@ namespace Phoenix.HabboHotel.Users
 				}
 			}
 			this.RoomVisits = (int)dataRow["RoomVisits"];
-			this.int_16 = (int)PhoenixEnvironment.GetUnixTimestamp();
+			this.Stat_LoginTime = (int)PhoenixEnvironment.GetUnixTimestamp();
 			this.Stat_OnlineTime = (int)dataRow["OnlineTime"];
 			this.Respect = (int)dataRow["Respect"];
 			this.RespectGiven = (int)dataRow["RespectGiven"];
@@ -325,33 +330,64 @@ namespace Phoenix.HabboHotel.Users
 				this.InventoryComponent = new InventoryComponent(Id, Session, HabboData);
 				this.AvatarEffectsInventoryComponent = new AvatarEffectsInventoryComponent(Id, Session, HabboData);
 				this.SpectatorMode = false;
-				this.bool_9 = false;
+				this.Disconnected = false;
 				foreach (DataRow dataRow3 in HabboData.GetUsersRooms.Rows)
 				{
-					this.list_6.Add(PhoenixEnvironment.GetGame().GetRoomManager().FetchRoomData((uint)dataRow3["Id"], dataRow3));
+					this.UsersRooms.Add(PhoenixEnvironment.GetGame().GetRoomManager().FetchRoomData((uint)dataRow3["Id"], dataRow3));
 				}
 			}
 		}
-		public void UpdateGroups(DatabaseClient class6_0)
+
+        private GameClient GetClient()
+        {
+            return PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Id);
+        }
+
+        public SubscriptionManager GetSubscriptionManager()
+        {
+            return SubscriptionManager;
+        }
+
+        public HabboMessenger GetMessenger()
+        {
+            return Messenger;
+        }
+
+        public BadgeComponent GetBadgeComponent()
+        {
+            return BadgeComponent;
+        }
+
+        public InventoryComponent GetInventoryComponent()
+        {
+            return InventoryComponent;
+        }
+
+        public AvatarEffectsInventoryComponent GetAvatarEffectsInventoryComponent()
+        {
+            return AvatarEffectsInventoryComponent;
+        }
+
+		public void UpdateGroups(DatabaseClient dbClient)
 		{
-			this.GroupMemberships = class6_0.ReadDataTable("SELECT * FROM group_memberships WHERE userid = " + this.Id);
+			this.GroupMemberships = dbClient.ReadDataTable("SELECT * FROM group_memberships WHERE userid = " + Id);
 			if (this.GroupMemberships != null)
 			{
 				foreach (DataRow dataRow in this.GroupMemberships.Rows)
 				{
-                    Guild @class = GuildManager.GetGuild((int)dataRow["groupid"]);
-					if (@class == null)
+                    Group group = GroupManager.GetGroup((int)dataRow["groupid"]);
+					if (group == null)
 					{
-						DataTable dataTable = class6_0.ReadDataTable("SELECT * FROM groups WHERE Id = " + (int)dataRow["groupid"] + " LIMIT 1;");
+						DataTable dataTable = dbClient.ReadDataTable("SELECT * FROM groups WHERE Id = " + (int)dataRow["groupid"] + " LIMIT 1;");
 						IEnumerator enumerator2 = dataTable.Rows.GetEnumerator();
 						try
 						{
 							while (enumerator2.MoveNext())
 							{
 								DataRow dataRow2 = (DataRow)enumerator2.Current;
-                                if (!GuildManager.GuildList.ContainsKey((int)dataRow2["Id"]))
+                                if (!GroupManager.GroupList.ContainsKey((int)dataRow2["Id"]))
 								{
-                                    GuildManager.GuildList.Add((int)dataRow2["Id"], new Guild((int)dataRow2["Id"], dataRow2, class6_0));
+                                    GroupManager.GroupList.Add((int)dataRow2["Id"], new Group((int)dataRow2["Id"], dataRow2, dbClient));
 								}
 							}
 							continue;
@@ -365,13 +401,13 @@ namespace Phoenix.HabboHotel.Users
 							}
 						}
 					}
-					if (!@class.List.Contains((int)this.Id))
+					if (!group.List.Contains((int)this.Id))
 					{
-						@class.AddMember((int)this.Id);
+						group.AddMember((int)this.Id);
 					}
 				}
-				int num = class6_0.ReadInt32("SELECT groupid FROM user_stats WHERE Id = " + this.Id + " LIMIT 1");
-                Guild class2 = GuildManager.GetGuild(num);
+				int num = dbClient.ReadInt32("SELECT groupid FROM user_stats WHERE Id = " + this.Id + " LIMIT 1");
+                Group class2 = GroupManager.GetGroup(num);
 				if (class2 != null)
 				{
 					this.GroupID = num;
@@ -386,24 +422,18 @@ namespace Phoenix.HabboHotel.Users
 				this.GroupID = 0;
 			}
 		}
-		internal void UpdateRooms(DatabaseClient class6_0)
+
+		internal void UpdateRooms(DatabaseClient dbClient)
 		{
-			this.list_6.Clear();
-			class6_0.AddParamWithValue("name", this.Username);
-			DataTable dataTable = class6_0.ReadDataTable("SELECT * FROM rooms WHERE owner = @name ORDER BY Id ASC");
+			this.UsersRooms.Clear();
+			dbClient.AddParamWithValue("name", Username);
+			DataTable dataTable = dbClient.ReadDataTable("SELECT * FROM rooms WHERE owner = @name ORDER BY Id ASC");
 			foreach (DataRow dataRow in dataTable.Rows)
 			{
-				this.list_6.Add(PhoenixEnvironment.GetGame().GetRoomManager().FetchRoomData((uint)dataRow["Id"], dataRow));
+				this.UsersRooms.Add(PhoenixEnvironment.GetGame().GetRoomManager().FetchRoomData((uint)dataRow["Id"], dataRow));
 			}
 		}
-		public void LoadData(HabboData class12_1)
-		{
-			this.method_8(class12_1);
-			this.method_5(class12_1);
-			this.method_6(class12_1);
-			this.method_7(class12_1);
-			this.LoadQuests();
-		}
+
 		public bool HasRole(string string_7)
 		{
 			if (PhoenixEnvironment.GetGame().GetRoleManager().UserHasPersonalPermissions(this.Id))
@@ -426,56 +456,67 @@ namespace Phoenix.HabboHotel.Users
 				return PhoenixEnvironment.GetGame().GetRoleManager().FloodTime(this.Rank);
 			}
 		}
-		public void method_5(HabboData class12_1)
+
+		public void LoadFavorites(HabboData UserData)
 		{
 			this.FavoriteRooms.Clear();
-			DataTable dataTable_ = class12_1.GetUserFavouriteRooms;
-			foreach (DataRow dataRow in dataTable_.Rows)
+            foreach (DataRow dataRow in UserData.GetUserFavouriteRooms.Rows)
 			{
-				this.FavoriteRooms.Add((uint)dataRow["room_id"]);
+				FavoriteRooms.Add((uint)dataRow["room_id"]);
 			}
 		}
-		public void method_6(HabboData class12_1)
+
+		public void LoadMutedUsers(HabboData UserData)
 		{
-			DataTable dataTable_ = class12_1.GetUserIgnores;
-			foreach (DataRow dataRow in dataTable_.Rows)
+            foreach (DataRow Row in UserData.GetUserIgnores.Rows)
 			{
-				this.MutedUsers.Add((uint)dataRow["ignore_id"]);
+				MutedUsers.Add((uint)Row["ignore_id"]);
 			}
 		}
-		public void method_7(HabboData class12_1)
+
+		public void LoadTags(HabboData UserData)
 		{
-			this.list_3.Clear();
-			DataTable dataTable_ = class12_1.GetUserTags;
-			foreach (DataRow dataRow in dataTable_.Rows)
+			this.Tags.Clear();
+			foreach (DataRow Row in UserData.GetUserTags.Rows)
 			{
-				this.list_3.Add((string)dataRow["tag"]);
+				Tags.Add((string)Row["tag"]);
 			}
-			if (this.list_3.Count >= 5 && this.GetClient() != null)
+			if (Tags.Count >= 5 && GetClient() != null)
 			{
-				PhoenixEnvironment.GetGame().GetAchievementManager().UnlockAchievement(this.GetClient(), 7u, 1);
+                PhoenixEnvironment.GetGame().GetAchievementManager().UnlockAchievement(GetClient(), 7, 1);
 			}
 		}
-		public void method_8(HabboData class12_1)
+
+		public void LoadAchievements(HabboData UserData)
 		{
-			DataTable dataTable = class12_1.GetAchievementData;
-			if (dataTable != null)
+			DataTable getAchievementData = UserData.GetAchievementData;
+			if (getAchievementData != null)
 			{
-				foreach (DataRow dataRow in dataTable.Rows)
+				foreach (DataRow Row in getAchievementData.Rows)
 				{
-					this.Achievements.Add((uint)dataRow["achievement_id"], (int)dataRow["achievement_level"]);
+					this.Achievements.Add((uint)Row["achievement_id"], (int)Row["achievement_level"]);
 				}
 			}
 		}
+
+        public void LoadData(HabboData UserData)
+        {
+            this.LoadAchievements(UserData);
+            this.LoadFavorites(UserData);
+            this.LoadMutedUsers(UserData);
+            this.LoadTags(UserData);
+            this.LoadQuests();
+        }
+
 		public void OnDisconnect()
 		{
-			if (!this.bool_9)
+			if (!this.Disconnected)
 			{
-				this.bool_9 = true;
+				this.Disconnected = true;
 				PhoenixEnvironment.GetGame().GetClientManager().NullClientShit(this.Id, this.Username);
-				if (!this.bool_16)
+				if (!this.HabboInfoSaved)
 				{
-					this.bool_16 = true;
+					this.HabboInfoSaved = true;
 					using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 					{
 						adapter.ExecuteQuery(string.Concat(new object[]
@@ -490,7 +531,7 @@ namespace Phoenix.HabboHotel.Users
 							this.Id,
 							"' LIMIT 1;"
 						}));
-						int num = (int)PhoenixEnvironment.GetUnixTimestamp() - this.int_16;
+						int num = (int)PhoenixEnvironment.GetUnixTimestamp() - this.Stat_LoginTime;
 						adapter.ExecuteQuery(string.Concat(new object[]
 						{
 							"UPDATE user_stats SET RoomVisits = '",
@@ -518,7 +559,7 @@ namespace Phoenix.HabboHotel.Users
 				if (this.Messenger != null)
 				{
 					this.Messenger.AppearOffline = true;
-					this.Messenger.method_5(true);
+					this.Messenger.OnStatusChanged(true);
 					this.Messenger = null;
 				}
 				if (this.SubscriptionManager != null)
@@ -526,19 +567,20 @@ namespace Phoenix.HabboHotel.Users
 					this.SubscriptionManager.Clear();
 					this.SubscriptionManager = null;
 				}
-				this.InventoryComponent.method_18();
+				this.InventoryComponent.RunDBUpdate();
 			}
 		}
-		internal void method_10(uint RoomId)
+
+		internal void OnEnterRoom(uint RoomId)
 		{
 			if (GlobalClass.RecordRoomVisits)
 			{
-				using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					@class.ExecuteQuery(string.Concat(new object[]
+					adapter.ExecuteQuery(string.Concat(new object[]
 					{
 						"INSERT INTO user_roomvisits (user_id,room_id,entry_timestamp,exit_timestamp,hour,minute) VALUES ('",
-						this.Id,
+						Id,
 						"','",
 						RoomId,
 						"',UNIX_TIMESTAMP(),'0','",
@@ -550,41 +592,41 @@ namespace Phoenix.HabboHotel.Users
 				}
 			}
 			this.CurrentRoomId = RoomId;
-			if (this.CurrentRoom.Owner != this.Username && this.CurrentQuestId == 15u)
+			if (CurrentRoom.Owner != Username && CurrentQuestId == 15)
 			{
-				PhoenixEnvironment.GetGame().GetQuestManager().ProgressUserQuest(15u, this.GetClient());
+				PhoenixEnvironment.GetGame().GetQuestManager().ProgressUserQuest(15, GetClient());
 			}
-			this.Messenger.method_5(false);
+			this.Messenger.OnStatusChanged(false);
 		}
-		public void method_11()
+
+		public void OnLeaveRoom()
 		{
 			try
 			{
 				if (GlobalClass.RecordRoomVisits)
 				{
-					using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+					using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 					{
-						@class.ExecuteQuery(string.Concat(new object[]
+						adapter.ExecuteQuery(string.Concat(new object[]
 						{
 							"UPDATE user_roomvisits SET exit_timestamp = UNIX_TIMESTAMP() WHERE room_id = '",
-							this.CurrentRoomId,
+							CurrentRoomId,
 							"' AND user_id = '",
-							this.Id,
+							Id,
 							"' ORDER BY entry_timestamp DESC LIMIT 1"
 						}));
 					}
 				}
 			}
-			catch
+            catch { }
+			this.CurrentRoomId = 0;
+			if (Messenger != null)
 			{
-			}
-			this.CurrentRoomId = 0u;
-			if (this.Messenger != null)
-			{
-				this.Messenger.method_5(false);
+				Messenger.OnStatusChanged(false);
 			}
 		}
-		public void method_12()
+
+		public void InitMessenger()
 		{
 			if (GetMessenger() == null)
 			{
@@ -597,42 +639,42 @@ namespace Phoenix.HabboHotel.Users
 				{
 					client.SendMessage(this.Messenger.SerializeFriends());
 					client.SendMessage(this.Messenger.SerializeRequests());
-					this.Messenger.method_5(true);
+					this.Messenger.OnStatusChanged(true);
 				}
 			}
 		}
 
-		public void UpdateCreditsBalance(bool bool_17)
+		public void UpdateCreditsBalance(bool InDatabase)
 		{
 			ServerMessage Message = new ServerMessage(6);
 			Message.AppendStringWithBreak(Credits + ".0");
 			this.Session.SendMessage(Message);
-			if (bool_17)
+			if (InDatabase)
 			{
-				using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					@class.ExecuteQuery(string.Concat(new object[]
+					adapter.ExecuteQuery(string.Concat(new object[]
 					{
 						"UPDATE users SET credits = '",
-						this.Credits,
+						Credits,
 						"' WHERE Id = '",
-						this.Id,
+						Id,
 						"' LIMIT 1;"
 					}));
 				}
 			}
 		}
 
-		public void UpdateShellsBalance(bool bool_17, bool bool_18)
+		public void UpdateShellsBalance(bool FromDatabase, bool ToDatabase)
 		{
-			if (bool_17)
+			if (FromDatabase)
 			{
 				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
 					this.shells = adapter.ReadInt32("SELECT vip_points FROM users WHERE Id = '" + Id + "' LIMIT 1;");
 				}
 			}
-			if (bool_18)
+			if (ToDatabase)
 			{
 				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 				{
@@ -708,36 +750,6 @@ namespace Phoenix.HabboHotel.Users
             }
         }
 
-		private GameClient GetClient()
-		{
-			return PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Id);
-		}
-
-		public SubscriptionManager GetSubscriptionManager()
-		{
-			return SubscriptionManager;
-		}
-
-		public HabboMessenger GetMessenger()
-		{
-			return Messenger;
-		}
-
-		public BadgeComponent GetBadgeComponent()
-		{
-			return BadgeComponent;
-		}
-
-		public InventoryComponent GetInventoryComponent()
-		{
-			return InventoryComponent;
-		}
-
-		public AvatarEffectsInventoryComponent GetAvatarEffectsInventoryComponent()
-		{
-			return AvatarEffectsInventoryComponent;
-		}
-
 		public void LoadQuests()
 		{
 			this.CompletedQuests.Clear();
@@ -755,43 +767,43 @@ namespace Phoenix.HabboHotel.Users
 			}
 		}
 
-		public void method_26(bool bool_17, GameClient class16_1)
+		public void method_26(bool FromDB, GameClient Session)
 		{
-			ServerMessage Message = new ServerMessage(266u);
+			ServerMessage Message = new ServerMessage(266);
 			Message.AppendInt32(-1);
-			Message.AppendStringWithBreak(class16_1.GetHabbo().Look);
-			Message.AppendStringWithBreak(class16_1.GetHabbo().Gender.ToLower());
-			Message.AppendStringWithBreak(class16_1.GetHabbo().Motto);
-			Message.AppendInt32(class16_1.GetHabbo().AchievementScore);
+			Message.AppendStringWithBreak(Session.GetHabbo().Look);
+			Message.AppendStringWithBreak(Session.GetHabbo().Gender.ToLower());
+			Message.AppendStringWithBreak(Session.GetHabbo().Motto);
+			Message.AppendInt32(Session.GetHabbo().AchievementScore);
 			Message.AppendStringWithBreak("");
-			class16_1.SendMessage(Message);
-			if (class16_1.GetHabbo().InRoom)
+			Session.SendMessage(Message);
+			if (Session.GetHabbo().InRoom)
 			{
-				Room class14_ = class16_1.GetHabbo().CurrentRoom;
-				if (class14_ != null)
+				Room currentRoom = Session.GetHabbo().CurrentRoom;
+				if (currentRoom != null)
 				{
-					RoomUser @class = class14_.GetRoomUserByHabbo(class16_1.GetHabbo().Id);
-					if (@class != null)
+					RoomUser roomUserByHabbo = currentRoom.GetRoomUserByHabbo(Session.GetHabbo().Id);
+					if (roomUserByHabbo != null)
 					{
-						if (bool_17)
+						if (FromDB)
 						{
 							DataRow dataRow = null;
-							using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
+							using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 							{
-								class2.AddParamWithValue("userid", class16_1.GetHabbo().Id);
-								dataRow = class2.ReadDataRow("SELECT * FROM users WHERE Id = @userid LIMIT 1");
+								adapter.AddParamWithValue("userid", Session.GetHabbo().Id);
+								dataRow = adapter.ReadDataRow("SELECT * FROM users WHERE Id = @userid LIMIT 1");
 							}
-							class16_1.GetHabbo().Motto = PhoenixEnvironment.FilterInjectionChars((string)dataRow["motto"]);
-							class16_1.GetHabbo().Look = PhoenixEnvironment.FilterInjectionChars((string)dataRow["look"]);
+							Session.GetHabbo().Motto = PhoenixEnvironment.FilterInjectionChars((string)dataRow["motto"]);
+							Session.GetHabbo().Look = PhoenixEnvironment.FilterInjectionChars((string)dataRow["look"]);
 						}
-						ServerMessage Message2 = new ServerMessage(266u);
-						Message2.AppendInt32(@class.VirtualId);
-						Message2.AppendStringWithBreak(class16_1.GetHabbo().Look);
-						Message2.AppendStringWithBreak(class16_1.GetHabbo().Gender.ToLower());
-						Message2.AppendStringWithBreak(class16_1.GetHabbo().Motto);
-						Message2.AppendInt32(class16_1.GetHabbo().AchievementScore);
+						ServerMessage Message2 = new ServerMessage(266);
+						Message2.AppendInt32(roomUserByHabbo.VirtualId);
+						Message2.AppendStringWithBreak(Session.GetHabbo().Look);
+						Message2.AppendStringWithBreak(Session.GetHabbo().Gender.ToLower());
+						Message2.AppendStringWithBreak(Session.GetHabbo().Motto);
+						Message2.AppendInt32(Session.GetHabbo().AchievementScore);
 						Message2.AppendStringWithBreak("");
-						class14_.SendMessage(Message2, null);
+						currentRoom.SendMessage(Message2, null);
 					}
 				}
 			}

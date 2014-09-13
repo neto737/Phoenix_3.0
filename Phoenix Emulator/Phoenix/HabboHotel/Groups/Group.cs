@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using Phoenix.Storage;
-namespace Phoenix.HabboHotel.Guilds
+namespace Phoenix.HabboHotel.Groups
 {
-	internal sealed class Guild
+	internal class Group
 	{
 		public int Id;
 		public string Name;
@@ -15,7 +15,7 @@ namespace Phoenix.HabboHotel.Guilds
 		public uint RoomId;
 		public string Locked;
 
-		public Guild(int Id, DataRow Row, DatabaseClient adapter)
+		public Group(int Id, DataRow Row, DatabaseClient adapter)
 		{
 			this.Id = Id;
 			this.Name = (string)Row["name"];
@@ -34,17 +34,17 @@ namespace Phoenix.HabboHotel.Guilds
 
 		public void AddMember(int MemberId)
 		{
-			if (!this.List.Contains(MemberId))
+			if (!List.Contains(MemberId))
 			{
-				this.List.Add(MemberId);
+				List.Add(MemberId);
 			}
 		}
 
 		public void RemoveMember(int MemberId)
 		{
-			if (this.List.Contains(MemberId))
+			if (List.Contains(MemberId))
 			{
-				this.List.Remove(MemberId);
+				List.Remove(MemberId);
 			}
 		}
 	}

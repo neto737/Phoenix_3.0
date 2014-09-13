@@ -277,8 +277,8 @@
     <Compile Include="Phoenix\HabboHotel\Game.cs" />
     <Compile Include="Phoenix\HabboHotel\GameClients\GameClientManager.cs" />
     <Compile Include="Phoenix\HabboHotel\GameClients\GameClient.cs" />
-    <Compile Include="Phoenix\HabboHotel\Guilds\Guild.cs" />
-    <Compile Include="Phoenix\HabboHotel\Guilds\GuildManager.cs" />
+    <Compile Include="Phoenix\HabboHotel\Groups\Group.cs" />
+    <Compile Include="Phoenix\HabboHotel\Groups\GroupManager.cs" />
     <Compile Include="Phoenix\HabboHotel\Items\Interactors\InteractorJukebox.cs" />
     <Compile Include="Phoenix\HabboHotel\Items\TeleHandler.cs" />
     <Compile Include="Phoenix\HabboHotel\Items\UserItem.cs" />
@@ -389,7 +389,7 @@
     <Compile Include="Phoenix\HabboHotel\Users\Messenger\MessengerRequest.cs" />
     <Compile Include="Phoenix\HabboHotel\Users\Subscriptions\Subscription.cs" />
     <Compile Include="Phoenix\HabboHotel\Users\Subscriptions\SubscriptionManager.cs" />
-    <Compile Include="Phoenix\HabboHotel\HabboData.cs" />
+    <Compile Include="Phoenix\HabboHotel\Users\HabboData.cs" />
     <Compile Include="Phoenix\Messages\ClientMessage.cs" />
     <Compile Include="Phoenix\Messages\GameClientMessageHandler.cs" />
     <Compile Include="Phoenix\Messages\ServerMessage.cs" />

@@ -2,26 +2,26 @@ using System;
 using System.Collections;
 namespace Phoenix.Collections
 {
-	internal sealed class ClonedTable : Hashtable, IDisposable
+	internal class ClonedTable : Hashtable, IDisposable
 	{
 		private bool mDisposed;
 
 		public ClonedTable(Hashtable CloneTable) : base(CloneTable)
 		{
-			this.mDisposed = false;
+			mDisposed = false;
 		}
 
 		public void Dispose()
 		{
-			this.Dispose(true);
+			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
 		private void Dispose(bool Disposing)
 		{
-			if (!this.mDisposed)
+			if (!mDisposed)
 			{
-				this.mDisposed = true;
+				mDisposed = true;
 				if (Disposing)
 				{
 					base.Clear();

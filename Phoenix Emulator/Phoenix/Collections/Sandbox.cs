@@ -2,26 +2,26 @@ using System;
 using System.Collections;
 namespace Phoenix.Collections
 {
-	internal sealed class Sandbox : Hashtable, IDisposable
+	internal class Sandbox : Hashtable, IDisposable
 	{
 		private bool mDisposed = false;
 
 		internal void Clear()
 		{
-			this.Dispose();
+			Dispose();
 		}
 
 		public void Dispose()
 		{
-			this.Dispose(true);
+			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
 		private void Dispose(bool Disposing)
 		{
-			if (!this.mDisposed)
+			if (!mDisposed)
 			{
-				this.mDisposed = true;
+				mDisposed = true;
 				if (Disposing)
 				{
 					base.Clear();

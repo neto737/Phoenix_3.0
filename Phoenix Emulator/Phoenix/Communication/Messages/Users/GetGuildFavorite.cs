@@ -4,7 +4,7 @@ using Phoenix.HabboHotel.GameClients;
 using Phoenix.Messages;
 using Phoenix.HabboHotel.Rooms;
 using Phoenix.Storage;
-using Phoenix.HabboHotel.Guilds;
+using Phoenix.HabboHotel.Groups;
 namespace Phoenix.Communication.Messages.Users
 {
 	internal sealed class GetGuildFavorite : MessageEvent
@@ -33,7 +33,7 @@ namespace Phoenix.Communication.Messages.Users
 					Message.AppendInt32(dataTable_.Rows.Count);
 					foreach (DataRow dataRow in dataTable_.Rows)
 					{
-                        Guild class2 = GuildManager.GetGuild((int)dataRow["groupid"]);
+                        Group class2 = GroupManager.GetGroup((int)dataRow["groupid"]);
 						Message.AppendInt32(class2.Id);
 						Message.AppendStringWithBreak(class2.Name);
 						Message.AppendStringWithBreak(class2.Badge);
@@ -55,13 +55,13 @@ namespace Phoenix.Communication.Messages.Users
 						Message2.AppendInt32(1);
 						class3.Serialize(Message2);
 						class14_.SendMessage(Message2, null);
-                        Guild class4 = GuildManager.GetGuild(Session.GetHabbo().GroupID);
+                        Group class4 = GroupManager.GetGroup(Session.GetHabbo().GroupID);
 						if (!class14_.list_17.Contains(class4))
 						{
 							class14_.list_17.Add(class4);
 							ServerMessage Message3 = new ServerMessage(309u);
 							Message3.AppendInt32(class14_.list_17.Count);
-                            foreach (Guild class2 in class14_.list_17)
+                            foreach (Group class2 in class14_.list_17)
 							{
 								Message3.AppendInt32(class2.Id);
 								Message3.AppendStringWithBreak(class2.Badge);
@@ -70,13 +70,13 @@ namespace Phoenix.Communication.Messages.Users
 						}
 						else
 						{
-                            foreach (Guild current in class14_.list_17)
+                            foreach (Group current in class14_.list_17)
 							{
 								if (current == class4 && current.Badge != class4.Badge)
 								{
 									ServerMessage Message3 = new ServerMessage(309u);
 									Message3.AppendInt32(class14_.list_17.Count);
-                                    foreach (Guild class2 in class14_.list_17)
+                                    foreach (Group class2 in class14_.list_17)
 									{
 										Message3.AppendInt32(class2.Id);
 										Message3.AppendStringWithBreak(class2.Badge);

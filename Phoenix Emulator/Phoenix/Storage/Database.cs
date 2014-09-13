@@ -22,7 +22,7 @@ namespace Phoenix.Storage
         {
             get
             {
-                return this.mMaxPoolSize;
+                return mMaxPoolSize;
             }
         }
 
@@ -30,7 +30,7 @@ namespace Phoenix.Storage
         {
             get
             {
-                return this.mMinPoolSize;
+                return mMinPoolSize;
             }
         }
 
@@ -38,7 +38,7 @@ namespace Phoenix.Storage
         {
             get
             {
-                return this.mName;
+                return mName;
             }
         }
     }

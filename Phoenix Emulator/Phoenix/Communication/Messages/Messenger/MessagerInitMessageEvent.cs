@@ -7,7 +7,7 @@ namespace Phoenix.Communication.Messages.Messenger
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			Session.GetHabbo().method_12();
+			Session.GetHabbo().InitMessenger();
 		}
 	}
 }

@@ -102,9 +102,8 @@ namespace Phoenix.Net
                     base.Close();
                     base.Dispose();
                 }
-                catch
-                {
-                }
+                catch { }
+
                 Array.Clear(this.mDataBuffer, 0, this.mDataBuffer.Length);
                 this.mDataBuffer = null;
                 this.mDataReceivedCallback = null;

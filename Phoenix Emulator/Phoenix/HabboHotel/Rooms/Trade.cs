@@ -256,8 +256,8 @@ namespace Phoenix.HabboHotel.Rooms
 				}
 			}
 
-			this.GetTradeUser(this.twoId).GetClient().GetHabbo().GetInventoryComponent().method_18();
-			this.GetTradeUser(this.oneId).GetClient().GetHabbo().GetInventoryComponent().method_18();
+			this.GetTradeUser(this.twoId).GetClient().GetHabbo().GetInventoryComponent().RunDBUpdate();
+			this.GetTradeUser(this.oneId).GetClient().GetHabbo().GetInventoryComponent().RunDBUpdate();
 			foreach (UserItem I in ItemsOne)
 			{
 				using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())

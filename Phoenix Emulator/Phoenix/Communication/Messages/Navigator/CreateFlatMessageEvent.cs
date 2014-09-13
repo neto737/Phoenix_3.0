@@ -9,7 +9,7 @@ namespace Phoenix.Communication.Messages.Navigator
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			if (Session.GetHabbo().list_6.Count <= GlobalClass.MaxRoomsPerUser)
+			if (Session.GetHabbo().UsersRooms.Count <= GlobalClass.MaxRoomsPerUser)
 			{
 				string Name = PhoenixEnvironment.FilterInjectionChars(Event.PopFixedString());
 				string Model = Event.PopFixedString();

@@ -6,6 +6,7 @@ namespace Phoenix.Util
 		public const byte NEGATIVE = 72;
 		public const byte POSITIVE = 73;
 		public const int MAX_INTEGER_BYTE_AMOUNT = 6;
+
 		public static byte[] EncodeInt32(int i)
 		{
 			byte[] wf = new byte[6];
@@ -28,6 +29,7 @@ namespace Phoenix.Util
 			}
 			return bzData;
 		}
+
 		public static int DecodeInt32(byte[] bzData, out int totalBytes)
 		{
 			bool flag = (bzData[0] & 4) == 4;

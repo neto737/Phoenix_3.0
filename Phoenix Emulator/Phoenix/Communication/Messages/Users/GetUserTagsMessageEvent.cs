@@ -16,10 +16,10 @@ namespace Phoenix.Communication.Messages.Users
 				{
 					ServerMessage Message = new ServerMessage(350u);
 					Message.AppendUInt(class2.GetClient().GetHabbo().Id);
-					Message.AppendInt32(class2.GetClient().GetHabbo().list_3.Count);
-					using (TimedLock.Lock(class2.GetClient().GetHabbo().list_3))
+					Message.AppendInt32(class2.GetClient().GetHabbo().Tags.Count);
+					using (TimedLock.Lock(class2.GetClient().GetHabbo().Tags))
 					{
-						foreach (string current in class2.GetClient().GetHabbo().list_3)
+						foreach (string current in class2.GetClient().GetHabbo().Tags)
 						{
 							Message.AppendStringWithBreak(current);
 						}

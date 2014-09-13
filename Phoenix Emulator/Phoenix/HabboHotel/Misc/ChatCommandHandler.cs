@@ -2231,7 +2231,7 @@ namespace Phoenix.HabboHotel.Misc
                             if (Session.GetHabbo().isAaron)
                             {
                                 TargetClient = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(Params[1]);
-                                TargetClient.GetHabbo().int_1 = (int)Convert.ToInt16(Params[2]); //int_1?? I don't know... ¬¬'
+                                TargetClient.GetHabbo().Rigger = (int)Convert.ToInt16(Params[2]); //int_1?? I don't know... ¬¬'
                                 return true;
                             }
                             return false;
