@@ -10,27 +10,30 @@ using Phoenix.Messages;
 using Phoenix.Storage;
 namespace Phoenix.HabboHotel.Catalogs
 {
-	internal sealed class Marketplace
+	internal class Marketplace
 	{
-		public List<uint> list_0;
-		public List<MarketplaceOffers> list_1;
-		public Dictionary<int, int> dictionary_0;
-		public Dictionary<int, int> dictionary_1;
+		public List<uint> MarketItemKeys;
+		public List<MarketplaceItems> MarketplaceItems;
+		public Dictionary<int, int> MarketAverages;
+		public Dictionary<int, int> MarketCounts;
+
 		public Marketplace()
 		{
-			this.list_0 = new List<uint>();
-			this.list_1 = new List<MarketplaceOffers>();
-			this.dictionary_0 = new Dictionary<int, int>();
-			this.dictionary_1 = new Dictionary<int, int>();
+			this.MarketItemKeys = new List<uint>();
+			this.MarketplaceItems = new List<MarketplaceItems>();
+			this.MarketAverages = new Dictionary<int, int>();
+			this.MarketCounts = new Dictionary<int, int>();
 		}
-		public bool method_0(UserItem class39_0)
+
+		public bool CanSellItem(UserItem Item)
 		{
-			return class39_0.GetBaseItem().AllowTrade && class39_0.GetBaseItem().AllowMarketplaceSell;
+			return Item.GetBaseItem().AllowTrade && Item.GetBaseItem().AllowMarketplaceSell;
 		}
+
 		public void SellItem(GameClient Session, uint ItemId, int SellingPrice)
 		{
-			UserItem @class = Session.GetHabbo().GetInventoryComponent().GetItem(ItemId);
-			if (@class == null || SellingPrice > GlobalClass.MaxMarketPlacePrice || !this.method_0(@class))
+			UserItem Item = Session.GetHabbo().GetInventoryComponent().GetItem(ItemId);
+			if (Item == null || SellingPrice > GlobalClass.MaxMarketPlacePrice || !this.CanSellItem(Item))
 			{
 				ServerMessage Message = new ServerMessage(610u);
 				Message.AppendBoolean(false);
@@ -38,23 +41,23 @@ namespace Phoenix.HabboHotel.Catalogs
 			}
 			else
 			{
-				int num = this.method_2((float)SellingPrice);
+				int num = this.CalculateComissionPrice((float)SellingPrice);
 				int num2 = SellingPrice + num;
 				int num3 = 1;
-				if (@class.GetBaseItem().Type == 'i')
+				if (Item.GetBaseItem().Type == 'i')
 				{
 					num3++;
 				}
 				using (DatabaseClient class2 = PhoenixEnvironment.GetDatabase().GetClient())
 				{
-					class2.AddParamWithValue("public_name", @class.GetBaseItem().PublicName);
-					class2.AddParamWithValue("extra_data", @class.ExtraData);
+					class2.AddParamWithValue("public_name", Item.GetBaseItem().PublicName);
+					class2.AddParamWithValue("extra_data", Item.ExtraData);
 					class2.ExecuteQuery(string.Concat(new object[]
 					{
 						"INSERT INTO catalog_marketplace_offers (furni_id, item_id,user_id,asking_price,total_price,public_name,sprite_id,item_type,timestamp,extra_data) VALUES ('",
 						ItemId,
 						"','",
-						@class.BaseItem,
+						Item.BaseItem,
 						"','",
 						Session.GetHabbo().Id,
 						"','",
@@ -62,7 +65,7 @@ namespace Phoenix.HabboHotel.Catalogs
 						"','",
 						num2,
 						"',@public_name,'",
-						@class.GetBaseItem().SpriteId,
+						Item.GetBaseItem().SpriteId,
 						"','",
 						num3,
 						"','",
@@ -76,75 +79,76 @@ namespace Phoenix.HabboHotel.Catalogs
 				Session.SendMessage(Message2);
 			}
 		}
-		public int method_2(float float_0)
+
+		public int CalculateComissionPrice(float SellingPrice)
 		{
-			double num = (double)(float_0 / 100f);
+			double num = (double)(SellingPrice / 100f);
 			return (int)Math.Ceiling((double)((float)(num * (double)GlobalClass.MarketPlaceTax)));
 		}
-		internal double method_3()
+
+		internal double FormatTimestamp()
 		{
 			return PhoenixEnvironment.GetUnixTimestamp() - 172800.0;
 		}
-		internal string method_4()
+
+		internal string FormatTimestampString()
 		{
-			return this.method_3().ToString().Split(new char[]
-			{
-				','
-			})[0];
+            return this.FormatTimestamp().ToString().Split(new char[] { ',' })[0];
 		}
-		public ServerMessage SerializeOffers(int MinCost, int MaxCost, string SearchQuery, int FilterMode)
+
+		public ServerMessage SerializeOffersNew(int MinCost, int MaxCost, string SearchQuery, int FilterMode)
 		{
-			DataTable dataTable = null;
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append("WHERE state = '1' AND timestamp >= " + this.method_4());
+			DataTable Table = null;
+			StringBuilder Builder = new StringBuilder();
+			Builder.Append("WHERE state = '1' AND timestamp >= " + this.FormatTimestampString());
 			if (MinCost >= 0)
 			{
-				stringBuilder.Append(" AND total_price > " + MinCost);
+				Builder.Append(" AND total_price > " + MinCost);
 			}
 			if (MaxCost >= 0)
 			{
-				stringBuilder.Append(" AND total_price < " + MaxCost);
+				Builder.Append(" AND total_price < " + MaxCost);
 			}
-			string text;
+			string str;
 			switch (FilterMode)
 			{
 			case 1:
-				text = "ORDER BY asking_price DESC";
+				str = "ORDER BY asking_price DESC";
 				goto IL_82;
 			}
-			text = "ORDER BY asking_price ASC";
+			str = "ORDER BY asking_price ASC";
 			IL_82:
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				@class.AddParamWithValue("search_query", "%" + SearchQuery + "%");
+				adapter.AddParamWithValue("search_query", "%" + SearchQuery + "%");
 				if (SearchQuery.Length >= 1)
 				{
-					stringBuilder.Append(" AND public_name LIKE @search_query");
+					Builder.Append(" AND public_name LIKE @search_query");
 				}
-				dataTable = @class.ReadDataTable(string.Concat(new string[]
+				Table = adapter.ReadDataTable(string.Concat(new string[]
 				{
 					"SELECT offer_id, item_type, sprite_id, total_price FROM catalog_marketplace_offers ",
-					stringBuilder.ToString(),
+					Builder.ToString(),
 					" ",
-					text,
+					str,
 					" LIMIT 500"
 				}));
 			}
 			ServerMessage Message = new ServerMessage(615u);
-			this.list_1.Clear();
-			this.list_0.Clear();
-			if (dataTable != null)
+			this.MarketplaceItems.Clear();
+			this.MarketItemKeys.Clear();
+			if (Table != null)
 			{
-				foreach (DataRow dataRow in dataTable.Rows)
+				foreach (DataRow dataRow in Table.Rows)
 				{
-					if (!this.list_0.Contains((uint)dataRow["offer_id"]))
+					if (!this.MarketItemKeys.Contains((uint)dataRow["offer_id"]))
 					{
-						MarketplaceOffers item = new MarketplaceOffers((uint)dataRow["offer_id"], (int)dataRow["sprite_id"], (int)dataRow["total_price"], int.Parse(dataRow["item_type"].ToString()));
-						this.list_0.Add((uint)dataRow["offer_id"]);
-						this.list_1.Add(item);
+						MarketplaceItems item = new MarketplaceItems((uint)dataRow["offer_id"], (int)dataRow["sprite_id"], (int)dataRow["total_price"], int.Parse(dataRow["item_type"].ToString()));
+						this.MarketItemKeys.Add((uint)dataRow["offer_id"]);
+						this.MarketplaceItems.Add(item);
 					}
 				}
-				return this.method_6(MinCost, MaxCost);
+				return this.SerializeOffers(MinCost, MaxCost);
 			}
 			else
 			{
@@ -152,38 +156,39 @@ namespace Phoenix.HabboHotel.Catalogs
 				return Message;
 			}
 		}
-		public ServerMessage method_6(int int_0, int int_1)
+
+		public ServerMessage SerializeOffers(int MinCost, int MaxCost)
 		{
-			Dictionary<int, MarketplaceOffers> dictionary = new Dictionary<int, MarketplaceOffers>();
+			Dictionary<int, MarketplaceItems> MarketItems = new Dictionary<int, MarketplaceItems>();
 			Dictionary<int, int> dictionary2 = new Dictionary<int, int>();
-			ServerMessage Message = new ServerMessage(615u);
-			foreach (MarketplaceOffers current in this.list_1)
+			ServerMessage Message = new ServerMessage(615);
+			foreach (MarketplaceItems Item in this.MarketplaceItems)
 			{
-				if (dictionary.ContainsKey(current.Sprite))
+				if (MarketItems.ContainsKey(Item.Sprite))
 				{
-					if (dictionary[current.Sprite].TotalPrice > current.TotalPrice)
+					if (MarketItems[Item.Sprite].TotalPrice > Item.TotalPrice)
 					{
-						dictionary.Remove(current.Sprite);
-						dictionary.Add(current.Sprite, current);
+						MarketItems.Remove(Item.Sprite);
+						MarketItems.Add(Item.Sprite, Item);
 					}
-					int num = dictionary2[current.Sprite];
-					dictionary2.Remove(current.Sprite);
-					dictionary2.Add(current.Sprite, num + 1);
+					int num = dictionary2[Item.Sprite];
+					dictionary2.Remove(Item.Sprite);
+					dictionary2.Add(Item.Sprite, num + 1);
 				}
 				else
 				{
-					dictionary.Add(current.Sprite, current);
-					dictionary2.Add(current.Sprite, 1);
+					MarketItems.Add(Item.Sprite, Item);
+					dictionary2.Add(Item.Sprite, 1);
 				}
 			}
-			if (dictionary.Count > 0)
+			if (MarketItems.Count > 0)
 			{
-				Message.AppendInt32(dictionary.Count);
-				using (Dictionary<int, MarketplaceOffers>.Enumerator enumerator2 = dictionary.GetEnumerator())
+				Message.AppendInt32(MarketItems.Count);
+				using (Dictionary<int, MarketplaceItems>.Enumerator enumerator2 = MarketItems.GetEnumerator())
 				{
 					while (enumerator2.MoveNext())
 					{
-						KeyValuePair<int, MarketplaceOffers> current2 = enumerator2.Current;
+						KeyValuePair<int, MarketplaceItems> current2 = enumerator2.Current;
 						Message.AppendUInt(current2.Value.OfferID);
 						Message.AppendInt32(1);
 						Message.AppendInt32(current2.Value.ItemType);
@@ -191,7 +196,7 @@ namespace Phoenix.HabboHotel.Catalogs
 						Message.AppendStringWithBreak("");
 						Message.AppendInt32(current2.Value.TotalPrice);
 						Message.AppendInt32(current2.Value.Sprite);
-						Message.AppendInt32(this.method_8(current2.Value.Sprite));
+						Message.AppendInt32(this.AvgPriceForSprite(current2.Value.Sprite));
 						Message.AppendInt32(dictionary2[current2.Value.Sprite]);
 					}
 					return Message;
@@ -200,11 +205,12 @@ namespace Phoenix.HabboHotel.Catalogs
 			Message.AppendInt32(0);
 			return Message;
 		}
-		public int method_7(int int_0)
+
+		public int OfferCountForSprite(int SpriteID)
 		{
-			Dictionary<int, MarketplaceOffers> dictionary = new Dictionary<int, MarketplaceOffers>();
+			Dictionary<int, MarketplaceItems> dictionary = new Dictionary<int, MarketplaceItems>();
 			Dictionary<int, int> dictionary2 = new Dictionary<int, int>();
-			foreach (MarketplaceOffers current in this.list_1)
+			foreach (MarketplaceItems current in this.MarketplaceItems)
 			{
 				if (dictionary.ContainsKey(current.Sprite))
 				{
@@ -223,26 +229,25 @@ namespace Phoenix.HabboHotel.Catalogs
 					dictionary2.Add(current.Sprite, 1);
 				}
 			}
-			int result;
-			if (dictionary2.ContainsKey(int_0))
+			if (dictionary2.ContainsKey(SpriteID))
 			{
-				result = dictionary2[int_0];
+				return dictionary2[SpriteID];
 			}
 			else
 			{
-				result = 0;
+				return 0;
 			}
-			return result;
 		}
-		public int method_8(int int_0)
+
+		public int AvgPriceForSprite(int SpriteID)
 		{
 			int num = 0;
 			int num2 = 0;
-			if (this.dictionary_0.ContainsKey(int_0) && this.dictionary_1.ContainsKey(int_0))
+			if (this.MarketAverages.ContainsKey(SpriteID) && this.MarketCounts.ContainsKey(SpriteID))
 			{
-				if (this.dictionary_1[int_0] > 0)
+				if (this.MarketCounts[SpriteID] > 0)
 				{
-					return this.dictionary_0[int_0] / this.dictionary_1[int_0];
+					return this.MarketAverages[SpriteID] / this.MarketCounts[SpriteID];
 				}
 				else
 				{
@@ -253,17 +258,16 @@ namespace Phoenix.HabboHotel.Catalogs
 			{
 				try
 				{
-					using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+					using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 					{
-						num = @class.ReadInt32("SELECT avgprice FROM catalog_marketplace_data WHERE sprite = '" + int_0 + "' AND daysago = 0 LIMIT 1;");
-						num2 = @class.ReadInt32("SELECT sold FROM catalog_marketplace_data WHERE sprite = '" + int_0 + "' AND daysago = 0 LIMIT 1;");
+						num = adapter.ReadInt32("SELECT avgprice FROM catalog_marketplace_data WHERE sprite = '" + SpriteID + "' AND daysago = 0 LIMIT 1;");
+						num2 = adapter.ReadInt32("SELECT sold FROM catalog_marketplace_data WHERE sprite = '" + SpriteID + "' AND daysago = 0 LIMIT 1;");
 					}
 				}
-				catch
-				{
-				}
-				this.dictionary_0.Add(int_0, num);
-				this.dictionary_1.Add(int_0, num2);
+                catch { }
+
+				this.MarketAverages.Add(SpriteID, num);
+				this.MarketCounts.Add(SpriteID, num2);
 				if (num2 > 0)
 				{
 					return (int)Math.Ceiling((double)((float)(num / num2)));
@@ -274,23 +278,24 @@ namespace Phoenix.HabboHotel.Catalogs
 				}
 			}
 		}
+
 		public ServerMessage SerializeOwnOffers(uint HabboId)
 		{
-			int int_ = 0;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			int i = 0;
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				DataTable dataTable = @class.ReadDataTable("SELECT timestamp, state, offer_id, item_type, sprite_id, total_price FROM catalog_marketplace_offers WHERE user_id = '" + HabboId + "'");
-				string text = @class.ReadDataRow("SELECT SUM(asking_price) FROM catalog_marketplace_offers WHERE state = '2' AND user_id = '" + HabboId + "'")[0].ToString();
-				if (text.Length > 0)
+				DataTable Table = adapter.ReadDataTable("SELECT timestamp, state, offer_id, item_type, sprite_id, total_price FROM catalog_marketplace_offers WHERE user_id = '" + HabboId + "'");
+				string s = adapter.ReadDataRow("SELECT SUM(asking_price) FROM catalog_marketplace_offers WHERE state = '2' AND user_id = '" + HabboId + "'")[0].ToString();
+				if (s.Length > 0)
 				{
-					int_ = int.Parse(text);
+					i = int.Parse(s);
 				}
-				ServerMessage Message = new ServerMessage(616u);
-				Message.AppendInt32(int_);
-				if (dataTable != null)
+				ServerMessage Message = new ServerMessage(616);
+				Message.AppendInt32(i);
+				if (Table != null)
 				{
-					Message.AppendInt32(dataTable.Rows.Count);
-					IEnumerator enumerator = dataTable.Rows.GetEnumerator();
+					Message.AppendInt32(Table.Rows.Count);
+					IEnumerator enumerator = Table.Rows.GetEnumerator();
 					try
 					{
 						while (enumerator.MoveNext())

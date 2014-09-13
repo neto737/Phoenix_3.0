@@ -8,7 +8,7 @@ namespace Phoenix.Communication.Messages.Catalog
 	{
 		public void parse(GameClient Session, ClientMessage Event)
 		{
-			CatalogPage Page = PhoenixEnvironment.GetGame().GetCatalog().method_5(Event.PopWiredInt32());
+			CatalogPage Page = PhoenixEnvironment.GetGame().GetCatalog().GetPage(Event.PopWiredInt32());
 			if (Page != null && Page.Enabled && Page.Visible && Page.MinRank <= Session.GetHabbo().Rank)
 			{
 				if (Page.ClubOnly && !Session.GetHabbo().GetSubscriptionManager().HasSubscription("habbo_club"))

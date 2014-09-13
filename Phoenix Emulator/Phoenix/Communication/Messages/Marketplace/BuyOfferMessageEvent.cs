@@ -17,7 +17,7 @@ namespace Phoenix.Communication.Messages.Marketplace
 			{
 				Row = adapter.ReadDataRow("SELECT state, timestamp, total_price, extra_data, item_id, furni_id FROM catalog_marketplace_offers WHERE offer_id = '" + ItemId + "' LIMIT 1");
 			}
-			if (Row == null || (string)Row["state"] != "1" || (double)Row["timestamp"] <= PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().method_3())
+			if (Row == null || (string)Row["state"] != "1" || (double)Row["timestamp"] <= PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().FormatTimestamp())
 			{
 				Session.SendNotif(TextManager.GetText("marketplace_error_expired"));
 			}
@@ -70,25 +70,25 @@ namespace Phoenix.Communication.Messages.Marketplace
 								", 0)"
 							}));
 						}
-						if (PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.ContainsKey(Item.SpriteId) && PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.ContainsKey(Item.SpriteId))
+						if (PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().MarketAverages.ContainsKey(Item.SpriteId) && PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().MarketCounts.ContainsKey(Item.SpriteId))
 						{
-							int num3 = PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1[Item.SpriteId];
-							int num4 = PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0[Item.SpriteId];
+							int num3 = PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().MarketCounts[Item.SpriteId];
+							int num4 = PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().MarketAverages[Item.SpriteId];
 							num4 += (int)Row["total_price"];
-							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.Remove(Item.SpriteId);
-							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.Add(Item.SpriteId, num4);
-							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.Remove(Item.SpriteId);
-							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.Add(Item.SpriteId, num3 + 1);
+							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().MarketAverages.Remove(Item.SpriteId);
+							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().MarketAverages.Add(Item.SpriteId, num4);
+							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().MarketCounts.Remove(Item.SpriteId);
+							PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().MarketCounts.Add(Item.SpriteId, num3 + 1);
 						}
 						else
 						{
-							if (!PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.ContainsKey(Item.SpriteId))
+							if (!PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().MarketAverages.ContainsKey(Item.SpriteId))
 							{
-								PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_0.Add(Item.SpriteId, (int)Row["total_price"]);
+								PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().MarketAverages.Add(Item.SpriteId, (int)Row["total_price"]);
 							}
-							if (!PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.ContainsKey(Item.SpriteId))
+							if (!PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().MarketCounts.ContainsKey(Item.SpriteId))
 							{
-								PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().dictionary_1.Add(Item.SpriteId, 1);
+								PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().MarketCounts.Add(Item.SpriteId, 1);
 							}
 						}
 					}
@@ -106,7 +106,7 @@ namespace Phoenix.Communication.Messages.Marketplace
 					Message.AppendInt32(-1);
 					Message.AppendStringWithBreak("");
 					Session.SendMessage(Message);
-					Session.SendMessage(PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().SerializeOffers(-1, -1, "", 1));
+					Session.SendMessage(PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().SerializeOffersNew(-1, -1, "", 1));
 				}
 			}
 		}

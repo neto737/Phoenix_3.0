@@ -5,7 +5,7 @@ using Phoenix.Catalogs;
 using Phoenix.Messages;
 namespace Phoenix.HabboHotel.Catalogs
 {
-	internal sealed class CatalogPage
+	internal class CatalogPage
 	{
 		private int Id;
 		public int ParentId;
@@ -28,6 +28,7 @@ namespace Phoenix.HabboHotel.Catalogs
 		public string TextLinkPage;
 		public List<CatalogItem> Items;
 		private ServerMessage mMessage;
+
 		public int PageId
 		{
 			get
@@ -35,6 +36,7 @@ namespace Phoenix.HabboHotel.Catalogs
 				return this.Id;
 			}
 		}
+
 		internal ServerMessage GetMessage
 		{
 			get
@@ -42,6 +44,7 @@ namespace Phoenix.HabboHotel.Catalogs
 				return this.mMessage;
 			}
 		}
+
 		public CatalogPage(int Id, int ParentId, string Caption, bool Visible, bool Enabled, uint MinRank, bool ClubOnly, int IconColor, int IconImage, string Layout, string LayoutHeadline, string LayoutTeaser, string LayoutSpecial, string Text1, string Text2, string TextDetails, string TextTeaser, string TextLinkDesc, string TextLinkPage, ref Hashtable CataItems)
 		{
 			this.Items = new List<CatalogItem>();
@@ -72,10 +75,12 @@ namespace Phoenix.HabboHotel.Catalogs
 				}
 			}
 		}
+
 		internal void InitMsg()
 		{
 			this.mMessage = PhoenixEnvironment.GetGame().GetCatalog().SerializePage(this);
 		}
+
 		public CatalogItem GetItem(uint Id)
 		{
             for (int i = 0; i < Items.Count; i++)
@@ -89,6 +94,7 @@ namespace Phoenix.HabboHotel.Catalogs
             }
 			return null;
 		}
+
 		public void Serialize(int Rank, ServerMessage Message)
 		{
 			Message.AppendInt32(this.IconColor);

@@ -14,7 +14,7 @@ namespace Phoenix.Communication.Messages.Marketplace
 			int Sprite = Event.PopWiredInt32();
 			ServerMessage Message = new ServerMessage(617);
 			Message.AppendInt32(1);
-			Message.AppendInt32(PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().method_7(Sprite));
+			Message.AppendInt32(PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().OfferCountForSprite(Sprite));
 			Dictionary<int, DataRow> dictionary = new Dictionary<int, DataRow>();
 			DataTable Table = null;
 			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())

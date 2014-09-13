@@ -218,7 +218,7 @@ namespace Phoenix.HabboHotel.Users.Inventory
 					{
 						foreach (DataRow dataRow in dataTable2.Rows)
 						{
-							Pet class2 = PhoenixEnvironment.GetGame().GetCatalog().method_12(dataRow);
+							Pet class2 = PhoenixEnvironment.GetGame().GetCatalog().GeneratePetFromRow(dataRow);
 							this.InventoryPets.Add(class2.PetId, class2);
 						}
 					}

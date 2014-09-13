@@ -13,7 +13,7 @@ using Phoenix.HabboHotel.Items;
 using Phoenix.Storage;
 namespace Phoenix.HabboHotel.Catalogs
 {
-	internal sealed class Catalog
+	internal class Catalog
 	{
 		public Dictionary<int, CatalogPage> Pages;
 		public List<EcotronReward> EcotronRewards;
@@ -28,7 +28,7 @@ namespace Phoenix.HabboHotel.Catalogs
 			Logging.Write("Loading Catalogue..");
 			this.Pages = new Dictionary<int, CatalogPage>();
 			this.EcotronRewards = new List<EcotronReward>();
-			DataTable dataTable = dbClient.ReadDataTable("SELECT * FROM catalog_pages ORDER BY order_num ASC");
+			DataTable Table = dbClient.ReadDataTable("SELECT * FROM catalog_pages ORDER BY order_num ASC");
 			DataTable dataTable2 = dbClient.ReadDataTable("SELECT * FROM ecotron_rewards ORDER BY item_id");
 			try
 			{
@@ -39,7 +39,7 @@ namespace Phoenix.HabboHotel.Catalogs
 				this.mCacheID = 0;
 			}
 			this.mCacheID += 1;
-			Hashtable hashtable = new Hashtable();
+			Hashtable cataItems = new Hashtable();
 			DataTable dataTable3 = dbClient.ReadDataTable("SELECT * FROM catalog_items");
 			if (dataTable3 != null)
 			{
@@ -47,25 +47,25 @@ namespace Phoenix.HabboHotel.Catalogs
 				{
 					if (!(dataRow["item_ids"].ToString() == "") && (int)dataRow["amount"] > 0)
 					{
-                        hashtable.Add((uint)dataRow["Id"], new CatalogItem((uint)dataRow["Id"], (string)dataRow["catalog_name"], (string)dataRow["item_ids"], (int)dataRow["cost_credits"], (int)dataRow["cost_pixels"], (int)dataRow["cost_snow"], (int)dataRow["amount"], (int)dataRow["page_id"], PhoenixEnvironment.EnumToInt(dataRow["vip"].ToString()), (uint)dataRow["achievement"], (int)dataRow["song_id"]));
+                        cataItems.Add((uint)dataRow["Id"], new CatalogItem((uint)dataRow["Id"], (string)dataRow["catalog_name"], (string)dataRow["item_ids"], (int)dataRow["cost_credits"], (int)dataRow["cost_pixels"], (int)dataRow["cost_snow"], (int)dataRow["amount"], (int)dataRow["page_id"], PhoenixEnvironment.EnumToInt(dataRow["vip"].ToString()), (uint)dataRow["achievement"], (int)dataRow["song_id"]));
 					}
 				}
 			}
-			if (dataTable != null)
+			if (Table != null)
 			{
-				foreach (DataRow dataRow in dataTable.Rows)
+				foreach (DataRow Row in Table.Rows)
 				{
-					bool bool_ = false;
-					bool bool_2 = false;
-					if (dataRow["visible"].ToString() == "1")
+					bool Visible = false;
+					bool Enabled = false;
+					if (Row["visible"].ToString() == "1")
 					{
-						bool_ = true;
+						Visible = true;
 					}
-					if (dataRow["enabled"].ToString() == "1")
+					if (Row["enabled"].ToString() == "1")
 					{
-						bool_2 = true;
+						Enabled = true;
 					}
-					this.Pages.Add((int)dataRow["Id"], new CatalogPage((int)dataRow["Id"], (int)dataRow["parent_id"], (string)dataRow["caption"], bool_, bool_2, (uint)dataRow["min_rank"], PhoenixEnvironment.EnumToBool(dataRow["club_only"].ToString()), (int)dataRow["icon_color"], (int)dataRow["icon_image"], (string)dataRow["page_layout"], (string)dataRow["page_headline"], (string)dataRow["page_teaser"], (string)dataRow["page_special"], (string)dataRow["page_text1"], (string)dataRow["page_text2"], (string)dataRow["page_text_details"], (string)dataRow["page_text_teaser"], (string)dataRow["page_link_description"], (string)dataRow["page_link_pagename"], ref hashtable));
+					this.Pages.Add((int)Row["Id"], new CatalogPage((int)Row["Id"], (int)Row["parent_id"], (string)Row["caption"], Visible, Enabled, (uint)Row["min_rank"], PhoenixEnvironment.EnumToBool(Row["club_only"].ToString()), (int)Row["icon_color"], (int)Row["icon_image"], (string)Row["page_layout"], (string)Row["page_headline"], (string)Row["page_teaser"], (string)Row["page_special"], (string)Row["page_text1"], (string)Row["page_text2"], (string)Row["page_text_details"], (string)Row["page_text_teaser"], (string)Row["page_link_description"], (string)Row["page_link_pagename"], ref cataItems));
 				}
 			}
 			if (dataTable2 != null)
@@ -77,6 +77,7 @@ namespace Phoenix.HabboHotel.Catalogs
 			}
 			Logging.WriteLine("completed!");
 		}
+
 		internal void InitCache()
 		{
 			Logging.Write("Loading Catalogue Cache..");
@@ -84,7 +85,7 @@ namespace Phoenix.HabboHotel.Catalogs
 			this.mCataIndexCache = new ServerMessage[num];
 			for (int i = 1; i < num; i++)
 			{
-				this.mCataIndexCache[i] = this.method_17(i);
+				this.mCataIndexCache[i] = this.SerializeIndexForCache(i);
 			}
 			foreach (CatalogPage current in this.Pages.Values)
 			{
@@ -93,55 +94,59 @@ namespace Phoenix.HabboHotel.Catalogs
 			Logging.WriteLine("completed!");
 		}
 
-		public CatalogItem FindItem(uint uint_1)
+		public CatalogItem FindItem(uint ItemId)
 		{
-			foreach (CatalogPage current in this.Pages.Values)
+			foreach (CatalogPage Page in this.Pages.Values)
 			{
-				foreach (CatalogItem current2 in current.Items)
+				foreach (CatalogItem Item in Page.Items)
 				{
-					if (current2.Id == uint_1)
+					if (Item.Id == ItemId)
 					{
-						return current2;
+						return Item;
 					}
 				}
 			}
 			return null;
 		}
+
 		public bool IsItemInCatalog(uint BaseId)
 		{
-			DataRow dataRow = null;
-			using (DatabaseClient @class = PhoenixEnvironment.GetDatabase().GetClient())
+			DataRow Row = null;
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				dataRow = @class.ReadDataRow("SELECT Id FROM catalog_items WHERE item_ids = '" + BaseId + "' LIMIT 1");
+				Row = adapter.ReadDataRow("SELECT Id FROM catalog_items WHERE item_ids = '" + BaseId + "' LIMIT 1");
 			}
-			return dataRow != null;
+			return Row != null;
 		}
-		public int GetTreeSize(int int_0, int int_1)
+
+		public int GetTreeSize(int Rank, int TreeId)
 		{
 			int num = 0;
-			foreach (CatalogPage current in this.Pages.Values)
+			foreach (CatalogPage Page in this.Pages.Values)
 			{
-				if ((ulong)current.MinRank <= (ulong)((long)int_0) && current.ParentId == int_1)
+				if ((Page.MinRank <= Rank) && (Page.ParentId == TreeId))
 				{
 					num++;
 				}
 			}
 			return num;
 		}
-		public CatalogPage method_5(int int_0)
+
+		public CatalogPage GetPage(int Page)
 		{
-			if (!this.Pages.ContainsKey(int_0))
+			if (!Pages.ContainsKey(Page))
 			{
 				return null;
 			}
 			else
 			{
-				return this.Pages[int_0];
+				return Pages[Page];
 			}
 		}
+
 		public bool HandlePurchase(GameClient Session, int int_0, uint uint_1, string string_0, bool bool_0, string string_1, string string_2, bool bool_1)
 		{
-			CatalogPage @class = this.method_5(int_0);
+			CatalogPage @class = this.GetPage(int_0);
 			if (@class == null || !@class.Enabled || !@class.Visible || @class.MinRank > Session.GetHabbo().Rank)
 			{
 				return false;
@@ -298,7 +303,7 @@ namespace Phoenix.HabboHotel.Catalogs
 											string text2 = array[1];
 											string text3 = array[2];
 											int.Parse(text2);
-											if (!this.method_8(string_3))
+											if (!this.CheckPetName(string_3))
 											{
 												return false;
 											}
@@ -373,7 +378,7 @@ namespace Phoenix.HabboHotel.Catalogs
 								if (bool_0)
 								{
 									uint num3 = this.GenerateItemId();
-									Item class4 = this.method_10();
+									Item class4 = this.GeneratePresent();
 									using (DatabaseClient class3 = PhoenixEnvironment.GetDatabase().GetClient())
 									{
 										class3.AddParamWithValue("gift_message", "!" + ChatCommandHandler.ApplyWordFilter(PhoenixEnvironment.FilterInjectionChars(string_2, true, true)) + " - " + Session.GetHabbo().Username);
@@ -568,9 +573,9 @@ namespace Phoenix.HabboHotel.Catalogs
 								else
 								{
 									this.DeliverItems(Session, class2.GetBaseItem(), class2.Amount, string_0, true, 0u);
-									if (class2.uint_2 > 0u)
+									if (class2.Achievement > 0u)
 									{
-										PhoenixEnvironment.GetGame().GetAchievementManager().UnlockAchievement(Session, class2.uint_2, 1);
+										PhoenixEnvironment.GetGame().GetAchievementManager().UnlockAchievement(Session, class2.Achievement, 1);
 									}
 									return true;
 								}
@@ -580,47 +585,44 @@ namespace Phoenix.HabboHotel.Catalogs
 				}
 			}
 		}
-		public void GiveGift(string string_0, uint uint_1, uint uint_2, int int_0)
+
+		public void GiveGift(string GiftMessage, uint GiftUserId, uint ItemId, int PageId)
 		{
-			CatalogPage @class = this.method_5(int_0);
-			CatalogItem class2 = @class.GetItem(uint_2);
-			uint num = this.GenerateItemId();
-			Item class3 = this.method_10();
-			using (DatabaseClient class4 = PhoenixEnvironment.GetDatabase().GetClient())
+			CatalogItem CataItem = GetPage(PageId).GetItem(ItemId);
+			uint num = GenerateItemId();
+			Item Item = GeneratePresent();
+
+			using (DatabaseClient adapter = PhoenixEnvironment.GetDatabase().GetClient())
 			{
-				class4.AddParamWithValue("gift_message", "!" + ChatCommandHandler.ApplyWordFilter(PhoenixEnvironment.FilterInjectionChars(string_0, true, true)));
-				class4.ExecuteQuery(string.Concat(new object[]
-				{
-					"INSERT INTO items (Id,user_id,base_item,extra_data,wall_pos) VALUES ('",
-					num,
-					"','",
-					uint_1,
-					"','",
-					class3.ItemId,
-					"',@gift_message,'')"
-				}));
-				class4.ExecuteQuery(string.Concat(new object[]
-				{
-					"INSERT INTO user_presents (item_id,base_id,amount,extra_data) VALUES ('",
-					num,
-					"','",
-					class2.GetBaseItem().ItemId,
-					"','",
-					class2.Amount,
-					"','')"
-				}));
+				adapter.AddParamWithValue("gift_message", "!" + ChatCommandHandler.ApplyWordFilter(PhoenixEnvironment.FilterInjectionChars(GiftMessage, true, true)));
+				adapter.ExecuteQuery(string.Concat(new object[] { "INSERT INTO items (Id,user_id,base_item,extra_data,wall_pos) VALUES ('", num, "','", GiftUserId, "','", Item.ItemId, "',@gift_message,'')" }));
+				adapter.ExecuteQuery(string.Concat(new object[] { "INSERT INTO user_presents (item_id,base_id,amount,extra_data) VALUES ('", num, "','", CataItem.GetBaseItem().ItemId, "','", CataItem.Amount, "','')" }));
 			}
-			GameClient class5 = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(uint_1);
-			if (class5 != null)
+			GameClient clientByHabbo = PhoenixEnvironment.GetGame().GetClientManager().GetClientByHabbo(GiftUserId);
+			if (clientByHabbo != null)
 			{
-				class5.SendNotif("You have received a gift! Check your inventory.");
-				class5.GetHabbo().GetInventoryComponent().UpdateItems(true);
+				clientByHabbo.SendNotif("You have received a gift! Check your inventory.");
+				clientByHabbo.GetHabbo().GetInventoryComponent().UpdateItems(true);
 			}
 		}
-		public bool method_8(string string_0)
+
+		public bool CheckPetName(string PetName)
 		{
-			return string_0.Length >= 1 && string_0.Length <= 16 && PhoenixEnvironment.IsValidAlphaNumeric(string_0) && !(string_0 != ChatCommandHandler.ApplyWordFilter(string_0));
+            if ((PetName.Length < 1) || (PetName.Length > 16))
+            {
+                return false;
+            }
+            if (!PhoenixEnvironment.IsValidAlphaNumeric(PetName))
+            {
+                return false;
+            }
+            if (PetName != ChatCommandHandler.ApplyWordFilter(PetName))
+            {
+                return false;
+            }
+            return true;
 		}
+
 		public void DeliverItems(GameClient Session, Item Item, int int_0, string string_0, bool bool_0, uint uint_1)
 		{
 			string text = Item.Type.ToString();
@@ -691,7 +693,7 @@ namespace Phoenix.HabboHotel.Catalogs
 							{
 								'\n'
 							});
-							Pet class15_ = this.method_11(Session.GetHabbo().Id, array[0], Convert.ToInt32(Item.Name.Split(new char[]
+							Pet class15_ = this.CreatePet(Session.GetHabbo().Id, array[0], Convert.ToInt32(Item.Name.Split(new char[]
 							{
 								't'
 							})[1]), array[1], array[2]);
@@ -821,168 +823,166 @@ namespace Phoenix.HabboHotel.Catalogs
 			}
 			Session.SendNotif("Something went wrong! The item type could not be processed. Please do not try to buy this item anymore, instead inform support as soon as possible.");
 		}
-		public Item method_10()
-		{
-			switch (PhoenixEnvironment.GetRandomNumber(0, 6))
-			{
-			case 0:
-			{
-                return PhoenixEnvironment.GetGame().GetItemManager().GetItem(164u);
-			}
-			case 1:
-			{
-				return PhoenixEnvironment.GetGame().GetItemManager().GetItem(165u);
-			}
-			case 2:
-			{
-				return PhoenixEnvironment.GetGame().GetItemManager().GetItem(166u);
-			}
-			case 3:
-			{
-				return PhoenixEnvironment.GetGame().GetItemManager().GetItem(167u);
-			}
-			case 4:
-			{
-                return PhoenixEnvironment.GetGame().GetItemManager().GetItem(168u);
-			}
-			case 5:
-			{
-                return PhoenixEnvironment.GetGame().GetItemManager().GetItem(169u);
-			}
-			case 6:
-			{
-                return PhoenixEnvironment.GetGame().GetItemManager().GetItem(170u);
-			}
-            default:
+
+        public Item GeneratePresent()
+        {
+            switch (PhoenixEnvironment.GetRandomNumber(0, 6))
             {
-                return null;
+                case 0:
+                    {
+                        return PhoenixEnvironment.GetGame().GetItemManager().GetItem(164);
+                    }
+                case 1:
+                    {
+                        return PhoenixEnvironment.GetGame().GetItemManager().GetItem(165);
+                    }
+                case 2:
+                    {
+                        return PhoenixEnvironment.GetGame().GetItemManager().GetItem(166);
+                    }
+                case 3:
+                    {
+                        return PhoenixEnvironment.GetGame().GetItemManager().GetItem(167);
+                    }
+                case 4:
+                    {
+                        return PhoenixEnvironment.GetGame().GetItemManager().GetItem(168);
+                    }
+                case 5:
+                    {
+                        return PhoenixEnvironment.GetGame().GetItemManager().GetItem(169);
+                    }
+                case 6:
+                    {
+                        return PhoenixEnvironment.GetGame().GetItemManager().GetItem(170);
+                    }
+                default:
+                    {
+                        return null;
+                    }
             }
-			}
-		}
-		public Pet method_11(uint uint_1, string string_0, int int_0, string string_1, string string_2)
+        }
+
+		public Pet CreatePet(uint UserId, string Name, int Type, string Race, string Color)
 		{
-			return new Pet(this.GenerateItemId(), uint_1, 0u, string_0, (uint)int_0, string_1, string_2, 0, 100, 100, 0, PhoenixEnvironment.GetUnixTimestamp(), 0, 0, 0.0)
-			{
-				DBState = DatabaseUpdateState.NeedsInsert
-			};
+			return new Pet(this.GenerateItemId(), UserId, 0, Name, (uint)Type, Race, Color, 0, 100, 100, 0, PhoenixEnvironment.GetUnixTimestamp(), 0, 0, 0.0) {    DBState = DatabaseUpdateState.NeedsInsert   };
 		}
-		public Pet method_12(DataRow dataRow_0)
+
+		public Pet GeneratePetFromRow(DataRow Row)
 		{
-			if (dataRow_0 == null)
+			if (Row == null)
 			{
 				return null;
 			}
 			else
 			{
-				return new Pet((uint)dataRow_0["Id"], (uint)dataRow_0["user_id"], (uint)dataRow_0["room_id"], (string)dataRow_0["name"], (uint)dataRow_0["type"], (string)dataRow_0["race"], (string)dataRow_0["color"], (int)dataRow_0["expirience"], (int)dataRow_0["energy"], (int)dataRow_0["nutrition"], (int)dataRow_0["respect"], (double)dataRow_0["createstamp"], (int)dataRow_0["x"], (int)dataRow_0["y"], (double)dataRow_0["z"]);
+				return new Pet((uint)Row["Id"], (uint)Row["user_id"], (uint)Row["room_id"], (string)Row["name"], (uint)Row["type"], (string)Row["race"], (string)Row["color"], (int)Row["expirience"], (int)Row["energy"], (int)Row["nutrition"], (int)Row["respect"], (double)Row["createstamp"], (int)Row["x"], (int)Row["y"], (double)Row["z"]);
 			}
 		}
-		internal Pet method_13(DataRow dataRow_0, uint uint_1)
+
+		internal Pet GeneratePetFromRow(DataRow Row, uint PetID)
 		{
-			if (dataRow_0 == null)
+			if (Row == null)
 			{
 				return null;
 			}
 			else
 			{
-				return new Pet(uint_1, (uint)dataRow_0["user_id"], (uint)dataRow_0["room_id"], (string)dataRow_0["name"], (uint)dataRow_0["type"], (string)dataRow_0["race"], (string)dataRow_0["color"], (int)dataRow_0["expirience"], (int)dataRow_0["energy"], (int)dataRow_0["nutrition"], (int)dataRow_0["respect"], (double)dataRow_0["createstamp"], (int)dataRow_0["x"], (int)dataRow_0["y"], (double)dataRow_0["z"]);
+				return new Pet(PetID, (uint)Row["user_id"], (uint)Row["room_id"], (string)Row["name"], (uint)Row["type"], (string)Row["race"], (string)Row["color"], (int)Row["expirience"], (int)Row["energy"], (int)Row["nutrition"], (int)Row["respect"], (double)Row["createstamp"], (int)Row["x"], (int)Row["y"], (double)Row["z"]);
 			}
 		}
+
 		internal uint GenerateItemId()
 		{
-			lock (this.ItemIDCacheProtect)
+			lock (ItemIDCacheProtect)
 			{
-				return this.mCacheID++;
+				return mCacheID++;
 			}
 		}
-		public EcotronReward GetRandomEcotronReward()
-		{
-			uint uint_ = 1u;
-			if (PhoenixEnvironment.GetRandomNumber(1, 2000) == 2000)
-			{
-				uint_ = 5u;
-			}
-			else
-			{
-				if (PhoenixEnvironment.GetRandomNumber(1, 200) == 200)
-				{
-					uint_ = 4u;
-				}
-				else
-				{
-					if (PhoenixEnvironment.GetRandomNumber(1, 40) == 40)
-					{
-						uint_ = 3u;
-					}
-					else
-					{
-						if (PhoenixEnvironment.GetRandomNumber(1, 4) == 4)
-						{
-							uint_ = 2u;
-						}
-					}
-				}
-			}
-			List<EcotronReward> list = this.GetEcotronRewardsForLevel(uint_);
-			if (list != null && list.Count >= 1)
-			{
-				return list[PhoenixEnvironment.GetRandomNumber(0, list.Count - 1)];
-			}
-			else
-			{
-				return new EcotronReward(0u, 0u, 1479u, 0u);
-			}
-		}
-		public List<EcotronReward> GetEcotronRewardsForLevel(uint uint_1)
+
+        public EcotronReward GetRandomEcotronReward()
+        {
+            uint level = 1;
+            if (PhoenixEnvironment.GetRandomNumber(1, 2000) == 2000)
+            {
+                level = 5;
+            }
+            else if (PhoenixEnvironment.GetRandomNumber(1, 200) == 200)
+            {
+                level = 4;
+            }
+            else if (PhoenixEnvironment.GetRandomNumber(1, 40) == 40)
+            {
+                level = 3;
+            }
+            else if (PhoenixEnvironment.GetRandomNumber(1, 4) == 4)
+            {
+                level = 2;
+            }
+            List<EcotronReward> ecotronRewardsForLevel = this.GetEcotronRewardsForLevel(level);
+            if (ecotronRewardsForLevel != null && ecotronRewardsForLevel.Count >= 1)
+            {
+                return ecotronRewardsForLevel[PhoenixEnvironment.GetRandomNumber(0, ecotronRewardsForLevel.Count - 1)];
+            }
+            else
+            {
+                return new EcotronReward(0u, 0, 1479, 0);
+            }
+        }
+
+		public List<EcotronReward> GetEcotronRewardsForLevel(uint Level)
 		{
 			List<EcotronReward> list = new List<EcotronReward>();
-			foreach (EcotronReward current in this.EcotronRewards)
+			foreach (EcotronReward Reward in this.EcotronRewards)
 			{
-				if (current.RewardLevel == uint_1)
+				if (Reward.RewardLevel == Level)
 				{
-					list.Add(current);
+					list.Add(Reward);
 				}
 			}
 			return list;
 		}
-		public ServerMessage method_17(int int_0)
+
+		public ServerMessage SerializeIndexForCache(int Rank)
 		{
-			ServerMessage Message = new ServerMessage(126u);
+			ServerMessage Message = new ServerMessage(126);
 			Message.AppendBoolean(true);
 			Message.AppendInt32(0);
 			Message.AppendInt32(0);
 			Message.AppendInt32(-1);
 			Message.AppendStringWithBreak("");
-			Message.AppendInt32(this.GetTreeSize(int_0, -1));
+			Message.AppendInt32(GetTreeSize(Rank, -1));
 			Message.AppendBoolean(true);
-			foreach (CatalogPage current in this.Pages.Values)
+			foreach (CatalogPage Page in Pages.Values)
 			{
-				if (current.ParentId == -1)
+				if (Page.ParentId == -1)
 				{
-					current.Serialize(int_0, Message);
-					foreach (CatalogPage current2 in this.Pages.Values)
+					Page.Serialize(Rank, Message);
+					foreach (CatalogPage page in Pages.Values)
 					{
-						if (current2.ParentId == current.PageId)
+						if (page.ParentId == Page.PageId)
 						{
-							current2.Serialize(int_0, Message);
+							page.Serialize(Rank, Message);
 						}
 					}
 				}
 			}
 			return Message;
 		}
-		internal ServerMessage GetIndexMessageForRank(uint uint_1)
+
+		internal ServerMessage GetIndexMessageForRank(uint Rank)
 		{
-			if (uint_1 < 1u)
+			if (Rank < 1)
 			{
-				uint_1 = 1u;
+				Rank = 1;
 			}
-			if ((ulong)uint_1 > (ulong)((long)PhoenixEnvironment.GetGame().GetRoleManager().RankBadge.Count))
+			if (Rank > PhoenixEnvironment.GetGame().GetRoleManager().RankBadge.Count)
 			{
-				uint_1 = (uint)PhoenixEnvironment.GetGame().GetRoleManager().RankBadge.Count;
+				Rank = (uint)PhoenixEnvironment.GetGame().GetRoleManager().RankBadge.Count;
 			}
-			return this.mCataIndexCache[(int)((UIntPtr)uint_1)];
+			return mCataIndexCache[Rank];
 		}
+
         public ServerMessage SerializePage(CatalogPage Page)
         {
             ServerMessage message = new ServerMessage(0x7f);

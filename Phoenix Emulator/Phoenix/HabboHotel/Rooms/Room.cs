@@ -413,7 +413,7 @@ namespace Phoenix.HabboHotel.Rooms
                 {
                     foreach (DataRow dataRow_ in dataTable.Rows)
                     {
-                        Pet class2 = PhoenixEnvironment.GetGame().GetCatalog().method_12(dataRow_);
+                        Pet class2 = PhoenixEnvironment.GetGame().GetCatalog().GeneratePetFromRow(dataRow_);
                         List<RandomSpeech> list = new List<RandomSpeech>();
                         List<BotResponse> list2 = new List<BotResponse>();
                         this.method_4(new RoomBot(class2.PetId, this.RoomId, AIType.Pet, "freeroam", class2.Name, "", class2.Look, class2.X, class2.Y, (int)class2.Z, 0, 0, 0, 0, 0, ref list, ref list2, 0), class2);

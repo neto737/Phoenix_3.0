@@ -12,7 +12,7 @@ namespace Phoenix.Communication.Messages.Marketplace
 			string SearchQuery = Event.PopFixedString();
 			int FilterMode = Event.PopWiredInt32();
 
-			Session.SendMessage(PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().SerializeOffers(MinCost, MaxCost, SearchQuery, FilterMode));
+			Session.SendMessage(PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().SerializeOffersNew(MinCost, MaxCost, SearchQuery, FilterMode));
 		}
 	}
 }

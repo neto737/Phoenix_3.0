@@ -85,7 +85,7 @@ namespace Phoenix.HabboHotel.Items
 			Message.AppendBoolean(this.Item.AllowRecycle);
 			Message.AppendBoolean(this.Item.AllowTrade);
 			Message.AppendBoolean(this.Item.AllowInventoryStack);
-			Message.AppendBoolean(PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().method_0(this));
+			Message.AppendBoolean(PhoenixEnvironment.GetGame().GetCatalog().GetMarketplace().CanSellItem(this));
 			Message.AppendInt32(-1);
 			if (this.Item.Type == 's')
 			{

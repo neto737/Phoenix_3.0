@@ -25,7 +25,7 @@ namespace Phoenix.Communication.Messages.Rooms.Pets
 					}
 					if (dataRow != null)
 					{
-						Session.SendMessage(PhoenixEnvironment.GetGame().GetCatalog().method_12(dataRow).SerializeInfo());
+						Session.SendMessage(PhoenixEnvironment.GetGame().GetCatalog().GeneratePetFromRow(dataRow).SerializeInfo());
 					}
 				}
 				else

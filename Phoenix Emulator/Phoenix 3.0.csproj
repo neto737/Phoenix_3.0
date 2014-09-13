@@ -268,7 +268,7 @@
     <Compile Include="Phoenix\HabboHotel\Advertisements\AdvertisementManager.cs" />
     <Compile Include="Phoenix\HabboHotel\Advertisements\RoomAdvertisement.cs" />
     <Compile Include="Phoenix\HabboHotel\Catalogs\Catalog.cs" />
-    <Compile Include="Phoenix\HabboHotel\Catalogs\MarketplaceOffers.cs" />
+    <Compile Include="Phoenix\HabboHotel\Catalogs\MarketplaceItems.cs" />
     <Compile Include="Phoenix\HabboHotel\Catalogs\VoucherHandler.cs" />
     <Compile Include="Phoenix\HabboHotel\Catalogs\EcotronReward.cs" />
     <Compile Include="Phoenix\HabboHotel\Catalogs\CatalogPage.cs" />
