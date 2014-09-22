@@ -339,10 +339,6 @@ namespace Phoenix.HabboHotel.Roles
                     {
                         Command.Add("cmd_freeze");
                     }
-                    if (PhoenixEnvironment.EnumToBool(Row["cmd_enable"].ToString()))
-                    {
-                        Command.Add("cmd_enable");
-                    }
                     if (PhoenixEnvironment.EnumToBool(Row["cmd_roommute"].ToString()))
                     {
                         Command.Add("cmd_roommute");
@@ -708,10 +704,6 @@ namespace Phoenix.HabboHotel.Roles
                     {
                         list2.Add("cmd_freeze");
                     }
-                    if (PhoenixEnvironment.EnumToBool(Row["cmd_enable"].ToString()))
-                    {
-                        list2.Add("cmd_enable");
-                    }
                     if (PhoenixEnvironment.EnumToBool(Row["cmd_roommute"].ToString()))
                     {
                         list2.Add("cmd_roommute");
@@ -1021,6 +1013,7 @@ namespace Phoenix.HabboHotel.Roles
                 GlobalClass.cmdMoonwalkEnabled = false;
                 GlobalClass.cmdFollowEnabled = false;
                 GlobalClass.cmdFacelessEnabled = false;
+                GlobalClass.cmdEnableEnabled = false;
 
                 foreach (DataRow Row in table.Rows)
                 {
@@ -1047,6 +1040,10 @@ namespace Phoenix.HabboHotel.Roles
                     if (PhoenixEnvironment.EnumToBool(Row["cmdFaceless"].ToString()))
                     {
                         GlobalClass.cmdFacelessEnabled = true;
+                    }
+                    if (PhoenixEnvironment.EnumToBool(Row["cmdEnable"].ToString()))
+                    {
+                        GlobalClass.cmdEnableEnabled = true;
                     }
                     if (PhoenixEnvironment.EnumToBool(Row["cmdFollow"].ToString()))
                     {

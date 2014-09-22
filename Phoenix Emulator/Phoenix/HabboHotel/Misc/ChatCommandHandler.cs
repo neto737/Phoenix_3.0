@@ -1303,6 +1303,23 @@ namespace Phoenix.HabboHotel.Misc
                         #endregion
 
                         #region VIP Commands
+                        #region CMD Enable
+                        case 11: //CMD Enable
+                            if (!GlobalClass.cmdEnableEnabled)
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_disabled"));
+                                return true;
+                            }
+                            if (!Session.GetHabbo().Vip)
+                            {
+                                Session.GetHabbo().Sendselfwhisper(TextManager.GetText("cmd_error_permission_vip"));
+                                return true;
+                            }
+                            int effect = int.Parse(Params[1]);
+                            Session.GetHabbo().GetAvatarEffectsInventoryComponent().ApplyEffect(effect, true);
+                            PhoenixEnvironment.GetGame().GetClientManager().RecordCmdLogs(Session, Params[0].ToLower(), Input);
+                            return true;
+                        #endregion
                         #region CMD FlagMe
                         case 12: //CMD FlagMe
                             if (!GlobalClass.cmdFlagmeEnabled)
@@ -1855,10 +1872,6 @@ namespace Phoenix.HabboHotel.Misc
                             {
                                 Command = Command + TextManager.GetText("cmd_freeze_desc") + "\r\r";
                             }
-                            if (Session.GetHabbo().HasRole("cmd_enable"))
-                            {
-                                Command = Command + TextManager.GetText("cmd_enable_desc") + "\r\r";
-                            }
                             if (Session.GetHabbo().HasRole("cmd_roommute"))
                             {
                                 Command = Command + TextManager.GetText("cmd_roommute_desc") + "\r\r";
@@ -1996,6 +2009,10 @@ namespace Phoenix.HabboHotel.Misc
                                 if (GlobalClass.cmdFlagmeEnabled)
                                 {
                                     Command = Command + TextManager.GetText("cmd_flagme_desc") + "\r\r";
+                                }
+                                if (GlobalClass.cmdEnableEnabled)
+                                {
+                                    Command = Command + TextManager.GetText("cmd_enable_desc") + "\r\r";
                                 }
                             }
                             string RCommand = "";
@@ -2344,9 +2361,7 @@ namespace Phoenix.HabboHotel.Misc
                         #endregion
                     }
                 }
-                catch
-                {
-                }
+                catch { }
                 return false;
             }
         }

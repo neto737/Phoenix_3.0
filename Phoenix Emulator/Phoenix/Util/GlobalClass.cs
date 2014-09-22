@@ -32,6 +32,7 @@ namespace Phoenix.Util
 		private static bool cmdMimic = false;
 		private static bool cmdMoonwalk = false;
         private static bool cmdFaceless = false; //Faceless command
+        private static bool cmdEnable = false; //Enable command
 		private static bool cmdFollow = false;
 		private static bool cmdCredits = false;
 		public static bool ShuttingDown = false;
@@ -292,6 +293,18 @@ namespace Phoenix.Util
             set
             {
                 cmdFaceless = value;
+            }
+        }
+
+        public static bool cmdEnableEnabled
+        {
+            get
+            {
+                return cmdEnable;
+            }
+            set
+            {
+                cmdEnable = value;
             }
         }
         #endregion

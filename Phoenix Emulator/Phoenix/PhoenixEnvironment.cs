@@ -77,9 +77,7 @@ namespace Phoenix
                     MySqlConnection.ClearAllPools();
                     DatabaseManager = null;
                 }
-                catch
-                {
-                }
+                catch { }
             }
             Logging.WriteLine("Uninitialized successfully. Closing.");
         }
@@ -256,9 +254,7 @@ namespace Phoenix
             {
                 GetPacketManager().UnregisterPackets();
             }
-            catch
-            {
-            }
+            catch { }
             if (reason != "")
             {
                 if (ShutdownInitiated)
@@ -274,17 +270,13 @@ namespace Phoenix
                 {
                     Game.GetRoomManager().RemoveAllRooms();
                 }
-                catch
-                {
-                }
+                catch { }
                 try
                 {
                     GetConnectionManager().GetListener().Stop();
                     GetGame().GetClientManager().CloseAll();
                 }
-                catch
-                {
-                }
+                catch { }
                 try
                 {
                     using (DatabaseClient adapter = GetDatabase().GetClient())
@@ -295,18 +287,14 @@ namespace Phoenix
                     ConnectionManager.Shutdown();
                     Game.Destroy();
                 }
-                catch
-                {
-                }
+                catch { }
                 try
                 {
                     Console.WriteLine("Destroying database manager.");
                     MySqlConnection.ClearAllPools();
                     DatabaseManager = null;
                 }
-                catch
-                {
-                }
+                catch { }
                 Console.WriteLine("System disposed, goodbye!");
             }
             else
@@ -317,17 +305,13 @@ namespace Phoenix
                 {
                     Game.GetRoomManager().RemoveAllRooms();
                 }
-                catch
-                {
-                }
+                catch { }
                 try
                 {
                     GetConnectionManager().GetListener().Stop();
                     GetGame().GetClientManager().CloseAll();
                 }
-                catch
-                {
-                }
+                catch { }
                 ConnectionManager.Shutdown();
                 Game.Destroy();
                 Console.WriteLine(reason);
@@ -346,9 +330,7 @@ namespace Phoenix
                 message.AppendStringWithBreak(Message);
                 GetGame().GetClientManager().BroadcastMessage(message);
             }
-            catch
-            {
-            }
+            catch { }
         }
 
         public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)

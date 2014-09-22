@@ -323,8 +323,8 @@ namespace Phoenix.Communication
 			this.Messages.Add(249, new GetNowPlayingMessageEvent());
 			this.Messages.Add(258, new GetJukeboxPlayListMessageEvent());
 			this.Messages.Add(259, new GetUserSongDisksMessageEvent());
-            this.Messages.Add(255, new AddNewJukeboxCD()); //UPDATED! --> Jukebox fix
-            this.Messages.Add(256, new RemoveCDToJukebox()); //UPDATED! --> Jukebox fix
+            this.Messages.Add(255, new AddNewJukeboxCD()); //UPDATED! --> Jukebox fix --> Don't work this SHIIIIIIIIIT!
+            this.Messages.Add(256, new RemoveCDToJukebox()); //UPDATED! --> Jukebox fix --> Don't work this SHIIIIIIIIIT!
 		}
 		public void RegisterWired()
 		{
